@@ -1,0 +1,54 @@
+@use 'tokens' as *;
+
+// Otkrivanje pri skrolu — RevealDirective dodaje .is-visible.
+// Bez JS-a (SSR, pre hidratacije) sadržaj je vidljiv.
+.js-reveal .reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity var(--dur-slow) var(--ease),
+    transform var(--dur-slow) var(--ease);
+
+  &.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.js-reveal .reveal-image {
+  clip-path: inset(8% 0 0 0);
+  transition: clip-path 900ms var(--ease);
+
+  &.is-visible {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes draw-line {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js-reveal .reveal,
+  .js-reveal .reveal-image {
+    opacity: 1;
+    transform: none;
+    clip-path: none;
+  }
+}

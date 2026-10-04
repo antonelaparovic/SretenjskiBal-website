@@ -1,0 +1,55 @@
+@if (status() === 'sent') {
+  <div class="sent" role="status" tabindex="-1">
+    <p class="quote" i18n>Hvala na poruci.</p>
+    <p class="lead" i18n>Odgovorićemo vam u najkraćem roku.</p>
+    <button type="button" class="text-link link-btn" (click)="reset()" i18n>Pošalji novu poruku</button>
+  </div>
+} @else {
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <div class="pair">
+      <label class="field">
+        <span class="field__label" i18n>Ime</span>
+        <input class="field__control" formControlName="firstName" autocomplete="given-name" [attr.aria-invalid]="invalid('firstName')" />
+        @if (invalid('firstName')) { <span class="field__error" i18n>Unesite ime.</span> }
+      </label>
+      <label class="field">
+        <span class="field__label" i18n>Prezime</span>
+        <input class="field__control" formControlName="lastName" autocomplete="family-name" [attr.aria-invalid]="invalid('lastName')" />
+        @if (invalid('lastName')) { <span class="field__error" i18n>Unesite prezime.</span> }
+      </label>
+    </div>
+
+    <label class="field">
+      <span class="field__label" i18n>Email</span>
+      <input class="field__control" type="email" formControlName="email" autocomplete="email" placeholder="ime@primer.si" [attr.aria-invalid]="invalid('email')" />
+      @if (invalid('email')) { <span class="field__error" i18n>Unesite ispravnu email adresu.</span> }
+    </label>
+
+    <label class="field">
+      <span class="field__label" i18n>Tema</span>
+      <select class="field__control" formControlName="topic">
+        @for (t of topics; track t.value) { <option [value]="t.value">{{ t.label }}</option> }
+      </select>
+    </label>
+
+    <label class="field">
+      <span class="field__label" i18n>Poruka</span>
+      <textarea class="field__control" formControlName="message" rows="5" [attr.aria-invalid]="invalid('message')"></textarea>
+      @if (invalid('message')) { <span class="field__error" i18n>Poruka treba da ima najmanje 10 znakova.</span> }
+    </label>
+
+    <input class="hp" type="text" formControlName="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+
+    <label class="checkbox">
+      <input type="checkbox" formControlName="consent" [attr.aria-invalid]="invalid('consent')" />
+      <span i18n>Saglasan/na sam sa <a href="/privacy" class="inline-link">politikom privatnosti</a>.</span>
+    </label>
+    @if (invalid('consent')) { <span class="field__error" i18n>Potrebna je vaša saglasnost.</span> }
+
+    @if (serverError()) { <p class="server-error" role="alert">{{ serverError() }}</p> }
+
+    <button class="btn btn--primary submit" type="submit" [disabled]="status() === 'sending'" [attr.aria-busy]="status() === 'sending'">
+      @if (status() === 'sending') { <ng-container i18n>Slanje…</ng-container> } @else { <ng-container i18n>Pošalji poruku</ng-container> }
+    </button>
+  </form>
+}

@@ -1,0 +1,33 @@
+<footer class="footer">
+  <div class="container grid top">
+    <div class="identity">
+      <app-emblem [size]="88" label="Sretenjski bal" />
+      <p class="name">Sretenjski bal</p>
+      <p class="when">13.2.2027. · Maribor</p>
+      <p class="tagline" i18n>Kultura koja spaja.</p>
+    </div>
+
+    <nav class="links" i18n-aria-label aria-label="Linkovi u podnožju">
+      <ul>
+        @for (item of nav; track item.path) {
+          <li><a [routerLink]="item.path">{{ item.label }}</a></li>
+        }
+      </ul>
+    </nav>
+
+    <div class="org">
+      <p class="label" i18n>Organizator</p>
+      <a routerLink="/organizator">Kulturni centar Sretenje</a>
+      <a href="https://www.instagram.com/" target="_blank" rel="noopener">Instagram</a>
+    </div>
+  </div>
+
+  <div class="container bottom">
+    <span>© {{ year }} Kulturni centar Sretenje</span>
+    <ul>
+      @for (item of legal; track item.path) {
+        <li><a [routerLink]="item.path">{{ item.label }}</a></li>
+      }
+    </ul>
+  </div>
+</footer>

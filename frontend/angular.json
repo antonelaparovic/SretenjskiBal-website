@@ -1,0 +1,133 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "cli": {
+    "packageManager": "npm"
+  },
+  "newProjectRoot": "projects",
+  "projects": {
+    "frontend": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "",
+      "sourceRoot": "src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "src/main.ts",
+            "tsConfig": "tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "public"
+              }
+            ],
+            "styles": [
+              "node_modules/@fontsource/cormorant-garamond/300.css",
+              "node_modules/@fontsource/cormorant-garamond/400.css",
+              "node_modules/@fontsource/cormorant-garamond/500.css",
+              "node_modules/@fontsource/cormorant-garamond/300-italic.css",
+              "node_modules/@fontsource/cormorant-garamond/400-italic.css",
+              "node_modules/@fontsource/manrope/300.css",
+              "node_modules/@fontsource/manrope/400.css",
+              "node_modules/@fontsource/manrope/500.css",
+              "src/styles.scss"
+            ],
+            "server": "src/main.server.ts",
+            "outputMode": "server",
+            "security": {
+              "allowedHosts": [
+                "localhost",
+                "127.0.0.1",
+                "sretenjskibal.si",
+                "www.sretenjskibal.si"
+              ]
+            },
+            "ssr": {
+              "entry": "src/server.ts"
+            },
+            "polyfills": [
+              "@angular/localize/init"
+            ],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "src/styles"
+              ]
+            }
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "400kB",
+                  "maximumError": "800kB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "8kB",
+                  "maximumError": "16kB"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            },
+            "preview": {
+              "outputMode": "static",
+              "ssr": false,
+              "prerender": false,
+              "server": false,
+              "outputPath": "dist/preview",
+              "assets": [
+                {
+                  "glob": "**/*",
+                  "input": "public"
+                },
+                {
+                  "glob": "_redirects",
+                  "input": "netlify-preview"
+                }
+              ]
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "frontend:build:production"
+            },
+            "development": {
+              "buildTarget": "frontend:build:development"
+            }
+          },
+          "defaultConfiguration": "development",
+          "options": {
+            "proxyConfig": "proxy.conf.json"
+          }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test"
+        }
+      },
+      "i18n": {
+        "sourceLocale": {
+          "code": "sr-Latn",
+          "subPath": ""
+        }
+      }
+    }
+  }
+}

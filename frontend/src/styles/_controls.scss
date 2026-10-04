@@ -1,0 +1,137 @@
+@use 'tokens' as *;
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 2.25rem;
+  border: 1px solid transparent;
+  font-size: var(--fs-label);
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-base) var(--ease),
+    color var(--dur-base) var(--ease),
+    border-color var(--dur-base) var(--ease);
+
+  &--primary {
+    background: var(--c-burgundy);
+    color: var(--c-ivory);
+
+    &:hover {
+      background: var(--c-ivory);
+      color: var(--c-wine);
+    }
+  }
+
+  &--outline-light {
+    border-color: var(--c-brass);
+    color: var(--c-ivory);
+    background: transparent;
+
+    &:hover {
+      background: var(--c-ivory);
+      color: var(--c-wine);
+    }
+  }
+
+  &--outline-dark {
+    border-color: var(--c-wine);
+    color: var(--c-wine);
+    background: transparent;
+
+    &:hover {
+      background: var(--c-wine);
+      color: var(--c-ivory);
+    }
+  }
+
+  &:disabled,
+  &[aria-busy='true'] {
+    opacity: 0.6;
+    cursor: progress;
+  }
+}
+
+.text-link {
+  display: inline-block;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid currentColor;
+  font-size: var(--fs-small);
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  transition:
+    color var(--dur-base) var(--ease),
+    border-color var(--dur-base) var(--ease);
+
+  &:hover {
+    color: var(--c-brass);
+  }
+}
+
+// Polja forme: samo donja linija, bez kutija.
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+
+  &__label {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--c-burgundy);
+  }
+
+  &__control {
+    width: 100%;
+    min-height: 48px;
+    padding: 0.75rem 0;
+    border: 0;
+    border-bottom: 1px solid var(--c-ink);
+    border-radius: 0;
+    background: transparent;
+    font-size: 1rem;
+    transition: border-color var(--dur-base) var(--ease);
+
+    &:focus-visible {
+      outline: none;
+      border-bottom-color: var(--c-burgundy);
+      box-shadow: 0 1px 0 0 var(--c-burgundy);
+    }
+
+    &[aria-invalid='true'] {
+      border-bottom-color: #9b1c1c;
+    }
+  }
+
+  textarea.field__control {
+    min-height: 140px;
+    resize: vertical;
+  }
+
+  &__error {
+    font-size: var(--fs-small);
+    color: #9b1c1c;
+  }
+}
+
+.checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.6;
+
+  input {
+    width: 20px;
+    height: 20px;
+    margin: 0.15rem 0 0;
+    accent-color: var(--c-burgundy);
+    flex-shrink: 0;
+  }
+}

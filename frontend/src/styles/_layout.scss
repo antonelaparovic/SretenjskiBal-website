@@ -1,0 +1,31 @@
+@use 'tokens' as *;
+
+.container {
+  width: 100%;
+  max-width: calc(var(--container) + 2 * var(--gutter));
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--grid-gap);
+}
+
+.section {
+  padding-block: var(--section-y);
+}
+
+.bg-parchment { background: var(--c-parchment); color: var(--c-ink); }
+.bg-ivory { background: var(--c-ivory); color: var(--c-ink); }
+.bg-burgundy { background: var(--c-burgundy); color: var(--c-ivory); }
+.bg-wine { background: var(--c-wine); color: var(--c-ivory); }
+.bg-forest { background: var(--c-forest); color: var(--c-ivory); }
+
+.rule {
+  height: 1px;
+  border: 0;
+  margin: 0;
+  background: var(--c-brass);
+}

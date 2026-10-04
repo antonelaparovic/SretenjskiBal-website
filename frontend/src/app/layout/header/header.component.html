@@ -1,0 +1,49 @@
+<header class="header" [class.header--solid]="!transparent()" [class.header--open]="menuOpen()">
+  <div class="container bar">
+    <a class="brand" routerLink="/" i18n-aria-label aria-label="Sretenjski bal, početna">
+      <app-emblem [size]="48" />
+      <span class="brand__name">Sretenjski bal</span>
+    </a>
+
+    <nav class="nav" i18n-aria-label aria-label="Glavni meni">
+      <ul>
+        @for (item of nav; track item.path) {
+          <li><a [routerLink]="item.path" routerLinkActive="is-active" ariaCurrentWhenActive="page">{{ item.label }}</a></li>
+        }
+      </ul>
+    </nav>
+
+    <div class="tools">
+      <app-language-switcher />
+      <a class="btn btn--outline-light cta" routerLink="/karte" i18n>Karte</a>
+      <button
+        #menuButton
+        class="burger"
+        type="button"
+        [attr.aria-expanded]="menuOpen()"
+        aria-controls="mobile-menu"
+        (click)="toggleMenu()"
+      >
+        <span class="visually-hidden">
+          @if (menuOpen()) { <ng-container i18n>Zatvori meni</ng-container> } @else { <ng-container i18n>Otvori meni</ng-container> }
+        </span>
+        <span class="burger__line" aria-hidden="true"></span>
+        <span class="burger__line" aria-hidden="true"></span>
+      </button>
+    </div>
+  </div>
+
+  <div id="mobile-menu" class="overlay" [class.is-open]="menuOpen()" [attr.inert]="menuOpen() ? null : ''">
+    <nav class="container overlay__nav" i18n-aria-label aria-label="Meni">
+      <ul>
+        @for (item of nav; track item.path; let i = $index) {
+          <li [style.--i]="i"><a [routerLink]="item.path" routerLinkActive="is-active">{{ item.label }}</a></li>
+        }
+      </ul>
+    </nav>
+    <div class="container overlay__foot">
+      <app-language-switcher />
+      <span class="label" i18n>13.2.2027 · Maribor</span>
+    </div>
+  </div>
+</header>
