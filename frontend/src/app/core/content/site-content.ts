@@ -21,7 +21,8 @@ export const EVENT: EventInfo = {
   venueAddress: null,
   mapUrl: null,
   /** COMING_SOON → „Prodaja uskoro počinje", OPEN → dugmad „Rezerviši kartu", SOLD_OUT → „Rasprodato". */
-  salesStatus: 'COMING_SOON',
+  // Prodaja je otvorena; zatvara se u tabeli (tab Podešavanja, BOOKING_OPEN) ili ovde vraćanjem na 'COMING_SOON'.
+  salesStatus: 'OPEN',
 };
 
 /** Okvirna satnica — biće potvrđena. */
@@ -35,10 +36,22 @@ export const PROGRAM: ProgramItem[] = [
 ];
 
 /** priceCents: 0 znači da cena još nije određena (prikazuje se „Cena uskoro"). */
+/**
+ * Isti tipovi kao u formi za rezervaciju (/rezervacija); forma odavde uzima i cene.
+ * Kad se cena menja, promeniti je i u Google tabeli (tab Podešavanja, PRICE_…).
+ */
+// TODO: opisi za All inclusive i Balkon (šta je uključeno) — kad budu poznati.
 export const TICKETS: TicketType[] = [
-  { name: 'Ulaznica', description: 'Pristup celoj večeri.', priceCents: 0, ctaUrl: null, soldOut: false },
-  { name: 'Studentska ulaznica', description: 'Uz važeću studentsku ispravu.', priceCents: 0, ctaUrl: null, soldOut: false },
-  { name: 'Mesto za stolom', description: 'Rezervacija sedenja uz večeru.', priceCents: 0, ctaUrl: null, soldOut: false },
+  { code: 'ALL_INCLUSIVE', name: 'All inclusive', priceCents: 14000, ctaUrl: '/rezervacija', soldOut: false },
+  { code: 'BALKON', name: 'Balkon', priceCents: 8000, ctaUrl: '/rezervacija', soldOut: false },
+  {
+    code: 'STUDENT',
+    name: 'Studentska ulaznica',
+    description: 'Uz važeću studentsku ispravu.',
+    priceCents: 6000,
+    ctaUrl: '/rezervacija',
+    soldOut: false,
+  },
 ];
 
 /**

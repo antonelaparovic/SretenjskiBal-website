@@ -4,7 +4,7 @@ import { Equals, IsBoolean, IsEmail, IsIn, IsInt, IsOptional, IsString, Length, 
 export const CONTACT_TOPICS = {
   OPSTE: 'Opšti upit',
   PARTNERSTVO: 'Partnerstvo i sponzorstvo',
-  KARTE: 'Karte',
+  KARTE: 'Rezervacije',
   MEDIJI: 'Mediji',
   SARADNJA: 'Saradnja i nastup',
 } as const;

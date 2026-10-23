@@ -31,7 +31,7 @@ import { EditorialImageComponent } from '../../../shared/components/editorial-im
         </p>
         <p class="tagline rise d4" i18n>Kultura koja spaja.</p>
         <div class="actions rise d5">
-          <a class="btn btn--primary" routerLink="/karte" i18n>Karte</a>
+          <a class="btn btn--primary" routerLink="/rezervacija" i18n>Rezervacija</a>
           <a class="text-link" routerLink="/o-balu" i18n>O balu</a>
         </div>
       </div>

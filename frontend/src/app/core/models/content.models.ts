@@ -21,10 +21,12 @@ export interface ProgramItem {
 }
 
 export interface TicketType {
+  /** Šifra iz forme za rezervaciju — po njoj forma nalazi cenu. */
+  code?: TicketTypeCode;
   name: string;
   description?: string;
   priceCents: number;
-  /** Spoljni link za kupovinu (kad prodaja počne). */
+  /** Link za kupovinu kad prodaja počne: '/rezervacija' (forma na sajtu) ili spoljni prodavac. */
   ctaUrl: string | null;
   soldOut: boolean;
 }
@@ -49,4 +51,41 @@ export interface ContactPayload {
   website: string;
   /** Koliko je ms prošlo od prikaza forme do slanja (zaštita od botova). */
   elapsedMs: number;
+}
+
+/** Šifre tipova karata za rezervaciju — iste u backendu i u Google Apps Scriptu. */
+export type TicketTypeCode = 'ALL_INCLUSIVE' | 'BALKON' | 'STUDENT';
+
+export type ReservationSource = 'PREPORUKA' | 'DRUSTVENE_MREZE' | 'RANIJI_DOLAZAK' | 'SAJT' | 'EMAIL' | 'DRUGO';
+
+export interface BookingStatus {
+  open: boolean;
+}
+
+export interface ReservationPayload {
+  /** Isti za ponovljena slanja iste rezervacije — backend tako sprečava duplikat. */
+  requestId: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  /** Karte glase na osobu koja rezerviše. Lista da bi se kasnije mogli kombinovati tipovi; za sada jedna stavka. */
+  tickets: { ticketType: TicketTypeCode; count: number }[];
+  invoice: { needed: boolean; companyName?: string; companyAddress?: string; taxId?: string };
+  /** Posebna ishrana i alergije — posebna kolona u tabeli, zbog kuhinje. */
+  diet: string;
+  note: string;
+  source: ReservationSource;
+  sourceOther: string;
+  locale: 'sr' | 'sl' | 'en';
+  pageUrl: string;
+  utm: Partial<Record<'source' | 'medium' | 'campaign' | 'term' | 'content', string>>;
+  /** Honeypot — mora ostati prazno. */
+  website: string;
+  elapsedMs: number;
+}
+
+export interface ReservationResult {
+  ok: true;
+  reservationNumber: string;
+  guestMailSent: boolean;
 }

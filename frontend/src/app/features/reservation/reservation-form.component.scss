@@ -1,0 +1,316 @@
+:host {
+  display: block;
+}
+
+// Svaka celina forme je red: levo naziv i kratko objašnjenje, desno polja (kao sekcija Karte na početnoj).
+.row {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--grid-gap);
+  padding: 3rem 0;
+  border-top: 1px solid var(--c-rule-dark);
+
+  &:first-child {
+    border-top: 0;
+  }
+
+  &__aside {
+    grid-column: 1 / span 4;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  &__main {
+    grid-column: 6 / span 7;
+    min-width: 0;
+  }
+
+  &--submit {
+    border-top-color: var(--c-brass);
+  }
+}
+
+.legend {
+  color: var(--c-burgundy);
+}
+
+.aside-text {
+  max-width: 24em;
+  font-size: 0.9375rem;
+  font-weight: 300;
+  line-height: 1.7;
+  color: var(--c-ink-soft);
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2rem;
+}
+
+.choice {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+
+  legend {
+    padding: 0;
+    margin-bottom: 0.75rem;
+  }
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 2.5rem;
+  font-size: 1rem;
+}
+
+// Tipovi karata kao kartice: naziv i cena, izabrana je uokvirena bordo bojom.
+.tickets {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.ticket {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1.25rem 1.25rem 1.1rem;
+  border: 1px solid var(--c-rule-dark);
+  background: rgba(246, 241, 232, 0.5);
+  cursor: pointer;
+  transition: border-color var(--dur-base) var(--ease), background-color var(--dur-base) var(--ease);
+
+  input {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--c-burgundy);
+  }
+
+  &:hover {
+    border-color: var(--c-ink);
+  }
+
+  &:has(input:checked) {
+    border-color: var(--c-burgundy);
+    box-shadow: inset 0 0 0 1px var(--c-burgundy);
+    background: var(--c-ivory);
+  }
+
+  &:has(input:focus-visible) {
+    outline: 2px solid var(--c-burgundy);
+    outline-offset: 2px;
+  }
+
+  &__name {
+    padding-right: 1.75rem;
+    font-family: var(--font-display);
+    font-size: 1.375rem;
+    line-height: 1.15;
+  }
+
+  &__price {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    color: var(--c-burgundy);
+  }
+}
+
+.count-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1.5rem 3rem;
+}
+
+.stepper {
+  display: flex;
+  align-items: stretch;
+  width: 11rem;
+
+  &__btn {
+    flex: 0 0 48px;
+    border: 0;
+    border-bottom: 1px solid var(--c-ink);
+    background: transparent;
+    font-size: 1.375rem;
+    color: var(--c-burgundy);
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+  }
+
+  &__input {
+    text-align: center;
+    font-size: 1.125rem;
+    -moz-appearance: textfield;
+
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  }
+}
+
+.estimate {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+
+  &__value {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    line-height: 1.1;
+    color: var(--c-burgundy);
+  }
+}
+
+// Ishrana je istaknuta: svetlija podloga i mesingana linija.
+.diet {
+  padding: 1.25rem 1.5rem 1.5rem;
+  border-left: 2px solid var(--c-brass);
+  background: var(--c-ivory);
+
+  textarea.field__control {
+    min-height: 88px;
+  }
+}
+
+.company {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-left: 1.25rem;
+  border-left: 1px solid var(--c-rule-brass);
+}
+
+.field__hint {
+  font-size: var(--fs-small);
+  color: var(--c-ink-soft);
+}
+
+.optional {
+  letter-spacing: 0.08em;
+  text-transform: none;
+  color: var(--c-ink-soft);
+}
+
+.submit {
+  align-self: flex-start;
+}
+
+.notice,
+.success {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.5rem;
+
+  .quote {
+    color: var(--c-burgundy);
+  }
+}
+
+.success:focus {
+  outline: none;
+}
+
+.eyebrow {
+  color: var(--c-burgundy);
+}
+
+.number {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+
+  &__value {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(4rem, 9vw, 6.5rem);
+    line-height: 1;
+    letter-spacing: 0.04em;
+    color: var(--c-burgundy);
+  }
+}
+
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 3rem;
+  margin: 0;
+
+  dd {
+    margin: 0.25rem 0 0;
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+  }
+}
+
+.body {
+  max-width: 34em;
+}
+
+.accent {
+  color: var(--c-burgundy);
+}
+
+@media (max-width: 1023.98px) {
+  .row {
+    padding: 2.5rem 0;
+
+    &__aside,
+    &__main {
+      grid-column: 1 / -1;
+    }
+
+    &__aside {
+      margin-bottom: 0.75rem;
+    }
+  }
+}
+
+@media (max-width: 767.98px) {
+  .pair,
+  .tickets {
+    grid-template-columns: 1fr;
+  }
+
+  .ticket {
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+    padding-right: 3rem;
+
+    input {
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    &__name {
+      padding-right: 0;
+    }
+  }
+}

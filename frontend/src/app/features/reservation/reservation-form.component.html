@@ -1,0 +1,211 @@
+@if (result(); as r) {
+  <div class="row">
+    <div class="row__main success" #success tabindex="-1" role="status" aria-labelledby="success-title">
+      <p class="label eyebrow" id="success-title" i18n>Rezervacija je evidentirana</p>
+      <p class="quote" i18n>Hvala vam. Vaš zahtev za rezervaciju je primljen i upisan.</p>
+
+      <div class="number">
+        <span class="field__label" i18n>Broj rezervacije</span>
+        <span class="number__value">{{ r.number }}</span>
+      </div>
+
+      <dl class="summary">
+        <div><dt class="field__label" i18n>Tip karte</dt><dd>{{ r.ticketLabel }}</dd></div>
+        <div><dt class="field__label" i18n>Broj karata</dt><dd>{{ r.count }}</dd></div>
+      </dl>
+
+      <p class="lead" i18n>Javićemo vam se u roku od 3 dana sa detaljima za uplatu.</p>
+      <p class="body" i18n>Sačuvajte broj rezervacije i navedite ga prilikom uplate — u svrsi uplate upišite „Sretenjski bal {{ r.number }}“. Iznos i podatke za uplatu dobićete naknadno, e-mailom.</p>
+      @if (r.mailTo) {
+        <p class="note" i18n>Potvrdu sa ovim podacima poslali smo i na adresu {{ r.mailTo }}.</p>
+      }
+      <a class="text-link accent" routerLink="/" i18n>Na početnu</a>
+    </div>
+  </div>
+} @else {
+  @switch (booking()) {
+    @case ('loading') {
+      <div class="row"><p class="row__main note" role="status" i18n>Učitavanje forme za rezervaciju…</p></div>
+    }
+    @case ('error') {
+      <div class="row">
+        <div class="row__main notice" role="alert">
+          <p class="quote" i18n>Rezervacije trenutno nisu dostupne.</p>
+          <p class="body" i18n>Nismo uspeli da proverimo da li su rezervacije otvorene. Pokušajte ponovo za nekoliko minuta.</p>
+          <button type="button" class="btn btn--outline-dark" (click)="loadStatus()" i18n>Pokušaj ponovo</button>
+        </div>
+      </div>
+    }
+    @case ('closed') {
+      <div class="row">
+        <div class="row__main notice" role="status">
+          <p class="quote" i18n>Rezervacije trenutno nisu dostupne.</p>
+          @if (serverError()) { <p class="server-error">{{ serverError() }}</p> }
+          <p class="body" i18n>Za pitanja o kartama <a class="inline-link" routerLink="/kontakt" [queryParams]="{ tema: 'KARTE' }">pišite nam</a>.</p>
+        </div>
+      </div>
+    }
+    @default {
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <section class="row" aria-labelledby="sec-contact">
+          <div class="row__aside">
+            <h2 class="label legend" id="sec-contact" i18n>Vaši podaci</h2>
+            <p class="aside-text" i18n>Karte glase na vaše ime. Na ovaj e-mail šaljemo potvrdu i podatke za uplatu.</p>
+          </div>
+          <div class="row__main fields">
+            <label class="field">
+              <span class="field__label" i18n>Ime i prezime</span>
+              <input class="field__control" formControlName="fullName" autocomplete="name" required
+                [attr.aria-invalid]="invalid(form.controls.fullName)" aria-describedby="err-fullName" />
+              @if (invalid(form.controls.fullName)) { <span class="field__error" id="err-fullName" i18n>Unesite ime i prezime.</span> }
+            </label>
+            <div class="pair">
+              <label class="field">
+                <span class="field__label" i18n>Email</span>
+                <input class="field__control" type="email" formControlName="email" autocomplete="email" placeholder="ime@primer.si" required
+                  [attr.aria-invalid]="invalid(form.controls.email)" aria-describedby="err-email" />
+                @if (invalid(form.controls.email)) { <span class="field__error" id="err-email" i18n>Unesite ispravnu email adresu.</span> }
+              </label>
+              <label class="field">
+                <span class="field__label" i18n>Kontakt telefon</span>
+                <input class="field__control" type="tel" formControlName="phone" autocomplete="tel" placeholder="+386 …" required
+                  [attr.aria-invalid]="invalid(form.controls.phone)" aria-describedby="err-phone" />
+                @if (invalid(form.controls.phone)) { <span class="field__error" id="err-phone" i18n>Unesite broj telefona, npr. +386 40 123 456.</span> }
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <section class="row" aria-labelledby="sec-tickets">
+          <div class="row__aside">
+            <h2 class="label legend" id="sec-tickets" i18n>Ulaznice</h2>
+            <p class="aside-text" i18n>Cene su po osobi. Tačan iznos potvrđujemo u mejlu sa instrukcijama za uplatu.</p>
+          </div>
+          <div class="row__main fields">
+            <fieldset class="choice" aria-describedby="err-ticketType">
+              <legend class="field__label" i18n>Tip karte</legend>
+              <div class="tickets">
+                @for (t of ticketTypes; track t.value) {
+                  <label class="ticket">
+                    <input type="radio" formControlName="ticketType" [value]="t.value" required [attr.aria-invalid]="invalid(form.controls.ticketType)" />
+                    <span class="ticket__name">{{ t.label }}</span>
+                    @if (t.price) { <span class="ticket__price">{{ t.price }}</span> }
+                  </label>
+                }
+              </div>
+              @if (ticketType() === 'STUDENT') { <span class="field__hint" i18n>Studentska ulaznica važi uz važeću studentsku ispravu.</span> }
+              @if (invalid(form.controls.ticketType)) { <span class="field__error" id="err-ticketType" i18n>Izaberite tip karte.</span> }
+            </fieldset>
+
+            <div class="count-row">
+              <div class="field">
+                <label class="field__label" for="ticketCount" i18n>Broj karata</label>
+                <div class="stepper">
+                  <button type="button" class="stepper__btn" (click)="step(-1)" [disabled]="(ticketCount() ?? 1) <= 1" i18n-aria-label aria-label="Jedna karta manje">−</button>
+                  <input id="ticketCount" class="field__control stepper__input" type="number" inputmode="numeric" min="1" [max]="maxTickets" step="1"
+                    formControlName="ticketCount" required [attr.aria-invalid]="invalid(form.controls.ticketCount)" aria-describedby="err-ticketCount" />
+                  <button type="button" class="stepper__btn" (click)="step(1)" i18n-aria-label aria-label="Jedna karta više">+</button>
+                </div>
+                @if (invalid(form.controls.ticketCount)) { <span class="field__error" id="err-ticketCount" i18n>Unesite broj karata (ceo broj, najmanje 1).</span> }
+              </div>
+
+              @if (estimate(); as e) {
+                <p class="estimate" aria-live="polite">
+                  <span class="field__label" i18n>Okvirni iznos</span>
+                  <span class="estimate__value">{{ e.total }}</span>
+                  <span class="field__hint">{{ e.count }} × {{ e.unit }}</span>
+                </p>
+              }
+            </div>
+          </div>
+        </section>
+
+        <section class="row" aria-labelledby="sec-diet">
+          <div class="row__aside">
+            <h2 class="label legend" id="sec-diet" i18n>Ishrana i napomene</h2>
+            <p class="aside-text" i18n>Kuhinji je važno da unapred zna za posebne potrebe u ishrani.</p>
+          </div>
+          <div class="row__main fields">
+            <label class="field diet">
+              <span class="field__label"><ng-container i18n>Posebna ishrana i alergije</ng-container> <span class="optional" i18n>(opciono)</span></span>
+              <textarea class="field__control" formControlName="diet" rows="2" aria-describedby="hint-diet"></textarea>
+              <span class="field__hint" id="hint-diet" i18n>Npr. vegetarijanska, veganska, bez glutena, bez laktoze, alergija na orašaste plodove. Ako rezervišete za više osoba, napišite i za koga.</span>
+            </label>
+
+            <label class="field">
+              <span class="field__label"><ng-container i18n>Ostale napomene</ng-container> <span class="optional" i18n>(opciono)</span></span>
+              <textarea class="field__control" formControlName="note" rows="3" aria-describedby="hint-note"></textarea>
+              <span class="field__hint" id="hint-note" i18n>Ako kupujete karte za nekog drugog, napišite za koga. Ovde upišite i želje u vezi sa sedenjem.</span>
+            </label>
+          </div>
+        </section>
+
+        <section class="row" aria-labelledby="sec-more">
+          <div class="row__aside">
+            <h2 class="label legend" id="sec-more" i18n>Još malo</h2>
+          </div>
+          <div class="row__main fields">
+            <fieldset class="choice">
+              <legend class="field__label" i18n>Da li vam je potrebna faktura na firmu?</legend>
+              <div class="options">
+                <label class="checkbox"><input type="radio" formControlName="invoiceNeeded" [value]="false" /><span i18n>Ne</span></label>
+                <label class="checkbox"><input type="radio" formControlName="invoiceNeeded" [value]="true" /><span i18n>Da</span></label>
+              </div>
+            </fieldset>
+
+            @if (invoiceNeeded()) {
+              <div class="company" formGroupName="company">
+                <label class="field">
+                  <span class="field__label" i18n>Naziv firme</span>
+                  <input class="field__control" formControlName="name" autocomplete="organization" required
+                    [attr.aria-invalid]="invalid(form.controls.company.controls.name)" aria-describedby="err-company-name" />
+                  @if (invalid(form.controls.company.controls.name)) { <span class="field__error" id="err-company-name" i18n>Unesite naziv firme.</span> }
+                </label>
+                <label class="field">
+                  <span class="field__label" i18n>Adresa firme</span>
+                  <input class="field__control" formControlName="address" autocomplete="street-address" required
+                    [attr.aria-invalid]="invalid(form.controls.company.controls.address)" aria-describedby="err-company-address" />
+                  @if (invalid(form.controls.company.controls.address)) { <span class="field__error" id="err-company-address" i18n>Unesite adresu firme.</span> }
+                </label>
+                <label class="field">
+                  <span class="field__label" i18n>Poreski identifikacioni broj</span>
+                  <input class="field__control" formControlName="taxId" required
+                    [attr.aria-invalid]="invalid(form.controls.company.controls.taxId)" aria-describedby="err-company-tax" />
+                  @if (invalid(form.controls.company.controls.taxId)) { <span class="field__error" id="err-company-tax" i18n>Unesite poreski identifikacioni broj.</span> }
+                </label>
+              </div>
+            }
+
+            <label class="field">
+              <span class="field__label" i18n>Kako ste saznali za Sretenjski bal?</span>
+              <select class="field__control" formControlName="source" required
+                [attr.aria-invalid]="invalid(form.controls.source)" aria-describedby="err-source">
+                <option value="" disabled i18n>Izaberite…</option>
+                @for (s of sources; track s.value) { <option [value]="s.value">{{ s.label }}</option> }
+              </select>
+              @if (invalid(form.controls.source)) { <span class="field__error" id="err-source" i18n>Izaberite jednu od ponuđenih mogućnosti.</span> }
+            </label>
+
+            @if (source() === 'DRUGO') {
+              <label class="field">
+                <span class="field__label"><ng-container i18n>Recite nam više</ng-container> <span class="optional" i18n>(opciono)</span></span>
+                <input class="field__control" formControlName="sourceOther" />
+              </label>
+            }
+          </div>
+        </section>
+
+        <div class="row row--submit">
+          <div class="row__main fields">
+            <input class="hp" type="text" formControlName="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+            <p class="note" i18n>Sva polja su obavezna, osim onih označenih kao opciona. Podatke iz ove forme koristimo za obradu vaše rezervacije i kontakt u vezi sa njom. Više u <a routerLink="/privacy" class="inline-link">politici privatnosti</a>.</p>
+            @if (serverError()) { <p class="server-error" role="alert">{{ serverError() }}</p> }
+            <button class="btn btn--primary submit" type="submit" [disabled]="sending()" [attr.aria-busy]="sending()">
+              @if (sending()) { <ng-container i18n>Slanje rezervacije…</ng-container> } @else { <ng-container i18n>Pošalji rezervaciju</ng-container> }
+            </button>
+          </div>
+        </div>
+      </form>
+    }
+  }
+}

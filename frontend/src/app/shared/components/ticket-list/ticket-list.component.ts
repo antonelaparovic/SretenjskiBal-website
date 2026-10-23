@@ -1,12 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { SalesStatus, TicketType } from '../../../core/models/content.models';
 import { formatPrice } from '../../../core/util/format';
+import { RouterLink } from '@angular/router';
 import { RevealDirective } from '../../directives/reveal.directive';
 
 /** Kategorije karata kao redovi. */
 @Component({
   selector: 'app-ticket-list',
-  imports: [RevealDirective],
+  imports: [RevealDirective, RouterLink],
   template: `
     <ul class="list">
       @for (t of rows(); track t.name) {
@@ -19,7 +20,11 @@ import { RevealDirective } from '../../directives/reveal.directive';
           <div class="action">
             @switch (t.state) {
               @case ('open') {
-                <a class="btn btn--outline-light" [href]="t.ctaUrl" target="_blank" rel="noopener" i18n>Rezerviši kartu</a>
+                @if (t.internal) {
+                  <a class="btn btn--outline-light" [routerLink]="t.ctaUrl" i18n>Rezerviši kartu</a>
+                } @else {
+                  <a class="btn btn--outline-light" [href]="t.ctaUrl" target="_blank" rel="noopener" i18n>Rezerviši kartu</a>
+                }
               }
               @case ('sold') { <span class="label muted" i18n>Rasprodato</span> }
               @default { <span class="label muted" i18n>Uskoro</span> }
@@ -62,6 +67,8 @@ export class TicketListComponent {
       hasPrice: t.priceCents > 0,
       price: t.priceCents > 0 ? formatPrice(t.priceCents) : $localize`Cena uskoro`,
       ctaUrl: t.ctaUrl,
+      /** '/rezervacija' — forma na samom sajtu; ostalo je spoljni prodavac karata. */
+      internal: !!t.ctaUrl?.startsWith('/'),
       state:
         this.salesStatus() === 'SOLD_OUT' || t.soldOut
           ? 'sold'
