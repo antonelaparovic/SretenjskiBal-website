@@ -37,6 +37,15 @@
   align-items: center;
   gap: 0.875rem;
   flex-shrink: 0;
+  transition:
+    opacity var(--dur-slow) var(--ease),
+    visibility var(--dur-slow) var(--ease);
+
+  // Na vrhu početne znak i naziv su već veliki u heru — u meniju se pojavljuju tek pri skrolovanju.
+  .header--hero-top & {
+    opacity: 0;
+    visibility: hidden;
+  }
 
   &__name {
     font-family: var(--font-display);

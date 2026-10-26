@@ -14,7 +14,9 @@ import { VenueSectionComponent } from './sections/venue.section';
 import { DressCodeSectionComponent } from './sections/dress-code.section';
 import { TicketsSectionComponent } from './sections/tickets.section';
 import { OrganizerSectionComponent } from './sections/organizer.section';
-import { PartnersSectionComponent } from './sections/partners.section';
+// Partneri su sakriveni dok ih ne bude.
+// import { PartnersSectionComponent } from './sections/partners.section';
+import { PerformersSectionComponent } from './sections/performers.section';
 
 @Component({
   selector: 'app-home-page',
@@ -25,11 +27,11 @@ import { PartnersSectionComponent } from './sections/partners.section';
     DateMomentSectionComponent,
     WhySretenjeSectionComponent,
     WhyBallSectionComponent,
+    PerformersSectionComponent,
     VenueSectionComponent,
     DressCodeSectionComponent,
     TicketsSectionComponent,
     OrganizerSectionComponent,
-    PartnersSectionComponent,
   ],
   template: `
     <app-hero-section />
@@ -40,11 +42,13 @@ import { PartnersSectionComponent } from './sections/partners.section';
     <app-why-ball-section />
     <!-- Program večeri — sakriveno dok program ne bude definisan:
     <app-program-preview-section /> -->
+    <app-performers-section />
     <app-venue-section />
     <app-dress-code-section />
     <app-tickets-section />
     <app-organizer-section />
-    <app-partners-section />
+    <!-- Partneri — sakriveno dok ih ne bude:
+    <app-partners-section /> -->
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

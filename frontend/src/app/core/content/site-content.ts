@@ -4,6 +4,7 @@
  */
 import {
   EventInfo,
+  Performer,
   ProgramItem,
   Sponsor,
   TicketType,
@@ -74,3 +75,12 @@ export const TICKETS: TicketType[] = [
  * Dok je lista prazna, sajt prikazuje poziv „Postanite partner".
  */
 export const SPONSORS: Sponsor[] = [];
+
+/**
+ * Izvođači — prikazuju se na početnoj kao karusel, redom kako su ovde upisani (prvi = glavni izvođač).
+ * Portret staviti u frontend/public/images/izvodjaci/ i upisati putanju u photo.
+ * Dok je lista prazna, sekcija prikazuje „Imena izvođača objavljujemo uskoro."
+ * Primer:
+ *   { name: 'Ime Prezime', role: 'sopran', photo: '/images/izvodjaci/ime-prezime.jpg' },
+ */
+export const PERFORMERS: Performer[] = [];

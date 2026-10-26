@@ -24,7 +24,6 @@ export const routes: Routes = [
   { path: 'prostor', ...soon($localize`Prostor`) },
   { path: 'pravila-oblacenja', ...soon($localize`Pravila oblačenja`) },
   { path: 'partneri', ...soon($localize`Partneri`) },
-  { path: 'faq', ...soon($localize`Česta pitanja`) },
   { path: 'organizator', ...soon($localize`Kulturni centar Sretenje`) },
   // TODO: tekst politike privatnosti — forma za rezervaciju i kontakt forma linkuju ovde.
   { path: 'privacy', ...soon($localize`Politika privatnosti`) },

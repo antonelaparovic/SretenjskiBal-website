@@ -38,6 +38,14 @@ export interface Sponsor {
   url?: string;
 }
 
+export interface Performer {
+  name: string;
+  /** Kratko: instrument, glas ili ansambl, npr. „sopran", „gudački kvartet". */
+  role: string;
+  /** Portret, npr. '/images/izvodjaci/ime-prezime.jpg' (uspravna fotografija, najmanje 800 px širine). */
+  photo?: string;
+}
+
 export type ContactTopic = 'OPSTE' | 'PARTNERSTVO' | 'KARTE' | 'MEDIJI' | 'SARADNJA';
 
 export interface ContactPayload {
