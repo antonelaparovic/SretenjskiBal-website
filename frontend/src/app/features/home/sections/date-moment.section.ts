@@ -16,8 +16,7 @@ import { dateParts } from '../../../core/util/format';
           <span class="year">{{ parts().year }}</span>
         </p>
         <div class="aside" appReveal [appRevealDelay]="150">
-          <p class="label city">{{ city() }}</p>
-          <p class="quote" i18n>Jedno veče.<br />Početak jedne nove tradicije.</p>
+          <p class="quote" i18n>Prvi Sretenjski bal</p>
           @if (showCountdown()) {
             <app-countdown [target]="startsAt()" />
           }
@@ -41,7 +40,6 @@ import { dateParts } from '../../../core/util/format';
     .indent { padding-left: 0.75em; }
     .year { color: var(--c-brass); }
     .aside { grid-column: 9 / span 4; align-self: end; display: flex; flex-direction: column; gap: 1.75rem; }
-    .city { color: var(--c-brass); font-size: 0.875rem; }
     @media (max-width: 1023.98px) {
       .date, .aside { grid-column: 1 / -1; }
       .aside { margin-top: 3rem; }
@@ -51,7 +49,6 @@ import { dateParts } from '../../../core/util/format';
 })
 export class DateMomentSectionComponent {
   readonly startsAt = input.required<string>();
-  readonly city = input('Maribor');
   readonly showCountdown = input(true);
   protected readonly parts = computed(() => dateParts(this.startsAt()));
 }

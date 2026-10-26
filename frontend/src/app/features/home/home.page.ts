@@ -37,7 +37,7 @@ import { PerformersSectionComponent } from './sections/performers.section';
     <app-intro-section />
     <!-- Susret („Kultura koja spaja") — sakriveno, nije u dogovorenom redosledu:
     <app-encounter-section /> -->
-    <app-date-moment-section [startsAt]="event.startsAt" [city]="event.city" />
+    <app-date-moment-section [startsAt]="event.startsAt" />
     <app-why-sretenje-section />
     <app-why-ball-section />
     <!-- Program večeri — sakriveno dok program ne bude definisan:

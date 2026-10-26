@@ -51,6 +51,8 @@
     font-family: var(--font-display);
     font-size: 1.3125rem;
     letter-spacing: 0.06em;
+    // Optičko poravnanje sa slovima SB u znaku (znak ima krunu i krila, pa je njegova težina niže).
+    transform: translateY(0.3rem);
   }
 }
 
