@@ -4,7 +4,8 @@ export interface NavItem {
 }
 
 export const MAIN_NAV: NavItem[] = [
-  { label: $localize`Bal`, path: '/o-balu' },
+  // Sakriveno dok stranica O balu ne bude spremna:
+  // { label: $localize`Bal`, path: '/o-balu' },
   { label: $localize`Sretenje`, path: '/sretenje' },
   { label: $localize`Program`, path: '/program' },
   { label: $localize`Rezervacija`, path: '/rezervacija' },
@@ -15,7 +16,7 @@ export const MAIN_NAV: NavItem[] = [
 ];
 
 export const FOOTER_NAV: NavItem[] = [
-  { label: $localize`Bal`, path: '/o-balu' },
+  // { label: $localize`Bal`, path: '/o-balu' },
   { label: $localize`Sretenje`, path: '/sretenje' },
   { label: $localize`Program`, path: '/program' },
   { label: $localize`Rezervacija`, path: '/rezervacija' },
