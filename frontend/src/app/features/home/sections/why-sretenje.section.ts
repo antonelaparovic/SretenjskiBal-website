@@ -18,7 +18,7 @@ interface Moment {
             <ng-container i18n>Zašto Sretenje?</ng-container>
           </app-section-heading>
           <p class="lead" i18n>
-            Reč sretenje u oba jezika znači susret, a jedan praznik simboliše toliko susreta.
+            Reč sretenje u srpskom i slovenačkom jeziku znači susret, a jedan praznik simboliše toliko susreta.
           </p>
           <p class="quote pairs accent" i18n>
             <span>Vere i istorije.</span>
@@ -62,7 +62,7 @@ interface Moment {
 export class WhySretenjeSectionComponent {
   protected readonly moments: Moment[] = [
     {
-      mark: $localize`Susret`,
+      mark: $localize`Sretenje Gospodnje`,
       text: $localize`Prema Jevanđelju po Luki, četrdesetog dana po rođenju, Marija i Josif donose Isusa u jerusalimski hram, gde ga starac Simeon uzima u naručje i prepoznaje kao svetlost.`,
     },
     {
@@ -76,6 +76,10 @@ export class WhySretenjeSectionComponent {
     {
       mark: $localize`Od 2002.`,
       text: $localize`Sretenje je Dan državnosti Republike Srbije.`,
+    },
+    {
+      mark: $localize`Narodna tradicija`,
+      text: $localize`U narodu se Sretenje vezuje za simbolični susret zime i proleća.`,
     },
   ];
 }
