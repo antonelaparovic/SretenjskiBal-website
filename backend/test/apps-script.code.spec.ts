@@ -12,7 +12,7 @@ function reservation(overrides: Record<string, unknown> = {}) {
     fullName: 'Ana Anić',
     email: 'ana@primer.si',
     phone: '+386 40 123 456',
-    tickets: [{ ticketType: 'ALL_INCLUSIVE', count: 2 }],
+    tickets: [{ ticketType: 'SVECANA', count: 2 }],
     invoice: { needed: false },
     diet: '',
     note: 'Sedimo sa porodicom Petrović.',
@@ -100,7 +100,7 @@ describe('Apps Script (Code.gs)', () => {
       expect(cell(2, 'number')).toBe('27001');
       expect(cell(2, 'status')).toBe('NOVA');
       expect(cell(2, 'createdAt')).toBeInstanceOf(Date);
-      expect(cell(2, 'ticketType')).toBe('All inclusive');
+      expect(cell(2, 'ticketType')).toBe('Svečana');
       expect(cell(2, 'ticketCount')).toBe(2);
       expect(H).not.toContain('Imena gostiju');
       expect(cell(2, 'invoice')).toBe('DA');
@@ -155,11 +155,11 @@ describe('Apps Script (Code.gs)', () => {
 
     it('proverava podatke i u skripti', () => {
       expect(create(reservation({ tickets: [] })).fields).toEqual(['tickets']);
-      expect(create(reservation({ tickets: [{ ticketType: 'BALKON', count: 0 }] })).fields).toEqual(['tickets.0.count']);
-      expect(create(reservation({ tickets: [{ ticketType: 'BALKON', count: 1.5 }] })).fields).toEqual(['tickets.0.count']);
+      expect(create(reservation({ tickets: [{ ticketType: 'GALERIJA', count: 0 }] })).fields).toEqual(['tickets.0.count']);
+      expect(create(reservation({ tickets: [{ ticketType: 'GALERIJA', count: 1.5 }] })).fields).toEqual(['tickets.0.count']);
       expect(create(reservation({ tickets: [{ ticketType: 'VIP', count: 1 }] })).fields).toEqual(['tickets.0.ticketType']);
-      expect(create(reservation({ tickets: [{ ticketType: 'BALKON', count: 1 }, { ticketType: 'BALKON', count: 1 }] })).fields).toEqual(['tickets.1.ticketType']);
-      expect(create(reservation({ tickets: [{ ticketType: 'BALKON', count: 101 }] })).fields).toEqual(['tickets']);
+      expect(create(reservation({ tickets: [{ ticketType: 'GALERIJA', count: 1 }, { ticketType: 'GALERIJA', count: 1 }] })).fields).toEqual(['tickets.1.ticketType']);
+      expect(create(reservation({ tickets: [{ ticketType: 'GALERIJA', count: 101 }] })).fields).toEqual(['tickets']);
       expect(create(reservation({ invoice: { needed: true, companyName: 'Firma' } })).fields).toEqual(['invoice.companyAddress', 'invoice.taxId']);
       expect(create(reservation({ email: 'nije-mejl' })).fields).toContain('email');
       expect(create(reservation({ source: 'NESTO' })).fields).toContain('source');
@@ -177,33 +177,34 @@ describe('Apps Script (Code.gs)', () => {
     });
 
     it('mešoviti tipovi karata (za kasnije proširenje) se vide u redu', () => {
-      create(reservation({ tickets: [{ ticketType: 'ALL_INCLUSIVE', count: 2 }, { ticketType: 'BALKON', count: 1 }] }));
-      expect(cell(2, 'ticketType')).toBe('All inclusive ×2, Balkon ×1');
+      create(reservation({ tickets: [{ ticketType: 'SVECANA', count: 2 }, { ticketType: 'GALERIJA', count: 1 }] }));
+      expect(cell(2, 'ticketType')).toBe('Svečana ×2, Galerija ×1');
       expect(cell(2, 'ticketCount')).toBe(3);
-      expect(cell(2, 'amount')).toBe(360);
+      expect(cell(2, 'amount')).toBe(350);
     });
 
     it('iznos za uplatu se predlaže po cenama iz podešavanja', () => {
-      create(reservation()); // 2 × All inclusive
-      create(reservation({ tickets: [{ ticketType: 'BALKON', count: 3 }] }));
-      create(reservation({ tickets: [{ ticketType: 'STUDENT', count: 1 }] }));
-      expect([cell(2, 'amount'), cell(3, 'amount'), cell(4, 'amount')]).toEqual([280, 240, 60]);
+      create(reservation()); // 2 × Svečana
+      create(reservation({ tickets: [{ ticketType: 'GALERIJA', count: 3 }] }));
+      expect([cell(2, 'amount'), cell(3, 'amount')]).toEqual([280, 210]);
       expect(gas.outbox.find((m) => m.subject.endsWith('27001') && m.to === 'fbozic7@gmail.com')!.body).toContain('Iznos (po cenama iz podešavanja): 280,00 EUR');
-      setSetting('PRICE_BALKON', 95);
-      create(reservation({ tickets: [{ ticketType: 'BALKON', count: 1 }] }));
-      expect(cell(5, 'amount')).toBe(95);
-      setSetting('PRICE_BALKON', '');
-      expect(create(reservation({ tickets: [{ ticketType: 'BALKON', count: 1 }] }))).toMatchObject({ ok: true });
-      expect(cell(6, 'amount')).toBe('');
+      setSetting('PRICE_GALERIJA', 95);
+      create(reservation({ tickets: [{ ticketType: 'GALERIJA', count: 1 }] }));
+      expect(cell(4, 'amount')).toBe(95);
+      setSetting('PRICE_GALERIJA', '');
+      expect(create(reservation({ tickets: [{ ticketType: 'GALERIJA', count: 1 }] }))).toMatchObject({ ok: true });
+      expect(cell(5, 'amount')).toBe('');
     });
 
-    it('studentska ulaznica: naziv u tabeli i preveden u mejlu gostu', () => {
-      const students = [{ ticketType: 'STUDENT', count: 2 }];
-      create(reservation({ tickets: students, locale: 'sl', email: 'sl@primer.si' }));
-      create(reservation({ tickets: students, locale: 'en', email: 'en@primer.si' }));
-      expect(cell(2, 'ticketType')).toBe('Studentska ulaznica');
-      expect(gas.outbox.find((m) => m.to === 'sl@primer.si')!.body).toContain('Vrsta vstopnice: Študentska vstopnica');
-      expect(gas.outbox.find((m) => m.to === 'en@primer.si')!.body).toContain('Ticket type: Student ticket');
+    it('naziv tipa karte: u tabeli na srpskom, u mejlu gostu preveden', () => {
+      const gallery = [{ ticketType: 'GALERIJA', count: 2 }];
+      const gala = [{ ticketType: 'SVECANA', count: 1 }];
+      create(reservation({ tickets: gala, locale: 'sl', email: 'sl@primer.si' }));
+      create(reservation({ tickets: gallery, locale: 'en', email: 'en@primer.si' }));
+      expect(cell(2, 'ticketType')).toBe('Svečana');
+      expect(cell(3, 'ticketType')).toBe('Galerija');
+      expect(gas.outbox.find((m) => m.to === 'sl@primer.si')!.body).toContain('Vrsta vstopnice: Svečana vstopnica');
+      expect(gas.outbox.find((m) => m.to === 'en@primer.si')!.body).toContain('Ticket type: Gallery');
     });
 
     it('ishrana: posebna kolona, istaknuta u mejlu organizatoru i potvrđena gostu', () => {
@@ -228,7 +229,7 @@ describe('Apps Script (Code.gs)', () => {
       const admin = gas.outbox.find((m) => m.to === 'fbozic7@gmail.com')!;
       expect(admin.subject).toBe('Nova rezervacija za Sretenjski bal — 27001');
       expect(admin.replyTo).toBe('ana@primer.si');
-      for (const s of ['27001', 'Ana Anić', 'ana@primer.si', '+386 40 123 456', 'All inclusive', 'ISHRANA I ALERGIJE: —', 'Faktura na firmu: NE', 'Sedimo sa porodicom Petrović.', 'Preporuka prijatelja', 'Jezik forme: sr', 'https://docs.google.com/spreadsheets/d/test#gid=123']) {
+      for (const s of ['27001', 'Ana Anić', 'ana@primer.si', '+386 40 123 456', 'Svečana', 'ISHRANA I ALERGIJE: —', 'Faktura na firmu: NE', 'Sedimo sa porodicom Petrović.', 'Preporuka prijatelja', 'Jezik forme: sr', 'https://docs.google.com/spreadsheets/d/test#gid=123']) {
         expect(admin.body).toContain(s);
       }
     });
@@ -236,7 +237,7 @@ describe('Apps Script (Code.gs)', () => {
     it('potvrda gostu je na jeziku forme i sadrži broj i rok od 3 dana', () => {
       create(reservation());
       create(reservation({ locale: 'sl', email: 'sl@primer.si' }));
-      create(reservation({ locale: 'en', email: 'en@primer.si', tickets: [{ ticketType: 'BALKON', count: 2 }] }));
+      create(reservation({ locale: 'en', email: 'en@primer.si', tickets: [{ ticketType: 'GALERIJA', count: 2 }] }));
       const sr = gas.outbox.find((m) => m.to === 'ana@primer.si')!;
       expect(sr.subject).toBe('Sretenjski bal — rezervacija 27001 je evidentirana');
       expect(sr.body).toContain('Javićemo vam se u roku od 3 dana sa detaljima za uplatu.');
@@ -245,7 +246,7 @@ describe('Apps Script (Code.gs)', () => {
       expect(gas.outbox.find((m) => m.to === 'sl@primer.si')!.body).toContain('V 3 dneh vam bomo poslali podatke za plačilo.');
       const en = gas.outbox.find((m) => m.to === 'en@primer.si')!;
       expect(en.body).toContain('We will contact you within 3 days with the payment details.');
-      expect(en.body).toContain('Ticket type: Balcony');
+      expect(en.body).toContain('Ticket type: Gallery');
     });
 
     it('HTML mejla ne izvršava unos korisnika', () => {
@@ -282,7 +283,7 @@ describe('Apps Script (Code.gs)', () => {
       expect(gas.sheets.get('Rezervacije')!.data[0]).toEqual(H);
       expect(H.slice(0, 8)).toEqual(['Broj rezervacije', 'Status rezervacije', 'Ime i prezime kontakt osobe', 'Tip karte', 'Broj karata', 'Iznos za uplatu', 'Ishrana i alergije', 'Napomena']);
       const keys = gas.sheets.get('Podešavanja')!.data.map((r) => r[0]);
-      expect(keys).toEqual(expect.arrayContaining(['BOOKING_OPEN', 'PRICE_STUDENT', 'IBAN']));
+      expect(keys).toEqual(expect.arrayContaining(['BOOKING_OPEN', 'PRICE_GALERIJA', 'IBAN']));
       expect(keys).not.toContain('MAX_TICKETS');
       expect(gas.sheets.get('Statistika')!.data.length).toBeGreaterThan(10);
       expect(gas.props.get('API_SECRET')).toHaveLength(64);
@@ -307,7 +308,7 @@ describe('Apps Script (Code.gs)', () => {
 
   describe('instrukcije za uplatu i potvrda uplate', () => {
     it('ne šalje instrukcije bez iznosa ili podataka za uplatu', () => {
-      addRow({ number: '27001', status: 'NOVA', email: 'ana@primer.si', fullName: 'Ana', locale: 'sr', ticketType: 'Balkon', ticketCount: 2 });
+      addRow({ number: '27001', status: 'NOVA', email: 'ana@primer.si', fullName: 'Ana', locale: 'sr', ticketType: 'Galerija', ticketCount: 2 });
       expect(() => gas.ctx.sendPaymentInstructionsFor_('27001')).toThrow(/Iznos za uplatu/);
       res.data[1][H.indexOf(COL.amount)] = 130;
       setSetting('IBAN', '');
@@ -334,7 +335,7 @@ describe('Apps Script (Code.gs)', () => {
 
     it('podsetnik bez pravih podataka za uplatu izostavlja primaoca i IBAN', () => {
       setSetting('IBAN', 'TODO: SI56 0000');
-      addRow({ number: '27001', status: 'ČEKA NA UPLATU', email: 'ana@primer.si', fullName: 'Ana', locale: 'sr', ticketType: 'Balkon', ticketCount: 2, instructionsAt: daysFromToday(-8), deadline: daysFromToday(-1) });
+      addRow({ number: '27001', status: 'ČEKA NA UPLATU', email: 'ana@primer.si', fullName: 'Ana', locale: 'sr', ticketType: 'Galerija', ticketCount: 2, instructionsAt: daysFromToday(-8), deadline: daysFromToday(-1) });
       gas.ctx.dailyCheck();
       const reminder = gas.outbox.find((m) => m.to === 'ana@primer.si')!;
       expect(reminder.body).not.toMatch(/todo|IBAN|Primalac|Iznos za uplatu/i);
@@ -342,7 +343,7 @@ describe('Apps Script (Code.gs)', () => {
     });
 
     it('šalje instrukcije, upisuje rok od 7 dana i status ČEKA NA UPLATU', () => {
-      const row = addRow({ number: '27001', status: 'NOVA', email: 'ana@primer.si', fullName: 'Ana', locale: 'sr', ticketType: 'Balkon', ticketCount: 2, amount: 130 });
+      const row = addRow({ number: '27001', status: 'NOVA', email: 'ana@primer.si', fullName: 'Ana', locale: 'sr', ticketType: 'Galerija', ticketCount: 2, amount: 130 });
       gas.ctx.sendPaymentInstructionsFor_('27001');
       const mail = gas.outbox[0];
       expect(mail.subject).toBe('Sretenjski bal — instrukcije za uplatu, rezervacija 27001');
@@ -364,7 +365,7 @@ describe('Apps Script (Code.gs)', () => {
     });
 
     it('potvrda uplate samo za PLAĆENO i samo jednom', () => {
-      const row = addRow({ number: '27001', status: 'ČEKA NA UPLATU', email: 'ana@primer.si', fullName: 'Ana', locale: 'sl', ticketType: 'Balkon', ticketCount: 2 });
+      const row = addRow({ number: '27001', status: 'ČEKA NA UPLATU', email: 'ana@primer.si', fullName: 'Ana', locale: 'sl', ticketType: 'Galerija', ticketCount: 2 });
       expect(() => gas.ctx.sendPaymentConfirmationFor_('27001')).toThrow(/PLAĆENO/);
       res.data[row - 1][H.indexOf(COL.status)] = 'PLAĆENO';
       gas.ctx.sendPaymentConfirmationFor_('27001');
@@ -389,7 +390,7 @@ describe('Apps Script (Code.gs)', () => {
   });
 
   describe('dnevna provera rokova', () => {
-    const base = { email: 'gost@primer.si', fullName: 'Gost', locale: 'sr', ticketType: 'All inclusive', ticketCount: 2, amount: 150 };
+    const base = { email: 'gost@primer.si', fullName: 'Gost', locale: 'sr', ticketType: 'Svečana', ticketCount: 2, amount: 150 };
 
     it('podsetnik posle roka, isticanje posle perioda tolerancije, ništa za ostale', () => {
       const due = addRow({ ...base, number: '27001', status: 'ČEKA NA UPLATU', instructionsAt: daysFromToday(-8), deadline: daysFromToday(-1) });

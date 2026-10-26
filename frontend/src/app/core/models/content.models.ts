@@ -62,7 +62,7 @@ export interface ContactPayload {
 }
 
 /** Šifre tipova karata za rezervaciju — iste u backendu i u Google Apps Scriptu. */
-export type TicketTypeCode = 'ALL_INCLUSIVE' | 'BALKON' | 'STUDENT';
+export type TicketTypeCode = 'SVECANA' | 'GALERIJA';
 
 export type ReservationSource = 'PREPORUKA' | 'DRUSTVENE_MREZE' | 'RANIJI_DOLAZAK' | 'SAJT' | 'EMAIL' | 'DRUGO';
 

@@ -93,7 +93,6 @@
                   </label>
                 }
               </div>
-              @if (ticketType() === 'STUDENT') { <span class="field__hint" i18n>Studentska ulaznica važi uz važeću studentsku ispravu.</span> }
               @if (invalid(form.controls.ticketType)) { <span class="field__error" id="err-ticketType" i18n>Izaberite tip karte.</span> }
             </fieldset>
 

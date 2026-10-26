@@ -92,7 +92,7 @@ const HEADERS = Object.keys(COL).map(function (k) { return COL[k]; });
 const DATE_KEYS = ['instructionsAt', 'deadline', 'reminderAt', 'paidAt', 'paymentConfirmedAt', 'closedAt'];
 
 /** Šifre su iste kao na sajtu i u backendu; nazivi su ono što se vidi u tabeli. */
-const TICKET_TYPES = { ALL_INCLUSIVE: 'All inclusive', BALKON: 'Balkon', STUDENT: 'Studentska ulaznica' };
+const TICKET_TYPES = { SVECANA: 'Svečana', GALERIJA: 'Galerija' };
 const SOURCES = {
   PREPORUKA: 'Preporuka prijatelja',
   DRUSTVENE_MREZE: 'Društvene mreže',
@@ -109,9 +109,8 @@ const MAX_TICKETS_PER_RESERVATION = 100;
 const SETTINGS = [
   ['BOOKING_OPEN', false, 'Označeno = sajt prima nove rezervacije. Isključite kad se mesta popune — već upisane rezervacije ostaju.'],
   ['BALL_YEAR', '27', 'Dve cifre godine bala, početak broja rezervacije (27 → 27001, 27002…). Promenite pred sledeći bal.'],
-  ['PRICE_ALL_INCLUSIVE', 140, 'Cena karte All inclusive (EUR). Iznos za uplatu se upisuje automatski kao predlog — pre slanja instrukcija možete ga promeniti.'],
-  ['PRICE_BALKON', 80, 'Cena karte Balkon (EUR).'],
-  ['PRICE_STUDENT', 60, 'Cena studentske ulaznice (EUR).'],
+  ['PRICE_SVECANA', 140, 'Cena karte Svečana (EUR). Iznos za uplatu se upisuje automatski kao predlog — pre slanja instrukcija možete ga promeniti.'],
+  ['PRICE_GALERIJA', 70, 'Cena karte Galerija (EUR).'],
   ['PAYMENT_DAYS', 7, 'Rok za uplatu u danima, računa se od dana slanja instrukcija za uplatu.'],
   ['GRACE_DAYS', 2, 'Koliko dana posle podsetnika gost još može da plati. Sledećeg dana neplaćena rezervacija prelazi u ISTEKLO.'],
   ['ADMIN_EMAIL', 'fbozic7@gmail.com', 'Adresa na koju stižu obaveštenja o novim rezervacijama i dnevni izveštaj o rokovima.'],
@@ -307,7 +306,7 @@ function buildRecord_(r, number, now, settings) {
   };
 }
 
-/** „All inclusive" ili, kad se kasnije budu kombinovali tipovi, „All inclusive ×2, Balkon ×1". */
+/** „Svečana" ili, kad se kasnije budu kombinovali tipovi, „Svečana ×2, Galerija ×1". */
 function ticketSummary_(tickets) {
   if (tickets.length === 1) return TICKET_TYPES[tickets[0].ticketType];
   return tickets.map(function (t) { return TICKET_TYPES[t.ticketType] + ' ×' + t.count; }).join(', ');
@@ -827,8 +826,8 @@ const MAIL = {
 
 /** Nazivi tipova karata u mejlovima gostima (u tabeli su uvek na srpskom). */
 const TICKET_TYPE_TRANSLATIONS = {
-  sl: { 'Studentska ulaznica': 'Študentska vstopnica' },
-  en: { Balkon: 'Balcony', 'Studentska ulaznica': 'Student ticket' },
+  sl: { Svečana: 'Svečana vstopnica' },
+  en: { Svečana: 'Gala', Galerija: 'Gallery' },
 };
 
 function localizeTickets_(text, lang) {

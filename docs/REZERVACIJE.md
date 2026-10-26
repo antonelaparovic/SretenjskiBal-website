@@ -25,7 +25,7 @@ Sve ove stavke su u kodu označene sa `TODO`. Spisak u kodu daje komanda
 |---|---|---|
 | 1 | **Ograničiti deljenje tabele** (sada je javna) | Google tabela → Deli (odeljak 1.1) |
 | 2 | **Pravi podaci za uplatu**: primalac sa adresom, IBAN, BIC, banka. Sada stoje izmišljene vrednosti sa „TODO", obojene žuto. | Tabela → tab „Podešavanja" (početne vrednosti su u `google-apps-script/Code.gs`, `SETTINGS`) |
-| 3 | Opisi (šta je uključeno) za All inclusive i Balkon | `frontend/src/app/core/content/site-content.ts`, `TICKETS` |
+| 3 | Opisi (šta je uključeno) za Svečanu i Galeriju | `frontend/src/app/core/content/site-content.ts`, `TICKETS` |
 | 4 | Otvaranje prodaje na sajtu: `salesStatus: 'OPEN'` | `site-content.ts`, `EVENT` |
 | 5 | URL web aplikacije i ključ u produkcionom `.env` | `backend/.env` (vidi `backend/.env.example`) |
 | 6 | Tekst politike privatnosti | `frontend/src/app/app.routes.ts`, ruta `privacy` |
@@ -73,7 +73,7 @@ Tabela → **Deli (Share)** → Opšti pristup → **Ograničeno (Restricted)** 
 |---|---|
 | `BOOKING_OPEN` | ☑ = sajt prima rezervacije. **Početno je isključeno.** |
 | `BALL_YEAR` | Dve cifre godine bala, početak broja rezervacije: `27` → 27001, 27002… |
-| `PRICE_ALL_INCLUSIVE`, `PRICE_BALKON`, `PRICE_STUDENT` | Cene u evrima (140, 80, 60). Po njima se iznos za uplatu upisuje automatski kao predlog. Ako cenu menjate, promenite je i na sajtu (`site-content.ts`, `TICKETS`). |
+| `PRICE_SVECANA`, `PRICE_GALERIJA` | Cene u evrima (140, 70). Po njima se iznos za uplatu upisuje automatski kao predlog. Ako cenu menjate, promenite je i na sajtu (`site-content.ts`, `TICKETS`). |
 | `PAYMENT_DAYS` | Rok za uplatu u danima od slanja instrukcija (7). |
 | `GRACE_DAYS` | Dani posle podsetnika u kojima gost još može da plati (2). Sutradan rezervacija postaje ISTEKLO. |
 | `ADMIN_EMAIL` | Kome stižu nove rezervacije i dnevni izveštaj (fbozic7@gmail.com). |
@@ -127,7 +127,7 @@ Forma je na `/rezervacija`. Dugmad „Rezerviši kartu" u sekciji Karte na poče
 pojavljuju se kad u `frontend/src/app/core/content/site-content.ts` postavite `EVENT.salesStatus: 'OPEN'`.
 Do tada sekcija prikazuje karte sa cenama i „Prodaja uskoro počinje".
 
-Tipovi karata su **All inclusive**, **Balkon** i **Studentska ulaznica**, isti na početnoj i u formi.
+Tipovi karata su **Svečana** (140 €) i **Galerija** (70 €), isti na početnoj i u formi.
 Ako se menjaju, menjaju se na tri mesta (iste šifre): `reservation-form.component.ts` (`TICKET_TYPE_OPTIONS`),
 `backend/src/reservations/reservation.dto.ts` (`TICKET_TYPES`) i `google-apps-script/Code.gs` (`TICKET_TYPES`).
 Posle izmene `Code.gs` ponovo pokrenite „Podesi tabelu", da tab Statistika dobije red za novi tip.
@@ -179,7 +179,7 @@ PLAĆENO, sivo ISTEKLO/OTKAZANO. Filtrom u zaglavlju lako izdvojite npr. sve koj
 ### Nova rezervacija → instrukcije za uplatu
 
 1. Stiže mejl „Nova rezervacija za Sretenjski bal — 27001". *Odgovori* u mejlu ide direktno gostu.
-2. Kolona **Iznos za uplatu** je već popunjena po cenama (npr. 2 × All inclusive = 280). Proverite je i,
+2. Kolona **Iznos za uplatu** je već popunjena po cenama (npr. 2 × Svečana = 280). Proverite je i,
    ako treba (popust, dogovor), upišite drugi iznos.
 3. Kliknite bilo gde u redu → **Sretenjski bal → Pošalji instrukcije za uplatu (izabrani red)**.
    Prikazaće se kome se šalje, koji je iznos i koji je rok. Potvrdite sa **Da**.

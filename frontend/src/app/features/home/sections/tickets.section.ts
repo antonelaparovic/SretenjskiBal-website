@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { EVENT, TICKETS } from '../../../core/content/site-content';
 import { TicketListComponent } from '../../../shared/components/ticket-list/ticket-list.component';
 import { RevealDirective } from '../../../shared/directives/reveal.directive';
 
 @Component({
   selector: 'app-tickets-section',
-  imports: [TicketListComponent, RevealDirective],
+  imports: [TicketListComponent, RevealDirective, RouterLink],
   template: `
     <section id="karte" class="section bg-wine" aria-labelledby="tickets-title">
       <div class="container grid">
@@ -18,6 +19,9 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
         </div>
         <div class="list">
           <app-ticket-list [tickets]="tickets" [salesStatus]="salesStatus" />
+          @if (salesStatus === 'OPEN') {
+            <a class="btn cta" routerLink="/rezervacija" appReveal i18n>Rezerviši ulaznice</a>
+          }
         </div>
       </div>
     </section>
@@ -27,6 +31,8 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
     .title { font-size: clamp(5rem, 9vw, 8rem); line-height: 0.9; }
     .status { color: var(--c-brass); }
     .list { grid-column: 6 / span 7; }
+    .cta { margin-top: clamp(2rem, 4vw, 3rem); background: var(--c-ivory); color: var(--c-wine); }
+    .cta:hover { background: transparent; color: var(--c-ivory); border-color: var(--c-brass); }
     @media (max-width: 1023.98px) { .intro, .list { grid-column: 1 / -1; } .list { margin-top: 2.5rem; } }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

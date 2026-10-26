@@ -47,7 +47,7 @@ describe('ReservationFormComponent', () => {
     await type('[formcontrolname=fullName]', 'Ana Anić');
     await type('[formcontrolname=email]', 'ana@primer.si');
     await type('[formcontrolname=phone]', '+386 40 123 456');
-    await click(ticketRadios()[1]); // Balkon
+    await click(ticketRadios()[1]); // Galerija
     await type(count(), '2');
     await choose('[formcontrolname=source]', 2); // Društvene mreže
   }
@@ -105,17 +105,13 @@ describe('ReservationFormComponent', () => {
     expect(errors()).toEqual([]);
   });
 
-  it('tri tipa karata kao kartice sa cenom; uz studentsku ulaznicu napomena o ispravi', async () => {
+  it('dva tipa karata kao kartice sa cenom', async () => {
     await open();
     const cards = $$('.ticket').map((c) => [c.querySelector('.ticket__name')!.textContent!.trim(), c.querySelector('.ticket__price')!.textContent!.replace(/\s+/g, ' ').trim()]);
     expect(cards).toEqual([
-      ['All inclusive', '140 €'],
-      ['Balkon', '80 €'],
-      ['Studentska ulaznica', '60 €'],
+      ['Svečana', '140 €'],
+      ['Galerija', '70 €'],
     ]);
-    expect(el.textContent).not.toContain('studentsku ispravu');
-    await click(ticketRadios()[2]);
-    expect(el.textContent).toContain('Studentska ulaznica važi uz važeću studentsku ispravu.');
   });
 
   it('okvirni iznos prati tip i broj karata', async () => {
@@ -126,7 +122,7 @@ describe('ReservationFormComponent', () => {
     await type(count(), '3');
     expect($('.estimate__value').textContent).toContain('420');
     await click(ticketRadios()[1]);
-    expect($('.estimate__value').textContent).toContain('240');
+    expect($('.estimate__value').textContent).toContain('210');
   });
 
   it('ne šalje formu bez obaveznih podataka i označava greške', async () => {
@@ -186,7 +182,7 @@ describe('ReservationFormComponent', () => {
       fullName: 'Ana Anić',
       email: 'ana@primer.si',
       phone: '+386 40 123 456',
-      tickets: [{ ticketType: 'BALKON', count: 2 }],
+      tickets: [{ ticketType: 'GALERIJA', count: 2 }],
       invoice: { needed: false },
       diet: 'Jedna osoba bez glutena.',
       note: 'Kupujem i za sestru, Maju Anić.',
@@ -206,7 +202,7 @@ describe('ReservationFormComponent', () => {
     expect($('.number__value').textContent).toBe('27001');
     expect(el.textContent).toContain('Javićemo vam se u roku od 3 dana sa detaljima za uplatu.');
     expect(el.textContent).toContain('Sretenjski bal 27001');
-    expect($('.summary').textContent).toContain('Balkon');
+    expect($('.summary').textContent).toContain('Galerija');
     expect($('.summary').textContent).toContain('2');
     expect(el.textContent).toContain('ana@primer.si');
   });

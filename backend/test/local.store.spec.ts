@@ -6,7 +6,7 @@ import { LocalReservationStore } from '../src/reservations/local.store.js';
 import { ReservationInput } from '../src/reservations/reservation-store.js';
 
 const input = (requestId: string) =>
-  ({ requestId, tickets: [{ ticketType: 'BALKON', count: 1 }] }) as unknown as ReservationInput;
+  ({ requestId, tickets: [{ ticketType: 'GALERIJA', count: 1 }] }) as unknown as ReservationInput;
 
 describe('LocalReservationStore (razvoj)', () => {
   let dir: string;

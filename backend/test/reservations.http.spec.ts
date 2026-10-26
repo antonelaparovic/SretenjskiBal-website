@@ -35,7 +35,7 @@ function payload(overrides: Record<string, unknown> = {}) {
     fullName: '  Ana Anić ',
     email: 'Ana@Primer.si',
     phone: '+386 40 123 456',
-    tickets: [{ ticketType: 'ALL_INCLUSIVE', count: 2 }],
+    tickets: [{ ticketType: 'SVECANA', count: 2 }],
     diet: ' <b>Bez glutena</b> ',
     invoice: { needed: false, companyName: '', companyAddress: '', taxId: '' },
     note: '',
@@ -102,7 +102,7 @@ describe('HTTP /api/reservations', () => {
     const r = store.received[0];
     expect(r.fullName).toBe('Ana Anić');
     expect(r.email).toBe('ana@primer.si');
-    expect(r.tickets).toEqual([{ ticketType: 'ALL_INCLUSIVE', count: 2 }]);
+    expect(r.tickets).toEqual([{ ticketType: 'SVECANA', count: 2 }]);
     expect(r.diet).toBe('Bez glutena');
     expect(r.invoice).toEqual({ needed: false });
     expect(r.locale).toBe('sl');
@@ -111,17 +111,17 @@ describe('HTTP /api/reservations', () => {
   });
 
   it('jedna karta i veliki broj karata (bez prodajnog ograničenja)', async () => {
-    expect((await post(payload({ tickets: [{ ticketType: 'BALKON', count: 1 }] }))).status).toBe(200);
-    expect((await post(payload({ tickets: [{ ticketType: 'BALKON', count: 40 }] }))).status).toBe(200);
+    expect((await post(payload({ tickets: [{ ticketType: 'GALERIJA', count: 1 }] }))).status).toBe(200);
+    expect((await post(payload({ tickets: [{ ticketType: 'GALERIJA', count: 40 }] }))).status).toBe(200);
     expect(store.received.map((r) => r.tickets[0].count)).toEqual([1, 40]);
   });
 
-  it('sva tri tipa karata', async () => {
-    for (const ticketType of ['ALL_INCLUSIVE', 'BALKON', 'STUDENT']) {
+  it('oba tipa karata', async () => {
+    for (const ticketType of ['SVECANA', 'GALERIJA']) {
       const res = await post(payload({ tickets: [{ ticketType, count: 1 }] }));
       expect(res.status).toBe(200);
     }
-    expect(store.received.map((r) => r.tickets[0].ticketType)).toEqual(['ALL_INCLUSIVE', 'BALKON', 'STUDENT']);
+    expect(store.received.map((r) => r.tickets[0].ticketType)).toEqual(['SVECANA', 'GALERIJA']);
   });
 
   it('faktura na firmu zahteva podatke firme', async () => {
@@ -137,8 +137,8 @@ describe('HTTP /api/reservations', () => {
     ['telefon bez dovoljno cifara', { phone: '+386' }],
     ['bez imena', { fullName: '' }],
     ['bez karata', { tickets: [] }],
-    ['0 karata', { tickets: [{ ticketType: 'BALKON', count: 0 }] }],
-    ['neceo broj karata', { tickets: [{ ticketType: 'BALKON', count: 1.5 }] }],
+    ['0 karata', { tickets: [{ ticketType: 'GALERIJA', count: 0 }] }],
+    ['neceo broj karata', { tickets: [{ ticketType: 'GALERIJA', count: 1.5 }] }],
     ['nepoznat tip karte', { tickets: [{ ticketType: 'VIP', count: 1 }] }],
     ['predugačka napomena o ishrani', { diet: 'x'.repeat(1001) }],
     ['nepoznat izvor', { source: 'TV' }],
@@ -152,10 +152,10 @@ describe('HTTP /api/reservations', () => {
   });
 
   it('400 za ponovljen tip karte i preko tehničke granice od 100 karata', async () => {
-    const dup = await post(payload({ tickets: [{ ticketType: 'BALKON', count: 1 }, { ticketType: 'BALKON', count: 2 }] }));
+    const dup = await post(payload({ tickets: [{ ticketType: 'GALERIJA', count: 1 }, { ticketType: 'GALERIJA', count: 2 }] }));
     expect(dup.status).toBe(400);
     expect(await dup.json()).toMatchObject({ code: 'INVALID', fields: ['tickets'] });
-    const many = await post(payload({ tickets: [{ ticketType: 'BALKON', count: 60 }, { ticketType: 'STUDENT', count: 60 }] }));
+    const many = await post(payload({ tickets: [{ ticketType: 'GALERIJA', count: 60 }, { ticketType: 'SVECANA', count: 60 }] }));
     expect(many.status).toBe(400);
     expect(store.received).toHaveLength(0);
   });

@@ -20,7 +20,7 @@ import {
 } from 'class-validator';
 
 /** Šifre su iste na sajtu, ovde i u Apps Scriptu (tamo su i nazivi koji se vide u tabeli). */
-export const TICKET_TYPES = ['ALL_INCLUSIVE', 'BALKON', 'STUDENT'] as const;
+export const TICKET_TYPES = ['SVECANA', 'GALERIJA'] as const;
 export type TicketTypeCode = (typeof TICKET_TYPES)[number];
 
 export const RESERVATION_SOURCES = ['PREPORUKA', 'DRUSTVENE_MREZE', 'RANIJI_DOLAZAK', 'SAJT', 'EMAIL', 'DRUGO'] as const;

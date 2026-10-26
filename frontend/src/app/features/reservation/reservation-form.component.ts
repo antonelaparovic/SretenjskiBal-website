@@ -23,9 +23,8 @@ type Booking = 'loading' | 'open' | 'closed' | 'error';
 
 /** Šifre moraju biti iste u backend/src/reservations/reservation.dto.ts i google-apps-script/Code.gs. */
 export const TICKET_TYPE_OPTIONS: { value: TicketTypeCode; label: string }[] = [
-  { value: 'ALL_INCLUSIVE', label: $localize`All inclusive` },
-  { value: 'BALKON', label: $localize`Balkon` },
-  { value: 'STUDENT', label: $localize`Studentska ulaznica` },
+  { value: 'SVECANA', label: $localize`Svečana` },
+  { value: 'GALERIJA', label: $localize`Galerija` },
 ];
 
 export const SOURCE_OPTIONS: { value: ReservationSource; label: string }[] = [
