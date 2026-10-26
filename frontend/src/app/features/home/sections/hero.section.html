@@ -1,0 +1,39 @@
+<section class="hero" [class.hero--photo]="image.src" aria-labelledby="hero-title">
+  <div class="backdrop" aria-hidden="true">
+    @if (image.src; as src) {
+      <img class="photo" [ngSrc]="src" alt="" fill priority sizes="100vw" />
+      <div class="tint"></div>
+    } @else {
+      <div class="glow"></div>
+    }
+    <div class="scrim"></div>
+
+    <!-- Dva luka iz znaka bala: arhitektonski motiv, ne dekoracija. -->
+    <svg class="arches" viewBox="0 0 640 760" fill="none" preserveAspectRatio="xMaxYMax meet">
+      <path class="arch arch--1" d="M40 760V330a170 170 0 0 1 340 0v430" />
+      <path class="arch arch--2" d="M260 760V330a170 170 0 0 1 340 0v430" />
+    </svg>
+  </div>
+
+  <div class="container content">
+    <app-emblem class="rise d1" [size]="96" />
+    <h1 id="hero-title" class="title rise d2">
+      <span>Sretenjski</span>
+      <span>bal</span>
+    </h1>
+    <span class="line" aria-hidden="true"></span>
+    <p class="when rise d3">
+      <time datetime="2027-02-13">13 — 02 — 2027</time>
+      <span class="place" i18n>Narodni dom · Maribor</span>
+    </p>
+    <p class="tagline rise d4" i18n>Kultura koja spaja.</p>
+    <div class="actions rise d5">
+      <a class="btn btn--light" routerLink="/rezervacija" i18n>Rezerviši kartu</a>
+      <a class="text-link" routerLink="/o-balu" i18n>O balu</a>
+    </div>
+  </div>
+
+  @if (image.src && image.credit) {
+    <p class="credit">{{ image.credit }}</p>
+  }
+</section>

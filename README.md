@@ -68,6 +68,9 @@ Skoro sve što se menja pred bal je u **jednom fajlu**:
 
 Tekstovi sekcija na početnoj su u `frontend/src/app/features/home/sections/`, svaka sekcija u svom fajlu.
 
+**Fotografija u heru (početna):** stavi je u `frontend/public/images/` i upiši putanju u `HERO_IMAGE` u istom fajlu
+(`site-content.ts`). Sajt je sam tonira u bordo, pa slika ne mora da bude u bojama sajta. Bez fotografije hero je čist bordo.
+
 **Fotografije:** dok ih nema, na njihovom mestu stoji tonirana površina sa opisom šta treba da bude na slici.
 Kad stignu, stavi ih u `frontend/public/images/` i u sekciji upiši `[src]="'/images/ime-slike.jpg'"`
 na `<app-editorial-image>`.
