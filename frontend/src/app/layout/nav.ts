@@ -6,21 +6,17 @@ export interface NavItem {
 export const MAIN_NAV: NavItem[] = [
   // Sakriveno dok stranica O balu ne bude spremna:
   // { label: $localize`Bal`, path: '/o-balu' },
-  { label: $localize`Sretenje`, path: '/sretenje' },
   // Sakriveno dok program ne bude definisan:
   // { label: $localize`Program`, path: '/program' },
   { label: $localize`Rezervacija`, path: '/rezervacija' },
-  { label: $localize`Pravila oblačenja`, path: '/pravila-oblacenja' },
   // { label: $localize`Prostor`, path: '/prostor' },
   { label: $localize`Partneri`, path: '/partneri' },
 ];
 
 export const FOOTER_NAV: NavItem[] = [
   // { label: $localize`Bal`, path: '/o-balu' },
-  { label: $localize`Sretenje`, path: '/sretenje' },
   // { label: $localize`Program`, path: '/program' },
   { label: $localize`Rezervacija`, path: '/rezervacija' },
-  { label: $localize`Pravila oblačenja`, path: '/pravila-oblacenja' },
   { label: $localize`Partneri`, path: '/partneri' },
   { label: $localize`Kontakt`, path: '/kontakt' },
 ];

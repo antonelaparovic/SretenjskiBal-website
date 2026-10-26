@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { SectionHeadingComponent } from '../../../shared/components/section-heading/section-heading.component';
 import { RevealDirective } from '../../../shared/directives/reveal.directive';
 
@@ -10,7 +9,7 @@ interface Moment {
 
 @Component({
   selector: 'app-why-sretenje-section',
-  imports: [RouterLink, SectionHeadingComponent, RevealDirective],
+  imports: [SectionHeadingComponent, RevealDirective],
   template: `
     <section class="section bg-parchment paper" aria-labelledby="sretenje-title">
       <div class="container grid">
@@ -21,7 +20,6 @@ interface Moment {
           <p class="lead" i18n>
             Reč sretenje znači susret. Kroz vekove je okupila više značenja — verskih, istorijskih i narodnih.
           </p>
-          <a class="text-link accent" routerLink="/sretenje" i18n>Više o Sretenju</a>
         </div>
 
         <ol class="timeline">
@@ -39,7 +37,6 @@ interface Moment {
   `,
   styles: `
     .intro { grid-column: 1 / span 4; display: flex; flex-direction: column; align-items: flex-start; gap: 1.75rem; }
-    .accent { color: var(--c-burgundy); }
     .timeline { grid-column: 7 / span 6; border-left: 1px solid var(--c-brass); }
     .timeline li { position: relative; display: flex; flex-direction: column; gap: 0.75rem; padding: 0 0 3.25rem 3rem; }
     .timeline li:last-child { padding-bottom: 0; }

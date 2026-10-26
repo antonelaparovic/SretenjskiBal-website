@@ -21,7 +21,7 @@ export const EVENT: EventInfo = {
   venueName: null,
   venueAddress: null,
   mapUrl: null,
-  /** COMING_SOON → „Prodaja uskoro počinje", OPEN → dugmad „Rezerviši kartu", SOLD_OUT → „Rasprodato". */
+  /** COMING_SOON → „Prodaja uskoro počinje", OPEN → dugmad „Rezerviši ulaznicu", SOLD_OUT → „Rasprodato". */
   // Prodaja je otvorena; zatvara se u tabeli (tab Podešavanja, BOOKING_OPEN) ili ovde vraćanjem na 'COMING_SOON'.
   salesStatus: 'OPEN',
 };

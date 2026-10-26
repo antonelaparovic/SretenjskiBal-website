@@ -16,15 +16,12 @@ export const routes: Routes = [
   // Faza 4 — sadržajne stranice
   // Stranica O balu je privremeno uklonjena (link vodi na 404 dok se ne vrati).
   // { path: 'o-balu', ...soon($localize`O balu`) },
-  { path: 'sretenje', ...soon($localize`Sretenje`) },
   { path: 'balska-tradicija', ...soon($localize`Balska tradicija`) },
   { path: 'program', ...soon($localize`Program`) },
   // Stari link na karte vodi na formu za rezervaciju.
   { path: 'karte', redirectTo: 'rezervacija' },
   { path: 'prostor', ...soon($localize`Prostor`) },
-  { path: 'pravila-oblacenja', ...soon($localize`Pravila oblačenja`) },
   { path: 'partneri', ...soon($localize`Partneri`) },
-  { path: 'organizator', ...soon($localize`Kulturni centar Sretenje`) },
   // TODO: tekst politike privatnosti — forma za rezervaciju i kontakt forma linkuju ovde.
   { path: 'privacy', ...soon($localize`Politika privatnosti`) },
   { path: 'cookies', ...soon($localize`Kolačići`) },

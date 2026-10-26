@@ -21,9 +21,9 @@ import { RevealDirective } from '../../directives/reveal.directive';
             @switch (t.state) {
               @case ('open') {
                 @if (t.internal) {
-                  <a class="btn btn--outline-light" [routerLink]="t.ctaUrl" i18n>Rezerviši kartu</a>
+                  <a class="btn btn--outline-light" [routerLink]="t.ctaUrl" i18n>Rezerviši ulaznicu</a>
                 } @else {
-                  <a class="btn btn--outline-light" [href]="t.ctaUrl" target="_blank" rel="noopener" i18n>Rezerviši kartu</a>
+                  <a class="btn btn--outline-light" [href]="t.ctaUrl" target="_blank" rel="noopener" i18n>Rezerviši ulaznicu</a>
                 }
               }
               @case ('sold') { <span class="label muted" i18n>Rasprodato</span> }
