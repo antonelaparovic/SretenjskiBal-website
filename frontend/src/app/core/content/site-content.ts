@@ -25,6 +25,21 @@ export const EVENT: EventInfo = {
   salesStatus: 'OPEN',
 };
 
+/**
+ * Fotografija u heru (početna).
+ * Kad dobijete fotografiju Narodnog doma za koju imate dozvolu:
+ *   1) stavite je u frontend/public/images/ (npr. hero-narodni-dom.jpg, najmanje 2400 px širine),
+ *   2) upišite putanju u src, npr. '/images/hero-narodni-dom.jpg',
+ *   3) upišite autora u credit (prikazuje se diskretno u uglu).
+ * Fotografija se automatski tonira u bordo, pa ne mora da bude „u boji sajta".
+ * Dok je src null, hero je čist bordo sa lukovima iz znaka.
+ */
+export const HERO_IMAGE: { src: string | null; alt: string; credit: string | null } = {
+  src: null,
+  alt: 'Narodni dom u Mariboru',
+  credit: null,
+};
+
 /** Okvirna satnica — biće potvrđena. */
 export const PROGRAM: ProgramItem[] = [
   { time: '18:30', title: 'Dolazak gostiju' },
