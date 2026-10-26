@@ -4,7 +4,7 @@ import { SITE_URL } from '../../core/config/app.constants';
 import { EVENT } from '../../core/content/site-content';
 import { HeroSectionComponent } from './sections/hero.section';
 import { IntroSectionComponent } from './sections/intro.section';
-import { EncounterSectionComponent } from './sections/encounter.section';
+// import { EncounterSectionComponent } from './sections/encounter.section';
 import { DateMomentSectionComponent } from './sections/date-moment.section';
 import { WhySretenjeSectionComponent } from './sections/why-sretenje.section';
 import { WhyBallSectionComponent } from './sections/why-ball.section';
@@ -23,7 +23,6 @@ import { PerformersSectionComponent } from './sections/performers.section';
   imports: [
     HeroSectionComponent,
     IntroSectionComponent,
-    EncounterSectionComponent,
     DateMomentSectionComponent,
     WhySretenjeSectionComponent,
     WhyBallSectionComponent,
@@ -36,7 +35,8 @@ import { PerformersSectionComponent } from './sections/performers.section';
   template: `
     <app-hero-section />
     <app-intro-section />
-    <app-encounter-section />
+    <!-- Susret („Kultura koja spaja") — sakriveno, nije u dogovorenom redosledu:
+    <app-encounter-section /> -->
     <app-date-moment-section [startsAt]="event.startsAt" [city]="event.city" />
     <app-why-sretenje-section />
     <app-why-ball-section />
