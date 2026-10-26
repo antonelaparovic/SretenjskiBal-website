@@ -8,16 +8,15 @@ export const MAIN_NAV: NavItem[] = [
   // { label: $localize`Bal`, path: '/o-balu' },
   // Sakriveno dok program ne bude definisan:
   // { label: $localize`Program`, path: '/program' },
-  { label: $localize`Rezervacija`, path: '/rezervacija' },
+  { label: $localize`Ulaznice`, path: '/rezervacija' },
   // { label: $localize`Prostor`, path: '/prostor' },
-  { label: $localize`Partneri`, path: '/partneri' },
+  // { label: $localize`Partneri`, path: '/partneri' }, // vratiti kad se pojave partneri
 ];
 
 export const FOOTER_NAV: NavItem[] = [
   // { label: $localize`Bal`, path: '/o-balu' },
   // { label: $localize`Program`, path: '/program' },
-  { label: $localize`Rezervacija`, path: '/rezervacija' },
-  { label: $localize`Partneri`, path: '/partneri' },
+  { label: $localize`Ulaznice`, path: '/rezervacija' },
   { label: $localize`Kontakt`, path: '/kontakt' },
 ];
 

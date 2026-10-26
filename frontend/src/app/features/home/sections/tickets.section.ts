@@ -10,7 +10,7 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
     <section id="karte" class="section bg-wine" aria-labelledby="tickets-title">
       <div class="container grid">
         <div class="intro" appReveal>
-          <h2 id="tickets-title" class="display title" i18n>Rezervacija</h2>
+          <h2 id="tickets-title" class="display title" i18n>Ulaznice</h2>
           @switch (salesStatus) {
             @case ('COMING_SOON') { <p class="quote status" i18n>Prodaja uskoro počinje.</p> }
             @case ('SOLD_OUT') { <p class="quote status" i18n>Sve karte su rasprodate.</p> }
