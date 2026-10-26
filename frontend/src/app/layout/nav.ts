@@ -8,7 +8,7 @@ export const MAIN_NAV: NavItem[] = [
   // { label: $localize`Bal`, path: '/o-balu' },
   // Sakriveno dok program ne bude definisan:
   // { label: $localize`Program`, path: '/program' },
-  { label: $localize`Ulaznice`, path: '/rezervacija' },
+  // Ulaznice su u meniju samo kao dugme (header.component.html), ne kao link.
   // { label: $localize`Prostor`, path: '/prostor' },
   // { label: $localize`Partneri`, path: '/partneri' }, // vratiti kad se pojave partneri
 ];
