@@ -8,7 +8,8 @@ import { EncounterSectionComponent } from './sections/encounter.section';
 import { DateMomentSectionComponent } from './sections/date-moment.section';
 import { WhySretenjeSectionComponent } from './sections/why-sretenje.section';
 import { WhyBallSectionComponent } from './sections/why-ball.section';
-import { ProgramPreviewSectionComponent } from './sections/program-preview.section';
+// Program večeri je sakriven dok program ne bude definisan.
+// import { ProgramPreviewSectionComponent } from './sections/program-preview.section';
 import { VenueSectionComponent } from './sections/venue.section';
 import { DressCodeSectionComponent } from './sections/dress-code.section';
 import { TicketsSectionComponent } from './sections/tickets.section';
@@ -24,7 +25,6 @@ import { PartnersSectionComponent } from './sections/partners.section';
     DateMomentSectionComponent,
     WhySretenjeSectionComponent,
     WhyBallSectionComponent,
-    ProgramPreviewSectionComponent,
     VenueSectionComponent,
     DressCodeSectionComponent,
     TicketsSectionComponent,
@@ -38,7 +38,8 @@ import { PartnersSectionComponent } from './sections/partners.section';
     <app-date-moment-section [startsAt]="event.startsAt" [city]="event.city" />
     <app-why-sretenje-section />
     <app-why-ball-section />
-    <app-program-preview-section />
+    <!-- Program večeri — sakriveno dok program ne bude definisan:
+    <app-program-preview-section /> -->
     <app-venue-section />
     <app-dress-code-section />
     <app-tickets-section />

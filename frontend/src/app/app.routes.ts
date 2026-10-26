@@ -14,7 +14,8 @@ export const routes: Routes = [
   },
 
   // Faza 4 — sadržajne stranice
-  { path: 'o-balu', ...soon($localize`O balu`) },
+  // Stranica O balu je privremeno uklonjena (link vodi na 404 dok se ne vrati).
+  // { path: 'o-balu', ...soon($localize`O balu`) },
   { path: 'sretenje', ...soon($localize`Sretenje`) },
   { path: 'balska-tradicija', ...soon($localize`Balska tradicija`) },
   { path: 'program', ...soon($localize`Program`) },

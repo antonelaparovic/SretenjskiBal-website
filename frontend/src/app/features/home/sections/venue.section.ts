@@ -4,11 +4,10 @@ import { EventInfo } from '../../../core/models/content.models';
 import { EditorialImageComponent } from '../../../shared/components/editorial-image/editorial-image.component';
 import { SectionHeadingComponent } from '../../../shared/components/section-heading/section-heading.component';
 import { RevealDirective } from '../../../shared/directives/reveal.directive';
-import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-venue-section',
-  imports: [EditorialImageComponent, SectionHeadingComponent, RevealDirective, RouterLink],
+  imports: [EditorialImageComponent, SectionHeadingComponent, RevealDirective],
   template: `
     <section class="bg-parchment venue" aria-labelledby="venue-title">
       <div class="media">
@@ -34,7 +33,6 @@ import { RouterLink } from '@angular/router';
             @if (event().mapUrl; as map) {
               <a class="text-link accent" [href]="map" target="_blank" rel="noopener" i18n>Otvori mapu</a>
             }
-            <a class="text-link accent" routerLink="/prostor" i18n>Kako stići</a>
           </div>
         </address>
       </div>

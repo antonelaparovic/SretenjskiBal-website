@@ -1,10 +1,9 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { RevealDirective } from '../../../shared/directives/reveal.directive';
 
 @Component({
   selector: 'app-intro-section',
-  imports: [RouterLink, RevealDirective],
+  imports: [RevealDirective],
   template: `
     <section class="section bg-parchment paper" aria-labelledby="intro-title">
       <div class="container grid">
@@ -15,7 +14,8 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
             13. februara 2027. u Mariboru počinje Sretenjski bal — kulturno-muzičko veče posvećeno susretu,
             zajedništvu i savremenom nastavku građanske balske kulture.
           </p>
-          <a class="text-link accent" routerLink="/o-balu" i18n>Otkrijte priču</a>
+          <!-- Sakriveno dok stranica O balu ne bude spremna:
+          <a class="text-link accent" routerLink="/o-balu" i18n>Otkrijte priču</a> -->
         </div>
       </div>
     </section>
