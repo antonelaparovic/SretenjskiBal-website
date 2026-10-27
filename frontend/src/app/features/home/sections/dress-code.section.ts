@@ -3,7 +3,7 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
 
 interface Guide {
   title: string;
-  icon: 'gem' | 'bow';
+  icon: 'gown' | 'bow';
   allowed: string[];
   forbidden: string[];
 }
@@ -12,7 +12,7 @@ interface Guide {
   selector: 'app-dress-code-section',
   imports: [RevealDirective],
   template: `
-    <section id="pravila-oblacenja" class="section bg-forest" aria-labelledby="dress-title">
+    <section id="pravila-oblacenja" class="section dress" aria-labelledby="dress-title">
       <div class="container">
         <div class="head" appReveal>
           <div class="head__title">
@@ -26,8 +26,8 @@ interface Guide {
           @for (g of guides; track g.title; let i = $index) {
             <article class="col" appReveal [appRevealDelay]="i * 140">
               <h3 class="col__title">
-                @if (g.icon === 'gem') {
-                  <svg class="ico" viewBox="0 0 32 28" aria-hidden="true"><path d="M8 2h16l7 8-15 16L1 10z M1 10h30 M11 10l5 16 5-16 M8 2l3 8 5-8 5 8 3-8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+                @if (g.icon === 'gown') {
+                  <svg class="ico ico--gown" viewBox="0 0 30 40" aria-hidden="true"><path d="M11 2C10 6 9 8 9.500 11c.5 2.500 2 3.500 2.500 5C11 24 6 31 2 38c6 1.500 9-.5 13 1 4-1.500 7 .5 13-1-4-7-9-14-10-22 .5-1.500 2-2.500 2.500-5C21 8 20 6 19 2 M9.500 11c2.500 2 8.500 2 11 0 M12 16h6 M15 17c0 7-1 14-1.500 21" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 } @else {
                   <svg class="ico" viewBox="0 0 40 24" aria-hidden="true"><path d="M20 12L3 3v18zM20 12l17-9v18z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><rect x="16.5" y="8" width="7" height="8" rx="1.5" fill="currentColor"/></svg>
                 }
@@ -60,6 +60,7 @@ interface Guide {
     </section>
   `,
   styles: `
+    .dress { background: var(--c-ink); color: var(--c-ivory); }
     .head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 1.5rem 4rem; }
     .head__title { display: flex; flex-direction: column; gap: 1.25rem; }
     .eyebrow { color: var(--c-brass); }
@@ -70,6 +71,7 @@ interface Guide {
     .col { display: flex; flex-direction: column; }
     .col__title { display: flex; align-items: center; gap: 1rem; padding-bottom: 1.5rem; margin-bottom: 2rem; border-bottom: 1px solid var(--c-brass); font-family: var(--font-display); font-weight: 500; font-size: clamp(1.9rem, 3.2vw, 2.6rem); line-height: 1; letter-spacing: 0.04em; text-transform: uppercase; }
     .ico { width: 2.2rem; height: auto; color: var(--c-brass); flex: none; }
+    .ico--gown { width: 1.9rem; height: 2.5rem; }
     .sub { color: var(--c-brass); margin-bottom: 0.4rem; }
     .sub--no { margin-top: 2.25rem; color: #d58b94; }
     .list li { display: flex; align-items: center; gap: 0.9rem; padding: 0.9rem 0; border-bottom: 1px solid rgba(246, 241, 232, 0.12); font-size: 1.0625rem; }
@@ -86,7 +88,7 @@ export class DressCodeSectionComponent {
   protected readonly guides: Guide[] = [
     {
       title: $localize`Za dame`,
-      icon: 'gem',
+      icon: 'gown',
       allowed: [$localize`Duga večernja ili balska haljina do poda`, $localize`Elegantna svečana obuća`],
       forbidden: [
         $localize`Kratke i koktel haljine`,
