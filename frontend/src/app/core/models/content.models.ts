@@ -25,6 +25,8 @@ export interface TicketType {
   code?: TicketTypeCode;
   name: string;
   description?: string;
+  /** Šta je uključeno u ulaznicu (prikazuje se kao lista ispod naziva). */
+  includes?: string[];
   priceCents: number;
   /** Link za kupovinu kad prodaja počne: '/rezervacija' (forma na sajtu) ili spoljni prodavac. */
   ctaUrl: string | null;
