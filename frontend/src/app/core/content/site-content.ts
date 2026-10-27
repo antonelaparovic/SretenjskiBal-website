@@ -56,10 +56,10 @@ export const PROGRAM: ProgramItem[] = [
  * Isti tipovi kao u formi za rezervaciju (/rezervacija); forma odavde uzima i cene.
  * Kad se cena menja, promeniti je i u Google tabeli (tab Podešavanja, PRICE_…).
  */
-// TODO: opisi za Svečanu i Galeriju (šta je uključeno) — kad budu poznati.
+// TODO: dopuniti opise kad bude poznato šta je tačno uključeno u cenu (piće, večera…).
 export const TICKETS: TicketType[] = [
-  { code: 'SVECANA', name: 'Svečana', priceCents: 14000, ctaUrl: '/rezervacija', soldOut: false },
-  { code: 'GALERIJA', name: 'Galerija', priceCents: 7000, ctaUrl: '/rezervacija', soldOut: false },
+  { code: 'SVECANA', name: 'Svečana', description: 'Veče za svečano postavljenim stolovima.', priceCents: 14000, ctaUrl: '/rezervacija', soldOut: false },
+  { code: 'GALERIJA', name: 'Galerija', description: 'Veče sa galerije, u istoj svečanoj atmosferi.', priceCents: 7000, ctaUrl: '/rezervacija', soldOut: false },
 ];
 
 /**
