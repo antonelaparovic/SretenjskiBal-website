@@ -198,7 +198,7 @@ describe('ReservationFormComponent', () => {
       invoice: { needed: false },
       diet: 'Jedna osoba bez glutena.',
       dietConsent: true,
-      privacyPolicyVersion: '2026-10-27',
+      privacyPolicyVersion: '2026-10-28',
       note: 'Kupujem i za sestru, Maju Anić.',
       source: 'DRUSTVENE_MREZE',
       sourceOther: '',

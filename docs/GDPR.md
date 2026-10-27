@@ -12,7 +12,7 @@ Nisam pravnik — tekstove treba da pregleda pravnik, a SL i EN verzije izvorni 
 - Link „Uslovi korišćenja" je sakriven.
 
 ## Rokovi čuvanja (moje pretpostavke — potvrditi)
-Rezervacije 3 meseca posle bala; ishrana 30 dana; kontakt poruke 12 meseci; računi po zakonu.
+Rezervacije 6 meseci posle bala (potvrđeno); ishrana 30 dana; kontakt poruke 12 meseci; računi po zakonu.
 
 ## Obaveze van koda
 - Tabela rezervacija: ograničiti deljenje (nije javna), samo tim. Poželjno Google Workspace sa DPA umesto ličnog Gmail naloga.

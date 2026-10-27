@@ -52,7 +52,7 @@ const privacySr: LegalDoc = {
     {
       h: '3. Koliko dugo čuvamo podatke',
       list: [
-        'Podaci o rezervaciji: do 3 meseca nakon održavanja bala, osim podataka koje zakon traži da čuvamo (računi).',
+        'Podaci o rezervaciji: do 6 meseci nakon održavanja bala, osim podataka koje zakon traži da čuvamo (računi).',
         'Podaci o ishrani i alergijama: do 30 dana nakon bala, a ranije ako opozovete saglasnost.',
         'Poruke iz kontakt forme: do 12 meseci.',
         'Računi i knjigovodstvena dokumentacija: koliko propisuje zakon.',
@@ -126,7 +126,7 @@ const privacySl: LegalDoc = {
     {
       h: '3. Kako dolgo hranimo podatke',
       list: [
-        'Podatki o rezervaciji: do 3 mesece po plesu, razen podatkov, ki jih moramo hraniti po zakonu (računi).',
+        'Podatki o rezervaciji: do 6 mesecev po plesu, razen podatkov, ki jih moramo hraniti po zakonu (računi).',
         'Podatki o prehrani in alergijah: do 30 dni po plesu, prej, če privolitev prekličete.',
         'Sporočila iz kontaktnega obrazca: do 12 mesecev.',
         'Računi in računovodska dokumentacija: v skladu z zakonom.',
@@ -198,7 +198,7 @@ const privacyEn: LegalDoc = {
     {
       h: '3. How long we keep data',
       list: [
-        'Reservation data: up to 3 months after the ball, except data we are legally required to keep (invoices).',
+        'Reservation data: up to 6 months after the ball, except data we are legally required to keep (invoices).',
         'Diet and allergy information: up to 30 days after the ball, or sooner if you withdraw consent.',
         'Contact form messages: up to 12 months.',
         'Invoices and accounting records: as required by law.',

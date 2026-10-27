@@ -78,7 +78,7 @@ export const SPONSORS: Sponsor[] = [];
 export const PERFORMERS: Performer[] = [];
 
 /** Verzija teksta politike privatnosti. Menja se pri svakoj izmeni teksta; šalje se uz svaku formu kao dokaz šta je gost video. */
-export const PRIVACY_POLICY_VERSION = '2026-10-27';
+export const PRIVACY_POLICY_VERSION = '2026-10-28';
 
 /**
  * Podaci o organizatoru (upravljaču podataka) za politiku privatnosti i podnožje.

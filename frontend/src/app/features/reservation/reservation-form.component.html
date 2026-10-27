@@ -207,7 +207,7 @@
         <div class="row row--submit">
           <div class="row__main fields">
             <input class="hp" type="text" formControlName="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
-            <p class="note" i18n>Sva polja su obavezna, osim onih označenih kao opciona. Podatke iz ove forme koristimo za obradu vaše rezervacije i kontakt u vezi sa njom. Podatke obrađuje {{ organizerName }} na osnovu izvršenja rezervacije i čuva ih do 3 meseca nakon bala; možete zatražiti uvid, ispravku ili brisanje. Više u <a routerLink="/privacy" target="_blank" class="inline-link">politici privatnosti</a>.</p>
+            <p class="note" i18n>Sva polja su obavezna, osim onih označenih kao opciona. Podatke iz ove forme koristimo za obradu vaše rezervacije i kontakt u vezi sa njom. Podatke obrađuje {{ organizerName }} na osnovu izvršenja rezervacije i čuva ih do 6 meseci nakon bala; možete zatražiti uvid, ispravku ili brisanje. Više u <a routerLink="/privacy" target="_blank" class="inline-link">politici privatnosti</a>.</p>
             @if (serverError()) { <p class="server-error" role="alert">{{ serverError() }}</p> }
             <button class="btn btn--primary submit" type="submit" [disabled]="sending()" [attr.aria-busy]="sending()">
               @if (sending()) { <ng-container i18n>Slanje rezervacije…</ng-container> } @else { <ng-container i18n>Pošalji rezervaciju</ng-container> }
