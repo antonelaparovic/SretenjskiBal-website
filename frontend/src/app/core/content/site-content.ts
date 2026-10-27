@@ -18,9 +18,9 @@ export const EVENT: EventInfo = {
   startsAt: '2027-02-13T18:30:00+01:00',
   city: 'Maribor',
   /** Upisati kad mesto bude potvrđeno; do tada sajt prikazuje „uskoro". */
-  venueName: null,
-  venueAddress: null,
-  mapUrl: null,
+  venueName: 'Narodni dom Maribor',
+  venueAddress: 'Ulica kneza Koclja 9, 2000 Maribor',
+  mapUrl: 'https://www.google.com/maps/search/?api=1&query=Narodni+dom+Maribor',
   /** COMING_SOON → „Prodaja uskoro počinje", OPEN → dugmad „Rezerviši ulaznicu", SOLD_OUT → „Rasprodato". */
   // Prodaja je otvorena; zatvara se u tabeli (tab Podešavanja, BOOKING_OPEN) ili ovde vraćanjem na 'COMING_SOON'.
   salesStatus: 'OPEN',
