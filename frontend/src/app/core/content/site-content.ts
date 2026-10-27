@@ -84,9 +84,10 @@ export const PERFORMERS: Performer[] = [];
  * Fotografija se automatski tonira u bordo. Dok je src null, traka sa slikom se ne prikazuje.
  */
 export const BALL_TRADITION_IMAGE: { src: string | null; alt: string; credit: string | null } = {
-  src: null,
+  src: '/images/narodni-dom.jpg',
   alt: 'Narodni dom u Mariboru',
-  credit: null,
+  // TODO: potvrditi dozvolu za korišćenje fotografije (nd-mb.si) pre objave sajta.
+  credit: 'Foto: Janez Klenovšek / Narodni dom Maribor',
 };
 
 /** Verzija teksta politike privatnosti. Menja se pri svakoj izmeni teksta; šalje se uz svaku formu kao dokaz šta je gost video. */
