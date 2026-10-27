@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { BALL_TRADITION_IMAGE } from '../../core/content/site-content';
 import { SeoService } from '../../core/services/seo.service';
 import { RevealDirective } from '../../shared/directives/reveal.directive';
 
@@ -45,13 +44,6 @@ interface Chapter {
       </div>
     </section>
 
-    @if (image.src; as src) {
-      <figure class="photo" appReveal [appRevealImage]="true">
-        <img [src]="src" [alt]="image.alt" loading="lazy" />
-        <figcaption class="label" i18n>Narodni dom, Maribor @if (image.credit) { <span class="credit">· {{ image.credit }}</span> }</figcaption>
-      </figure>
-    }
-
     <section class="section bg-burgundy closing" aria-labelledby="bt-closing">
       <div class="container narrow">
         <div class="lines" appReveal>
@@ -89,12 +81,6 @@ interface Chapter {
     .chapter__title { font-family: var(--font-display); font-weight: 500; font-size: clamp(1.5rem, 2.4vw, 2rem); color: var(--c-wine); }
     .text-col p { font-weight: 300; line-height: 1.75; }
 
-    .photo { position: relative; margin: 0; height: clamp(320px, 62vh, 640px); overflow: hidden; background: var(--c-wine); }
-    .photo img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.1) brightness(0.92); }
-    .photo::before { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: #8a2434; mix-blend-mode: color; opacity: 0.9; }
-    .photo::after { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(to top, rgba(64, 16, 24, 0.85), rgba(110, 30, 45, 0.15) 60%, rgba(64, 16, 24, 0.35)); }
-    .photo figcaption { position: absolute; z-index: 2; left: var(--gutter, 1.5rem); bottom: 1.25rem; color: var(--c-ivory); opacity: 0.85; }
-    .credit { opacity: 0.7; text-transform: none; letter-spacing: 0.04em; }
     .closing { padding-block: clamp(5rem, 10vw, 9rem); }
     .narrow { display: flex; flex-direction: column; gap: 2.5rem; max-width: 52rem; }
     .lines { display: flex; flex-direction: column; gap: 1.2rem; }
@@ -118,7 +104,6 @@ interface Chapter {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BallTraditionPage {
-  protected readonly image = BALL_TRADITION_IMAGE;
   protected readonly chapters: Chapter[] = [
     {
       mark: '1834.',
