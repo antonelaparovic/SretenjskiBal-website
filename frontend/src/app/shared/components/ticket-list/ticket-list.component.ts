@@ -42,7 +42,7 @@ import { RevealDirective } from '../../directives/reveal.directive';
     .name { font-family: var(--font-display); font-weight: 400; font-size: clamp(1.875rem, 2.8vw, 2.5rem); line-height: 1.1; }
     .desc { margin-top: 0.4rem; font-size: 0.9375rem; font-weight: 300; color: var(--c-on-dark-soft); }
     .includes { margin-top: 1.1rem; display: flex; flex-direction: column; gap: 0.5rem; max-width: 34em; }
-    .includes li { position: relative; padding-left: 1.4rem; font-size: 0.9375rem; font-weight: 300; line-height: 1.5; color: var(--c-on-dark-soft); }
+    .includes li { position: relative; padding-left: 1.4rem; font-size: 1.125rem; font-weight: 300; line-height: 1.5; color: var(--c-on-dark-soft); }
     .includes li::before { content: ''; position: absolute; left: 0.15rem; top: 0.6em; width: 5px; height: 5px; transform: rotate(45deg); background: var(--c-brass); }
     .price { font-family: var(--font-display); font-size: clamp(1.875rem, 2.8vw, 2.5rem); color: var(--c-brass); }
     .price--soon { font-size: 1.125rem; font-style: italic; }
