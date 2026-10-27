@@ -11,8 +11,9 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
         <h2 id="ball-title" class="h1 title" appReveal i18n>Bal nikada nije bio samo ples.</h2>
         <div class="body" appReveal [appRevealDelay]="120">
           <p class="lead" i18n>
-            U 19. veku bal je širom srednje Evrope, pa i u srpskoj građanskoj sredini, bio mesto susreta,
-            razgovora, kulture i dobrotvornog rada. Muzika je bila povod, a zajednica smisao.
+            Reč bal potiče od latinskog ballare — igrati. Balovi su vekovima bili mesta susreta, razgovora,
+            povezivanja i dogovora, a dobrotvorni balovi prikupljali su sredstva za škole, društva i druge
+            javne potrebe.
           </p>
           <a class="text-link brass" routerLink="/balska-tradicija" i18n>Priča o balskoj kulturi</a>
         </div>

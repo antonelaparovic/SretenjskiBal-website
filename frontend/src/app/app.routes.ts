@@ -16,7 +16,10 @@ export const routes: Routes = [
   // Faza 4 — sadržajne stranice
   // Stranica O balu je privremeno uklonjena (link vodi na 404 dok se ne vrati).
   // { path: 'o-balu', ...soon($localize`O balu`) },
-  { path: 'balska-tradicija', ...soon($localize`Balska tradicija`) },
+  {
+    path: 'balska-tradicija',
+    loadComponent: () => import('./features/ball-tradition/ball-tradition.page').then((m) => m.BallTraditionPage),
+  },
   { path: 'program', ...soon($localize`Program`) },
   // Stari link na karte vodi na formu za rezervaciju.
   { path: 'karte', redirectTo: 'rezervacija' },
