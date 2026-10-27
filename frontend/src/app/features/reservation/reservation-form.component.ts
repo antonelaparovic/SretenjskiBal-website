@@ -13,7 +13,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
-import { TICKETS } from '../../core/content/site-content';
+import { ORGANIZER, PRIVACY_POLICY_VERSION, TICKETS } from '../../core/content/site-content';
 import { currentLocale } from '../../core/i18n/locale';
 import { ReservationPayload, ReservationSource, TicketTypeCode } from '../../core/models/content.models';
 import { FormsApiService } from '../../core/services/forms-api.service';
@@ -90,6 +90,7 @@ export class ReservationFormComponent {
   /** Ostaje isti dok rezervacija ne uspe, pa ponovno slanje posle greške ne pravi duplikat. */
   private requestId: string | null = null;
 
+  protected readonly organizerName = ORGANIZER.name;
   protected readonly form = this.fb.group({
     fullName: ['', [Validators.required, personName, Validators.maxLength(120)]],
     email: ['', [Validators.required, Validators.email, Validators.maxLength(254)]],
@@ -97,6 +98,7 @@ export class ReservationFormComponent {
     ticketCount: [1 as number | null, [Validators.required, wholeNumber, Validators.min(1), Validators.max(MAX_TICKETS)]],
     ticketType: ['' as TicketTypeCode | '', Validators.required],
     diet: ['', Validators.maxLength(1000)],
+    dietConsent: [false, Validators.requiredTrue],
     note: ['', Validators.maxLength(2000)],
     invoiceNeeded: [false],
     company: this.fb.group({
@@ -109,6 +111,7 @@ export class ReservationFormComponent {
     website: [''],
   });
 
+  protected readonly dietText = toSignal(this.form.controls.diet.valueChanges, { initialValue: '' });
   protected readonly invoiceNeeded = toSignal(this.form.controls.invoiceNeeded.valueChanges, { initialValue: false });
   protected readonly ticketCount = toSignal(this.form.controls.ticketCount.valueChanges, { initialValue: 1 as number | null });
   protected readonly ticketType = toSignal(this.form.controls.ticketType.valueChanges, { initialValue: '' as TicketTypeCode | '' });
@@ -125,6 +128,12 @@ export class ReservationFormComponent {
   constructor() {
     const c = this.form.controls;
     c.company.disable();
+    // Saglasnost za podatke o zdravlju traži se samo kad je ishrana popunjena.
+    c.dietConsent.disable();
+    c.diet.valueChanges.subscribe((text) => {
+      if (text.trim()) c.dietConsent.enable({ emitEvent: false });
+      else c.dietConsent.disable({ emitEvent: false });
+    });
     c.invoiceNeeded.valueChanges.subscribe((needed) => (needed ? c.company.enable() : c.company.disable()));
     // Status (otvoreno/zatvoreno) proveravamo u browseru, da ne bi ostao zapamćen u HTML-u sa servera.
     afterNextRender(() => this.loadStatus());
@@ -215,6 +224,8 @@ export class ReservationFormComponent {
         ? { needed: true, companyName: v.company.name.trim(), companyAddress: v.company.address.trim(), taxId: v.company.taxId.trim() }
         : { needed: false },
       diet: v.diet.trim(),
+      dietConsent: v.diet.trim() !== '' && v.dietConsent === true,
+      privacyPolicyVersion: PRIVACY_POLICY_VERSION,
       note: v.note.trim(),
       source: v.source as ReservationSource,
       sourceOther: v.source === 'DRUGO' ? v.sourceOther.trim() : '',

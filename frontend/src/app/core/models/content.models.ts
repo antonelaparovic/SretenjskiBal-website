@@ -81,6 +81,10 @@ export interface ReservationPayload {
   invoice: { needed: boolean; companyName?: string; companyAddress?: string; taxId?: string };
   /** Posebna ishrana i alergije — posebna kolona u tabeli, zbog kuhinje. */
   diet: string;
+  /** Izričita saglasnost za podatke o zdravlju (član 9 GDPR); true samo uz popunjenu ishranu. */
+  dietConsent: boolean;
+  /** Verzija politike privatnosti koju je gost video. */
+  privacyPolicyVersion: string;
   note: string;
   source: ReservationSource;
   sourceOther: string;

@@ -76,3 +76,19 @@ export const SPONSORS: Sponsor[] = [];
  *   { name: 'Ime Prezime', role: 'sopran', photo: '/images/izvodjaci/ime-prezime.jpg' },
  */
 export const PERFORMERS: Performer[] = [];
+
+/** Verzija teksta politike privatnosti. Menja se pri svakoj izmeni teksta; šalje se uz svaku formu kao dokaz šta je gost video. */
+export const PRIVACY_POLICY_VERSION = '2026-10-27';
+
+/**
+ * Podaci o organizatoru (upravljaču podataka) za politiku privatnosti i podnožje.
+ * Vrednosti u uglastim zagradama [UPISATI: …] su rezervisana mesta — ZAMENITI pre objave sajta.
+ */
+export const ORGANIZER = {
+  name: 'Kulturni centar Sretenje',
+  address: '[UPISATI: ulica i broj, poštanski broj, mesto]',
+  registration: '[UPISATI: matična / davčna številka]',
+  privacyEmail: '[UPISATI: e-adresa za pitanja o privatnosti]',
+  hosting: '[UPISATI: pružalac hostinga sajta]',
+  mailProvider: '[UPISATI: pružalac e-pošte (SMTP)]',
+} as const;

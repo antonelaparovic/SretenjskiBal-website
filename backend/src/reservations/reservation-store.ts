@@ -9,6 +9,9 @@ export interface ReservationInput {
   tickets: { ticketType: TicketTypeCode; count: number }[];
   invoice: { needed: boolean; companyName?: string; companyAddress?: string; taxId?: string };
   diet: string;
+  /** true samo ako je `diet` popunjen i gost je izričito pristao na obradu. */
+  dietConsent: boolean;
+  privacyPolicyVersion: string;
   note: string;
   source: ReservationSource;
   sourceOther: string;

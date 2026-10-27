@@ -15,6 +15,8 @@ function reservation(overrides: Record<string, unknown> = {}) {
     tickets: [{ ticketType: 'SVECANA', count: 2 }],
     invoice: { needed: false },
     diet: '',
+    dietConsent: false,
+    privacyPolicyVersion: '2026-10-27',
     note: 'Sedimo sa porodicom Petrović.',
     source: 'PREPORUKA',
     sourceOther: '',
@@ -167,7 +169,7 @@ describe('Apps Script (Code.gs)', () => {
     });
 
     it('unos koji liči na formulu ostaje običan tekst', () => {
-      create(reservation({ fullName: '=HYPERLINK("http://zlo.example","klik")', note: '@SUM(A1:A9)', diet: '-2+3' }));
+      create(reservation({ fullName: '=HYPERLINK("http://zlo.example","klik")', note: '@SUM(A1:A9)', diet: '-2+3', dietConsent: true }));
       const row = res.data[1];
       expect(row.some((c) => c instanceof Formula)).toBe(false);
       expect(cell(2, 'fullName')).toBe('=HYPERLINK("http://zlo.example","klik")');
@@ -208,7 +210,7 @@ describe('Apps Script (Code.gs)', () => {
     });
 
     it('ishrana: posebna kolona, istaknuta u mejlu organizatoru i potvrđena gostu', () => {
-      create(reservation({ diet: 'Jedna osoba bez glutena, jedna vegetarijanska.' }));
+      create(reservation({ diet: 'Jedna osoba bez glutena, jedna vegetarijanska.', dietConsent: true }));
       expect(cell(2, 'diet')).toBe('Jedna osoba bez glutena, jedna vegetarijanska.');
       const admin = gas.outbox.find((m) => m.to === 'fbozic7@gmail.com')!;
       expect(admin.subject).toBe('Nova rezervacija za Sretenjski bal — 27001 · posebna ishrana');
@@ -219,7 +221,7 @@ describe('Apps Script (Code.gs)', () => {
     it('nova kolona se sama dodaje u tabelu postavljenu starijom verzijom skripte', () => {
       res.data[0] = res.data[0].filter((h) => h !== 'Ishrana i alergije');
       res.data[0].push('Imena gostiju');
-      expect(create(reservation({ diet: 'Vegansko' }))).toMatchObject({ ok: true });
+      expect(create(reservation({ diet: 'Vegansko', dietConsent: true }))).toMatchObject({ ok: true });
       expect(res.data[0].slice(-2)).toEqual(['Imena gostiju', 'Ishrana i alergije']);
       expect(res.data[1][res.data[0].indexOf('Ishrana i alergije')]).toBe('Vegansko');
     });
@@ -301,7 +303,7 @@ describe('Apps Script (Code.gs)', () => {
       H.forEach((h, i) => expect(res.data[1][i]).toBe(h === 'Ishrana i alergije' ? '' : `vrednost: ${h}`));
       expect(res.data[1][H.length]).toBe('Ana, Marko');
       // Posle preuređenja sve i dalje radi.
-      expect(create(reservation({ diet: 'Vegansko' }))).toMatchObject({ ok: true });
+      expect(create(reservation({ diet: 'Vegansko', dietConsent: true }))).toMatchObject({ ok: true });
       expect(cell(3, 'diet')).toBe('Vegansko');
     });
   });

@@ -162,6 +162,17 @@ describe('ReservationFormComponent', () => {
     http.expectOne('/api/reservations').flush({ ok: true, reservationNumber: '27001', guestMailSent: false });
   });
 
+  it('ishrana bez izričite saglasnosti se ne šalje; bez ishrane saglasnost nije potrebna', async () => {
+    await open();
+    await fillValid();
+    expect($('input[formcontrolname=dietConsent]')).toBeNull();
+    await type('[formcontrolname=diet]', 'Bez glutena');
+    expect($('input[formcontrolname=dietConsent]')).toBeTruthy();
+    await click('button[type=submit]');
+    http.expectNone('/api/reservations');
+    expect(errors()).toContain('Bez saglasnosti ne možemo da primimo podatke o ishrani — uklonite ih ili potvrdite saglasnost.');
+  });
+
   it('polje „Drugo" za izvor prijave', async () => {
     await open();
     expect($('[formcontrolname=sourceOther]')).toBeNull();
@@ -173,6 +184,7 @@ describe('ReservationFormComponent', () => {
     await open();
     await fillValid();
     await type('[formcontrolname=diet]', 'Jedna osoba bez glutena.');
+    await click('input[formcontrolname=dietConsent]');
     await type('[formcontrolname=note]', 'Kupujem i za sestru, Maju Anić.');
     await click('button[type=submit]');
     await click('button[type=submit]'); // drugi klik dok se šalje
@@ -185,6 +197,8 @@ describe('ReservationFormComponent', () => {
       tickets: [{ ticketType: 'GALERIJA', count: 2 }],
       invoice: { needed: false },
       diet: 'Jedna osoba bez glutena.',
+      dietConsent: true,
+      privacyPolicyVersion: '2026-10-27',
       note: 'Kupujem i za sestru, Maju Anić.',
       source: 'DRUSTVENE_MREZE',
       sourceOther: '',

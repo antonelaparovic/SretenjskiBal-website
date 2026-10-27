@@ -28,7 +28,7 @@ Sve ove stavke su u kodu označene sa `TODO`. Spisak u kodu daje komanda
 | 3 | Opisi (šta je uključeno) za Svečanu i Galeriju | `frontend/src/app/core/content/site-content.ts`, `TICKETS` |
 | 4 | Otvaranje prodaje na sajtu: `salesStatus: 'OPEN'` | `site-content.ts`, `EVENT` |
 | 5 | URL web aplikacije i ključ u produkcionom `.env` | `backend/.env` (vidi `backend/.env.example`) |
-| 6 | Tekst politike privatnosti | `frontend/src/app/app.routes.ts`, ruta `privacy` |
+| 6 | Tekst politike privatnosti | `frontend/src/app/app.routes.ts`, ruta `privacy` | (tekst napisan — vidi GDPR.md, treba upisati podatke organizatora)
 
 Dok u podacima za uplatu piše „TODO", meni „Pošalji instrukcije za uplatu" odbija slanje i kaže šta
 nedostaje. Podsetnik tada izostavlja primaoca i IBAN. **Gost nikad ne dobija izmišljen broj računa.**

@@ -62,6 +62,7 @@ const COL = {
   pageUrl: 'Stranica prijave',
   utm: 'UTM parametri',
   systemNote: 'Sistemska napomena',
+  consent: 'Saglasnost',
   requestId: 'Jedinstveni identifikator zahteva',
 };
 
@@ -70,7 +71,7 @@ const COLUMN_GROUPS = [
   { color: '#5a1723', keys: ['number', 'status', 'fullName', 'ticketType', 'ticketCount', 'amount', 'diet', 'note', 'createdAt', 'email', 'phone'] },
   { color: '#26352c', keys: ['instructionsAt', 'deadline', 'reminderAt', 'paidAt', 'paymentConfirmedAt', 'closedAt', 'adminNote'] },
   { color: '#7a6438', keys: ['invoice', 'company', 'source', 'sourceOther', 'locale'] },
-  { color: '#5b4f48', keys: ['pageUrl', 'utm', 'systemNote', 'requestId'], collapsed: true },
+  { color: '#5b4f48', keys: ['pageUrl', 'utm', 'systemNote', 'consent', 'requestId'], collapsed: true },
 ];
 
 /** Objašnjenja koja se vide kad se pređe mišem preko zaglavlja. */
@@ -86,6 +87,7 @@ const HEADER_NOTES = {
   paymentConfirmedAt: 'Upisuje se kad iz menija pošaljete potvrdu uplate. Obrišite ga samo ako potvrdu treba poslati ponovo.',
   adminNote: 'Slobodno polje za ekipu — skripta ga nikad ne menja.',
   systemNote: 'Upisuje skripta (npr. da li su mejlovi poslati).',
+  consent: 'Dokaz o obaveštavanju i saglasnosti: verzija politike privatnosti koju je gost video i, ako je naveo ishranu, izričita saglasnost za podatke o zdravlju (član 9 GDPR). Ne brisati dok se rezervacija čuva.',
 };
 
 const HEADERS = Object.keys(COL).map(function (k) { return COL[k]; });
@@ -250,6 +252,9 @@ function validateReservation_(r) {
   });
   if (!tickets.length || total > MAX_TICKETS_PER_RESERVATION) bad.push('tickets');
   if (r.diet != null && typeof r.diet !== 'string') bad.push('diet');
+  // Ishrana i alergije su podaci o zdravlju: bez izričite saglasnosti se ne upisuju.
+  if (typeof r.diet === 'string' && r.diet.trim() && r.dietConsent !== true) bad.push('dietConsent');
+  if (!str(r.privacyPolicyVersion, 1, 20)) bad.push('privacyPolicyVersion');
   const inv = r.invoice || {};
   if (inv.needed === true) {
     if (!str(inv.companyName, 2, 200)) bad.push('invoice.companyName');
@@ -302,6 +307,7 @@ function buildRecord_(r, number, now, settings) {
     locale: r.locale,
     pageUrl: clean_(r.pageUrl || '').slice(0, 500),
     utm: Object.keys(utm).filter(function (k) { return utm[k]; }).map(function (k) { return 'utm_' + k + '=' + clean_(String(utm[k])).slice(0, 100); }).join('; '),
+    consent: 'Politika privatnosti v' + clean_(r.privacyPolicyVersion) + (String(r.diet || '').trim() ? '; ishrana: izričita saglasnost data' : '; ishrana: nije navedena'),
     requestId: r.requestId,
   };
 }

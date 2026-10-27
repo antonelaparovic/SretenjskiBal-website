@@ -22,10 +22,10 @@ export const routes: Routes = [
   { path: 'karte', redirectTo: 'rezervacija' },
   { path: 'prostor', ...soon($localize`Prostor`) },
   { path: 'partneri', ...soon($localize`Partneri`) },
-  // TODO: tekst politike privatnosti — forma za rezervaciju i kontakt forma linkuju ovde.
-  { path: 'privacy', ...soon($localize`Politika privatnosti`) },
-  { path: 'cookies', ...soon($localize`Kolačići`) },
-  { path: 'uslovi', ...soon($localize`Uslovi korišćenja`) },
+  { path: 'privacy', loadComponent: () => import('./features/legal/legal.page').then((m) => m.LegalPage), data: { kind: 'privacy' } },
+  { path: 'cookies', loadComponent: () => import('./features/legal/legal.page').then((m) => m.LegalPage), data: { kind: 'cookies' } },
+  // Uslovi korišćenja: sakriveno dok ne budu napisani.
+  // { path: 'uslovi', ...soon($localize`Uslovi korišćenja`) },
 
   { path: '**', loadComponent: () => import('./features/pages/not-found.page').then((m) => m.NotFoundPage) },
 ];

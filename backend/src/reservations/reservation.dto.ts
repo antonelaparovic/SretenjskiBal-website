@@ -116,6 +116,18 @@ export class CreateReservationDto {
   @MaxLength(1000)
   diet?: string;
 
+  /**
+   * Izričita saglasnost za podatke o ishrani i alergijama (podaci o zdravlju — posebna kategorija, član 9 GDPR).
+   * Obavezna (true) kad je `diet` popunjen; proverava se u servisu i u Apps Scriptu.
+   */
+  @IsBoolean()
+  dietConsent!: boolean;
+
+  /** Verzija politike privatnosti koju je gost video pri slanju — dokaz o obaveštavanju i saglasnosti. */
+  @IsString()
+  @Matches(/^[0-9A-Za-z.-]{1,20}$/)
+  privacyPolicyVersion!: string;
+
   @IsOptional()
   @Transform(trim)
   @IsString()

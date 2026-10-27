@@ -23,5 +23,5 @@ export const FOOTER_NAV: NavItem[] = [
 export const LEGAL_NAV: NavItem[] = [
   { label: $localize`Politika privatnosti`, path: '/privacy' },
   { label: $localize`Kolačići`, path: '/cookies' },
-  { label: $localize`Uslovi korišćenja`, path: '/uslovi' },
+  // { label: $localize`Uslovi korišćenja`, path: '/uslovi' }, // sakriveno dok ne budu napisani
 ];

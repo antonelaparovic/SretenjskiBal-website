@@ -51,6 +51,11 @@ export class ReservationsService {
       throw new BadRequestException({ code: 'INVALID', fields: ['tickets'] });
     }
 
+    // Podaci o ishrani su podaci o zdravlju: bez izričite saglasnosti ih ne primamo.
+    if (cleanText(dto.diet ?? '', { multiline: true }) && dto.dietConsent !== true) {
+      throw new BadRequestException({ code: 'INVALID', fields: ['dietConsent'] });
+    }
+
     let result;
     try {
       result = await this.store.create(this.toInput(dto));
@@ -93,6 +98,8 @@ export class ReservationsService {
       tickets: dto.tickets.map((t) => ({ ticketType: t.ticketType, count: t.count })),
       invoice,
       diet: cleanText(dto.diet ?? '', { multiline: true }),
+      dietConsent: dto.dietConsent === true && cleanText(dto.diet ?? '', { multiline: true }) !== '',
+      privacyPolicyVersion: dto.privacyPolicyVersion,
       note: cleanText(dto.note ?? '', { multiline: true }),
       source: dto.source,
       sourceOther: dto.source === 'DRUGO' ? cleanText(dto.sourceOther ?? '') : '',
