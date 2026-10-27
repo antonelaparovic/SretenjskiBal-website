@@ -73,46 +73,23 @@
 
 .couple {
   position: absolute;
-  right: max(var(--gutter), calc((100vw - var(--container)) / 2 - 1rem));
+  right: -0.5rem;
   bottom: 0;
   height: min(78%, 650px);
   aspect-ratio: 783 / 846;
-  // Polako lebdenje, tek kad se crtež do kraja pojavi.
-  animation: sway 14s ease-in-out 6s infinite alternate;
+  // Linije crta sam SVG (public/brand/plesni-par-linije.svg, oko 12 s); posle toga par lagano lebdi.
+  animation: sway 16s ease-in-out 12s infinite alternate;
 
   img {
     display: block;
     width: 100%;
     height: 100%;
-    opacity: 0.92;
-    // Meko otkrivanje odozdo naviše: donji deo (haljina) se pojavi prvi, pa figure.
-    -webkit-mask-image: linear-gradient(to top, #000 0%, #000 38%, transparent 62%, transparent 100%);
-    mask-image: linear-gradient(to top, #000 0%, #000 38%, transparent 62%, transparent 100%);
-    -webkit-mask-size: 100% 260%;
-    mask-size: 100% 260%;
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
-    -webkit-mask-position: 0 0;
-    mask-position: 0 0;
-    animation:
-      reveal 6.5s cubic-bezier(0.45, 0.05, 0.25, 1) 600ms forwards,
-      glow-pulse 9s ease-in-out 7s infinite alternate;
+    opacity: 0.95;
   }
 }
 
 .hero--photo .couple img {
   opacity: 0.85;
-}
-
-@keyframes reveal {
-  from {
-    -webkit-mask-position: 0 0;
-    mask-position: 0 0;
-  }
-  to {
-    -webkit-mask-position: 0 100%;
-    mask-position: 0 100%;
-  }
 }
 
 @keyframes sway {
@@ -121,15 +98,6 @@
   }
   to {
     transform: translate3d(0, -10px, 0) rotate(0.5deg);
-  }
-}
-
-@keyframes glow-pulse {
-  from {
-    filter: drop-shadow(0 0 0 rgba(186, 145, 89, 0));
-  }
-  to {
-    filter: drop-shadow(0 0 14px rgba(186, 145, 89, 0.28));
   }
 }
 
@@ -266,11 +234,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .couple,
-  .couple img {
+  .couple {
     animation: none;
-    -webkit-mask-image: none;
-    mask-image: none;
   }
 
   .glow,
