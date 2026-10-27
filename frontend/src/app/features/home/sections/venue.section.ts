@@ -40,9 +40,8 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
   styles: `
     .venue { padding-bottom: var(--section-y); }
     .media { position: relative; margin: 0; height: clamp(360px, 44vw, 640px); overflow: hidden; background: var(--c-wine); }
-    .media img { width: 100%; height: 100%; object-fit: cover; object-position: center 35%; filter: grayscale(1) contrast(1.1) brightness(0.92); }
-    .media::before { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: #8a2434; mix-blend-mode: color; opacity: 0.9; }
-    .media::after { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(to top, rgba(64, 16, 24, 0.85), rgba(110, 30, 45, 0.15) 60%, rgba(64, 16, 24, 0.35)); }
+    .media img { width: 100%; height: 100%; object-fit: cover; object-position: center 35%; filter: grayscale(0.9) contrast(1.08) brightness(0.88); }
+    .media::after { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(to top, rgba(64, 16, 24, 0.7), rgba(64, 16, 24, 0) 55%), rgba(64, 16, 24, 0.12); }
     .media figcaption { position: absolute; z-index: 2; left: var(--gutter, 1.5rem); bottom: 1.25rem; color: var(--c-ivory); opacity: 0.8; font-size: 0.7rem; }
     .body { padding-top: clamp(3rem, 6vw, 5rem); }
     .heading { grid-column: 1 / span 6; }
