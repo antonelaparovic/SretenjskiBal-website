@@ -60,7 +60,7 @@ interface Guide {
     </section>
   `,
   styles: `
-    .dress { background: var(--c-ink); color: var(--c-ivory); }
+    .dress { background: #3a332f; color: var(--c-ivory); } /* „Tinta" iz palete */
     .head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 1.5rem 4rem; }
     .head__title { display: flex; flex-direction: column; gap: 1.25rem; }
     .eyebrow { color: var(--c-brass); }
