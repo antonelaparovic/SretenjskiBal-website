@@ -15,7 +15,7 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
             povezivanja i dogovora, a dobrotvorni balovi prikupljali su sredstva za škole, društva i druge
             javne potrebe.
           </p>
-          <a class="text-link brass" routerLink="/balska-tradicija" i18n>Priča o balskoj kulturi</a>
+          <a class="text-link brass" routerLink="/balska-tradicija" i18n>Priča o balskoj tradiciji</a>
         </div>
       </div>
     </section>

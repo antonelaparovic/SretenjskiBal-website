@@ -77,6 +77,18 @@ export const SPONSORS: Sponsor[] = [];
  */
 export const PERFORMERS: Performer[] = [];
 
+/**
+ * Fotografija Narodnog doma za stranicu Balska tradicija (fasada ili stepenište, bez ljudi, meko predvečerje).
+ * 1) stavite fajl u frontend/public/images/ (npr. narodni-dom.jpg, najmanje 2000 px širine),
+ * 2) upišite putanju u src i autora/licencu u credit (npr. 'Foto: Ime Prezime, CC BY-SA 4.0').
+ * Fotografija se automatski tonira u bordo. Dok je src null, traka sa slikom se ne prikazuje.
+ */
+export const BALL_TRADITION_IMAGE: { src: string | null; alt: string; credit: string | null } = {
+  src: null,
+  alt: 'Narodni dom u Mariboru',
+  credit: null,
+};
+
 /** Verzija teksta politike privatnosti. Menja se pri svakoj izmeni teksta; šalje se uz svaku formu kao dokaz šta je gost video. */
 export const PRIVACY_POLICY_VERSION = '2026-10-28';
 
