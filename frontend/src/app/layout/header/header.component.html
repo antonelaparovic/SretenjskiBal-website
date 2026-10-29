@@ -33,6 +33,8 @@
     </div>
   </div>
 
+  <div class="backdrop" [class.is-open]="menuOpen()" (click)="menuOpen.set(false)" aria-hidden="true"></div>
+
   <div id="mobile-menu" class="overlay" [class.is-open]="menuOpen()" [attr.inert]="menuOpen() ? null : ''">
     <nav class="container overlay__nav" i18n-aria-label aria-label="Meni">
       <ul>

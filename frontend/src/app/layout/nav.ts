@@ -20,14 +20,16 @@ export interface SectionNavItem {
   path?: string;
 }
 
+/** Nazivi su isti kao naslovi sekcija na početnoj. */
 export const SECTION_NAV: SectionNavItem[] = [
-  { label: $localize`Zašto Sretenje`, id: 'sretenje' },
-  { label: $localize`O balu`, id: 'bal' },
+  { label: $localize`Zašto Sretenje?`, id: 'sretenje' },
+  { label: $localize`Bal nikada nije bio samo ples.`, id: 'bal' },
+  { label: $localize`Program večeri`, id: 'program' },
   { label: $localize`Izvođači`, id: 'izvodjaci' },
-  { label: $localize`Prostor`, id: 'prostor' },
-  { label: $localize`Pravila oblačenja`, id: 'pravila-oblacenja' },
+  { label: $localize`Narodni dom, Maribor`, id: 'prostor' },
+  { label: $localize`Formal / Black Tie`, id: 'pravila-oblacenja' },
   { label: $localize`Ulaznice`, id: 'karte' },
-  { label: $localize`Organizator`, id: 'organizator' },
+  { label: $localize`Kulturni centar Sretenje`, id: 'organizator' },
   { label: $localize`Priča o balskoj tradiciji`, path: '/balska-tradicija' },
 ];
 

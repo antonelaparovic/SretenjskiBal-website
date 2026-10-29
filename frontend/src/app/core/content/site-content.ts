@@ -42,13 +42,15 @@ export const HERO_IMAGE: { src: string | null; alt: string; credit: string | nul
 };
 
 /** Okvirna satnica — biće potvrđena. */
+/** Predlog programa — satnica i sadržaj se potvrđuju sa organizatorom. */
 export const PROGRAM: ProgramItem[] = [
-  { time: '18:30', title: 'Dolazak gostiju' },
-  { time: '19:30', title: 'Svečano otvaranje' },
-  { time: '20:00', title: 'Muzički program' },
-  { time: '21:00', title: 'Prvi ples' },
-  { time: '23:30', title: 'Poseban program' },
-  { time: '00:00', title: 'Ponoćno kolo' },
+  { time: '18:30', title: 'Dolazak gostiju', description: 'Doček u foajeu Narodnog doma, piće dobrodošlice i fotografisanje.' },
+  { time: '19:30', title: 'Svečano otvaranje', description: 'Pozdravne reči organizatora i zvanica, otvaranje prvog Sretenjskog bala.' },
+  { time: '20:00', title: 'Kulturno-umetnički program', description: 'Nastupi umetnika iz Srbije i Slovenije u Velikoj dvorani.' },
+  { time: '21:00', title: 'Prvi ples', description: 'Svečano otvaranje plesnog dela večeri.' },
+  { time: '21:30', title: 'Svečana večera', description: 'Večera za gostima sa sedećim mestima; koktel posluženje na galeriji.' },
+  { time: '22:30', title: 'Koncert grupe Galija', description: 'Glavni muzički program večeri.' },
+  { time: '00:00', title: 'Ponoćno kolo', description: 'Zajedničko kolo i završni deo večeri.' },
 ];
 
 /** priceCents: 0 znači da cena još nije određena (prikazuje se „Cena uskoro"). */
