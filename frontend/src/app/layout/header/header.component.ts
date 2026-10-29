@@ -25,17 +25,14 @@ import { MAIN_NAV, SECTION_NAV, SectionNavItem } from '../nav';
   styleUrl: './header.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    '(document:keydown.escape)': 'closeMenu(); closeSections()',
-    '(document:click)': 'onDocumentClick($event)',
+    '(document:keydown.escape)': 'closeMenu()',
   },
 })
 export class HeaderComponent {
   protected readonly nav = MAIN_NAV;
   protected readonly sections = SECTION_NAV;
-  protected readonly sectionsOpen = signal(false);
   protected readonly menuOpen = signal(false);
   private readonly router = inject(Router);
-  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly scrolled = signal(false);
   private readonly doc = inject(DOCUMENT);
   private readonly menuButton = viewChild<ElementRef<HTMLButtonElement>>('menuButton');
@@ -65,7 +62,6 @@ export class HeaderComponent {
     effect(() => {
       this.url();
       this.menuOpen.set(false);
-      this.sectionsOpen.set(false);
     });
 
     effect(() => {
@@ -73,24 +69,10 @@ export class HeaderComponent {
     });
   }
 
-  protected toggleSections(): void {
-    this.sectionsOpen.update((v) => !v);
-  }
-
-  protected closeSections(): void {
-    this.sectionsOpen.set(false);
-  }
-
-  protected onDocumentClick(event: Event): void {
-    const open = this.sectionsOpen();
-    if (open && !this.host.nativeElement.querySelector('.sections')?.contains(event.target as Node)) this.sectionsOpen.set(false);
-  }
-
   /** Skroluje do sekcije na početnoj; sa drugih stranica prvo vodi na početnu (Angular tada skroluje do sidra). */
   protected goTo(item: SectionNavItem, event: Event): void {
     if (item.path) return; // običan link
     event.preventDefault();
-    this.sectionsOpen.set(false);
     this.menuOpen.set(false);
     const onHome = this.url().split(/[?#]/)[0] === '/';
     const el = this.doc.getElementById(item.id!);

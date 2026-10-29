@@ -89,74 +89,6 @@
   }
 }
 
-.sections {
-  position: relative;
-
-  &__btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 0;
-    border: 0;
-    background: none;
-    color: inherit;
-    font: inherit;
-    font-size: 0.75rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    cursor: pointer;
-
-    svg {
-      transition: transform var(--dur-base) var(--ease);
-    }
-
-    &.is-open svg {
-      transform: rotate(180deg);
-    }
-  }
-
-  .nav &__list,
-  &__list {
-    position: absolute;
-    top: calc(100% + 0.75rem);
-    left: 0;
-    display: block;
-    gap: 0;
-    min-width: 16rem;
-    padding: 0.75rem 0;
-    background: var(--c-wine);
-    border: 1px solid var(--c-rule-brass);
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-6px);
-    transition:
-      opacity var(--dur-base) var(--ease),
-      transform var(--dur-base) var(--ease),
-      visibility 0s linear var(--dur-base);
-
-    &.is-open {
-      opacity: 1;
-      visibility: visible;
-      transform: none;
-      transition-delay: 0s;
-    }
-
-    a {
-      display: block;
-      padding: 0.6rem 1.5rem;
-      letter-spacing: 0.1em;
-
-      &::after {
-        display: none;
-      }
-
-      &:hover {
-        color: var(--c-brass);
-      }
-    }
-  }
-}
-
 .tools {
   display: flex;
   align-items: center;
@@ -169,7 +101,7 @@
 }
 
 .burger {
-  display: none;
+  display: flex;
   width: 44px;
   height: 44px;
   padding: 0;
@@ -285,20 +217,19 @@
     display: none;
   }
 
-  .burger {
-    display: flex;
-  }
-}
-
-@media (min-width: 1240px) {
-  .overlay {
-    display: none;
-  }
 }
 
 @media (max-width: 479.98px) {
   .cta,
   .brand__name {
+    display: none;
+  }
+}
+
+// Na širokom ekranu jezik i dugme „Ulaznice" već stoje u zaglavlju — u otvorenom meniju se ne ponavljaju.
+@media (min-width: 1240px) {
+  .overlay__cta,
+  .overlay__foot app-language-switcher {
     display: none;
   }
 }

@@ -10,19 +10,6 @@
         @for (item of nav; track item.path) {
           <li><a [routerLink]="item.path" routerLinkActive="is-active" ariaCurrentWhenActive="page">{{ item.label }}</a></li>
         }
-        <li class="sections">
-          <button type="button" class="sections__btn" [class.is-open]="sectionsOpen()" [attr.aria-expanded]="sectionsOpen()" aria-controls="sections-menu" (click)="toggleSections()">
-            <ng-container i18n>Sekcije</ng-container>
-            <svg viewBox="0 0 10 6" width="10" height="6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1" /></svg>
-          </button>
-          <ul id="sections-menu" class="sections__list" [class.is-open]="sectionsOpen()" [attr.inert]="sectionsOpen() ? null : ''">
-            @for (s of sections; track s.label) {
-              <li>
-                <a [routerLink]="s.path ?? '/'" [fragment]="s.id" (click)="goTo(s, $event)">{{ s.label }}</a>
-              </li>
-            }
-          </ul>
-        </li>
       </ul>
     </nav>
 
