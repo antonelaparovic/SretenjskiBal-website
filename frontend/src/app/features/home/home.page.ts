@@ -40,9 +40,9 @@ import { PerformersSectionComponent } from './sections/performers.section';
     <app-date-moment-section [startsAt]="event.startsAt" />
     <app-why-sretenje-section />
     <app-why-ball-section />
-    <app-program-preview-section />
     <app-performers-section />
     <app-venue-section />
+    <app-program-preview-section />
     <app-dress-code-section />
     <app-tickets-section />
     <app-organizer-section />
