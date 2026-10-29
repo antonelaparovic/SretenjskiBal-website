@@ -30,5 +30,7 @@ export const routes: Routes = [
   { path: 'cookies', ...soon($localize`Kolačići`) },
   { path: 'uslovi', ...soon($localize`Uslovi korišćenja`) },
 
+  // Stranica „ne postoji": prerender je pravi kao /404, a build je kopira u 404.html koji hosting vraća za nepoznate adrese.
+  { path: '404', loadComponent: () => import('./features/pages/not-found.page').then((m) => m.NotFoundPage) },
   { path: '**', loadComponent: () => import('./features/pages/not-found.page').then((m) => m.NotFoundPage) },
 ];

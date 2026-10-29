@@ -1,0 +1,3 @@
+# Cloudflare Pages — trajna preusmerenja (stari linkovi)
+/karte       /rezervacija  301
+/karte/      /rezervacija  301

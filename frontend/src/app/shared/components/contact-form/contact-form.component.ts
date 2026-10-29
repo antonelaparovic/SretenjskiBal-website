@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, inject, input, signal, effect } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, signal, effect, viewChild } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { HttpErrorResponse } from '@angular/common/http';
 import { ContactTopic } from '../../../core/models/content.models';
-import { FormsApiService } from '../../../core/services/forms-api.service';
+import { FormsApiService, ScriptError } from '../../../core/services/forms-api.service';
+import { TurnstileComponent } from '../turnstile/turnstile.component';
 
 type Status = 'idle' | 'sending' | 'sent' | 'error';
 
@@ -16,7 +16,7 @@ export const CONTACT_TOPICS: { value: ContactTopic; label: string }[] = [
 
 @Component({
   selector: 'app-contact-form',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, TurnstileComponent],
   templateUrl: './contact-form.component.html',
   styleUrl: './contact-form.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -29,7 +29,11 @@ export class ContactFormComponent {
   protected readonly status = signal<Status>('idle');
   protected readonly serverError = signal<string | null>(null);
   protected readonly submitted = signal(false);
+  /** Token Turnstile provere za sledeće slanje. */
+  protected readonly captcha = signal<string | null>(null);
+  protected readonly captchaFailed = signal(false);
   private readonly api = inject(FormsApiService);
+  private readonly turnstile = viewChild(TurnstileComponent);
   private renderedAt = Date.now();
 
   protected readonly form = inject(FormBuilder).nonNullable.group({
@@ -63,25 +67,39 @@ export class ContactFormComponent {
       this.form.markAllAsTouched();
       return;
     }
+    const captcha = this.captcha();
+    if (!captcha) {
+      this.serverError.set(
+        this.captchaFailed()
+          ? $localize`Provera da niste robot nije mogla da se učita. Proverite internet vezu ili isključite blokator reklama za ovaj sajt, pa osvežite stranicu.`
+          : $localize`Još trenutak — proveravamo da niste robot. Pokušajte ponovo za nekoliko sekundi.`,
+      );
+      return;
+    }
     this.status.set('sending');
     this.api
-      .sendContact({ ...this.form.getRawValue(), elapsedMs: Date.now() - this.renderedAt })
+      .sendContact({ ...this.form.getRawValue(), elapsedMs: Date.now() - this.renderedAt }, captcha)
       .subscribe({
         next: () => this.status.set('sent'),
-        error: (e: HttpErrorResponse) => {
+        error: (e: unknown) => {
           this.status.set('error');
+          this.turnstile()?.reset(); // token važi za jedno slanje
+          const code = e instanceof ScriptError ? e.code : null;
           this.serverError.set(
-            e.status === 429
-              ? $localize`Poslali ste više poruka u kratkom roku. Pokušajte ponovo za nekoliko minuta.`
-              : e.status === 400
-                ? $localize`Proverite unete podatke i pokušajte ponovo.`
-                : $localize`Poruka trenutno nije poslata. Pokušajte ponovo ili nam pišite direktno na email.`,
+            code === 'BUSY'
+              ? $localize`Trenutno je velika gužva. Pokušajte ponovo za minut.`
+              : code === 'CAPTCHA_FAILED'
+                ? $localize`Provera da niste robot nije prošla. Pokušajte ponovo za nekoliko sekundi.`
+                : code === 'INVALID' || code === 'REJECTED'
+                  ? $localize`Proverite unete podatke i pokušajte ponovo.`
+                  : $localize`Poruka trenutno nije poslata. Pokušajte ponovo ili nam pišite direktno na email.`,
           );
         },
       });
   }
 
   protected reset(): void {
+    this.captcha.set(null);
     this.form.reset({ topic: 'OPSTE' });
     this.submitted.set(false);
     this.renderedAt = Date.now();

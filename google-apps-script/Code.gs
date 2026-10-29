@@ -3,19 +3,23 @@
  * Google Apps Script vezan za tabelu „Bal rezervacije" (Proširenja → Apps Script).
  *
  * Šta radi:
- *  - prima rezervacije sa sajta (doPost), dodeljuje broj (npr. 27001) i upisuje jedan red po rezervaciji
+ *  - prima rezervacije direktno sa sajta (doPost), dodeljuje broj (npr. 27001) i upisuje jedan red po rezervaciji
  *  - šalje obaveštenje organizatoru i potvrdu gostu
+ *  - prima poruke iz kontakt forme (tab „Poruke" + mejl organizatoru)
  *  - meni „Sretenjski bal": instrukcije za uplatu, potvrda uplate, ručna provera rokova
  *  - dnevna provera rokova: podsetnik posle roka za uplatu, ISTEKLO posle perioda tolerancije
+ *
+ * Sajt je statički i šalje direktno ovoj skripti, pa je skripta javna: svaka rezervacija i poruka
+ * prolazi Cloudflare Turnstile proveru („da li je čovek"), proveru podataka i ograničenje broja slanja.
  *
  * Uputstvo za postavljanje: docs/REZERVACIJE.md u repozitorijumu sajta.
  * Lične podatke ne upisujemo u log (console) — samo brojeve rezervacija.
  */
 
-const SPREADSHEET_ID = '15mmdOh8e6veaV5-kH7Co3ANUHmtnl5f9wXDEdbKVAZ4';
 const SHEET_RESERVATIONS = 'Rezervacije';
 const SHEET_SETTINGS = 'Podešavanja';
 const SHEET_STATS = 'Statistika';
+const SHEET_MESSAGES = 'Poruke';
 const TIME_ZONE = 'Europe/Ljubljana';
 
 const STATUS = {
@@ -104,6 +108,30 @@ const SOURCES = {
 const LOCALES = ['sr', 'sl', 'en'];
 /** Tehnička zaštita od zloupotrebe forme (nije prodajno ograničenje). */
 const MAX_TICKETS_PER_RESERVATION = 100;
+/** Isti uslov kao na sajtu: cifre, razmaci, + ( ) / . - i najmanje 6 cifara. */
+const PHONE_RE = /^(?=(?:\D*\d){6})[+0-9 ()\/.-]{6,30}$/;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+/** Ovu formu čovek ne popuni brže — verovatno bot. */
+const MIN_FILL_MS = 4000;
+/** Najviše slanja (rezervacije + poruke) u jednom minutu za ceo sajt — čuva dnevni limit mejlova od zloupotrebe. */
+const MAX_SUBMISSIONS_PER_MINUTE = 20;
+
+/** Teme kontakt forme (šifre su iste kao na sajtu). */
+const CONTACT_TOPICS = {
+  OPSTE: 'Opšti upit',
+  PARTNERSTVO: 'Partnerstvo i sponzorstvo',
+  KARTE: 'Rezervacije',
+  MEDIJI: 'Mediji',
+  SARADNJA: 'Saradnja i nastup',
+};
+const MESSAGE_HEADERS = ['Datum i vreme', 'Ime', 'Prezime', 'E-mail', 'Tema', 'Poruka', 'Mejl poslat'];
+
+/**
+ * Cloudflare Turnstile. Pravi tajni ključ se upisuje u Svojstva skripte kao TURNSTILE_SECRET.
+ * Dok ga nema, koristi se Cloudflareov probni ključ koji uvek propušta — zaštita od botova tada nije uključena.
+ */
+const TURNSTILE_TEST_SECRET = '1x0000000000000000000000000000000AA';
+const TURNSTILE_VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 
 /** [ključ, početna vrednost, opis] — upisuje se u tab „Podešavanja" pri prvom pokretanju. */
 const SETTINGS = [
@@ -114,9 +142,10 @@ const SETTINGS = [
   ['PRICE_STUDENT', 60, 'Cena studentske ulaznice (EUR).'],
   ['PAYMENT_DAYS', 7, 'Rok za uplatu u danima, računa se od dana slanja instrukcija za uplatu.'],
   ['GRACE_DAYS', 2, 'Koliko dana posle podsetnika gost još može da plati. Sledećeg dana neplaćena rezervacija prelazi u ISTEKLO.'],
-  ['ADMIN_EMAIL', 'fbozic7@gmail.com', 'Adresa na koju stižu obaveštenja o novim rezervacijama i dnevni izveštaj o rokovima.'],
-  ['REPLY_TO', 'fbozic7@gmail.com', 'Adresa na koju gosti odgovaraju na automatske mejlove.'],
+  ['ADMIN_EMAIL', 'info@kcsretenje.si', 'Adresa na koju stižu obaveštenja o novim rezervacijama i dnevni izveštaj o rokovima.'],
+  ['REPLY_TO', 'info@kcsretenje.si', 'Adresa na koju gosti odgovaraju na automatske mejlove.'],
   ['SENDER_NAME', 'Sretenjski bal', 'Ime pošiljaoca u mejlovima.'],
+  ['SENDER_EMAIL', 'info@kcsretenje.si', 'Adresa sa koje idu mejlovi. Mora biti dodata u Gmailu naloga pod kojim radi skripta (Podešavanja → Nalozi → Pošalji poštu kao); dok nije, mejlovi idu sa glavne adrese tog naloga. Prazno = glavna adresa.'],
   ['GUEST_EMAILS', true, 'Označeno = gost odmah dobija mejl da je rezervacija evidentirana.'],
   ['CURRENCY', 'EUR', 'Valuta iznosa za uplatu.'],
   // TODO: privremene vrednosti dok ne stignu pravi podaci za uplatu. Dok u nekoj od njih piše „TODO",
@@ -129,7 +158,7 @@ const SETTINGS = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Web app — poziva ga isključivo backend sajta (sa tajnim ključem)
+// Web app — poziva ga sajt direktno iz browsera (POST, telo je JSON poslat kao običan tekst)
 // ─────────────────────────────────────────────────────────────────────────────
 
 function doGet() {
@@ -143,10 +172,11 @@ function doPost(e) {
   } catch (err) {
     return json_({ ok: false, code: 'BAD_REQUEST' });
   }
-  if (!checkSecret_(req && req.secret)) return json_({ ok: false, code: 'UNAUTHORIZED' });
+  if (!req || typeof req !== 'object') return json_({ ok: false, code: 'BAD_REQUEST' });
   try {
     if (req.action === 'status') return json_(getStatus_());
-    if (req.action === 'create') return json_(createReservation_(req.reservation || {}));
+    if (req.action === 'create') return json_(createReservation_(req.reservation || {}, req.captcha));
+    if (req.action === 'contact') return json_(sendContact_(req.contact || {}, req.captcha));
     return json_({ ok: false, code: 'BAD_REQUEST' });
   } catch (err) {
     console.error('doPost greška: ' + err.message);
@@ -158,12 +188,44 @@ function json_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
 }
 
-function checkSecret_(given) {
-  const secret = PropertiesService.getScriptProperties().getProperty('API_SECRET');
-  if (!secret || typeof given !== 'string' || given.length !== secret.length) return false;
-  let diff = 0;
-  for (let i = 0; i < secret.length; i++) diff |= secret.charCodeAt(i) ^ given.charCodeAt(i);
-  return diff === 0;
+/** Provera „da li je čovek" kod Cloudflarea. Svaki token važi samo jednom. */
+function verifyCaptcha_(token) {
+  if (typeof token !== 'string' || !token || token.length > 2048) return false;
+  const secret = PropertiesService.getScriptProperties().getProperty('TURNSTILE_SECRET') || TURNSTILE_TEST_SECRET;
+  try {
+    const res = UrlFetchApp.fetch(TURNSTILE_VERIFY_URL, {
+      method: 'post',
+      payload: { secret: secret, response: token },
+      muteHttpExceptions: true,
+    });
+    return JSON.parse(res.getContentText()).success === true;
+  } catch (err) {
+    console.error('Turnstile provera nije uspela: ' + err.message);
+    return false;
+  }
+}
+
+/** Skriveno polje popunjeno ili forma poslata prebrzo — bot. */
+function looksLikeBot_(input) {
+  const elapsed = Number(input.elapsedMs);
+  return Boolean(input.website) || (input.elapsedMs !== undefined && (!isFinite(elapsed) || elapsed < MIN_FILL_MS));
+}
+
+/** Ograničenje broja slanja u minuti za ceo sajt (skripta ne vidi IP adresu posetioca). */
+function tooManySubmissions_() {
+  const cache = CacheService.getScriptCache();
+  const key = 'submissions:' + Math.floor(Date.now() / 60000);
+  const count = Number(cache.get(key) || 0) + 1;
+  cache.put(key, String(count), 120);
+  return count > MAX_SUBMISSIONS_PER_MINUTE;
+}
+
+/** Zajedničke provere pre svakog slanja; vraća grešku ili null. */
+function guardSubmission_(input, captcha) {
+  if (looksLikeBot_(input)) return { ok: false, code: 'REJECTED' };
+  if (tooManySubmissions_()) return { ok: false, code: 'BUSY' };
+  if (!verifyCaptcha_(captcha)) return { ok: false, code: 'CAPTCHA_FAILED' };
+  return null;
 }
 
 function getStatus_() {
@@ -175,11 +237,13 @@ function getStatus_() {
 // Nova rezervacija
 // ─────────────────────────────────────────────────────────────────────────────
 
-function createReservation_(input) {
+function createReservation_(input, captcha) {
   const settings = readSettings_();
   if (!settings.bookingOpen) return { ok: false, code: 'BOOKING_CLOSED' };
   const invalid = validateReservation_(input);
   if (invalid.length) return { ok: false, code: 'INVALID', fields: invalid };
+  const blocked = guardSubmission_(input, captcha);
+  if (blocked) return blocked;
 
   const lock = LockService.getScriptLock();
   if (!lock.tryLock(20000)) return { ok: false, code: 'BUSY' };
@@ -231,16 +295,22 @@ function createReservation_(input) {
   return result;
 }
 
-/** Druga linija odbrane — backend već proverava sve ovo. Vraća listu neispravnih polja. */
+function str_(v, min, max) {
+  return typeof v === 'string' && v.trim().length >= min && v.trim().length <= max;
+}
+
+function optionalStr_(v, max) {
+  return v === undefined || v === null || (typeof v === 'string' && v.length <= max);
+}
+
+/** Sajt proverava isto u browseru, ali skripta je javna, pa sve proverava ponovo. Vraća listu neispravnih polja. */
 function validateReservation_(r) {
   const bad = [];
-  const str = function (v, min, max) {
-    return typeof v === 'string' && v.trim().length >= min && v.trim().length <= max;
-  };
+  const str = str_;
   if (!str(r.requestId, 8, 64) || !/^[A-Za-z0-9-]+$/.test(r.requestId)) bad.push('requestId');
   if (!str(r.fullName, 2, 120)) bad.push('fullName');
-  if (!str(r.email, 3, 254) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(r.email)) bad.push('email');
-  if (!str(r.phone, 6, 30)) bad.push('phone');
+  if (!str(r.email, 3, 254) || !EMAIL_RE.test(String(r.email).trim())) bad.push('email');
+  if (!str(r.phone, 6, 30) || !PHONE_RE.test(String(r.phone).trim())) bad.push('phone');
   const tickets = Array.isArray(r.tickets) ? r.tickets : [];
   const seen = {};
   let total = 0;
@@ -250,7 +320,11 @@ function validateReservation_(r) {
     if (t) { seen[t.ticketType] = true; total += Number(t.count) || 0; }
   });
   if (!tickets.length || total > MAX_TICKETS_PER_RESERVATION) bad.push('tickets');
-  if (r.diet != null && typeof r.diet !== 'string') bad.push('diet');
+  if (!optionalStr_(r.diet, 1000)) bad.push('diet');
+  if (!optionalStr_(r.note, 2000)) bad.push('note');
+  if (!optionalStr_(r.sourceOther, 200)) bad.push('sourceOther');
+  if (!optionalStr_(r.pageUrl, 500)) bad.push('pageUrl');
+  if (r.utm !== undefined && (typeof r.utm !== 'object' || r.utm === null || Array.isArray(r.utm))) bad.push('utm');
   const inv = r.invoice || {};
   if (inv.needed === true) {
     if (!str(inv.companyName, 2, 200)) bad.push('invoice.companyName');
@@ -260,6 +334,71 @@ function validateReservation_(r) {
   if (!SOURCES[r.source]) bad.push('source');
   if (LOCALES.indexOf(r.locale) < 0) bad.push('locale');
   return bad;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Kontakt forma
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Poruka se upisuje u tab „Poruke" (da se ne izgubi) i šalje organizatoru; „Odgovori" ide pošiljaocu. */
+function sendContact_(m, captcha) {
+  const bad = [];
+  if (!str_(m.firstName, 1, 80)) bad.push('firstName');
+  if (!str_(m.lastName, 1, 80)) bad.push('lastName');
+  if (!str_(m.email, 3, 254) || !EMAIL_RE.test(String(m.email).trim())) bad.push('email');
+  if (!CONTACT_TOPICS[m.topic]) bad.push('topic');
+  if (!str_(m.message, 10, 4000)) bad.push('message');
+  if (m.consent !== true) bad.push('consent');
+  if (bad.length) return { ok: false, code: 'INVALID', fields: bad };
+  const blocked = guardSubmission_(m, captcha);
+  if (blocked) return blocked;
+
+  const settings = readSettings_();
+  const msg = {
+    at: new Date(),
+    firstName: clean_(m.firstName),
+    lastName: clean_(m.lastName),
+    email: clean_(m.email).toLowerCase(),
+    topic: CONTACT_TOPICS[m.topic],
+    message: clean_(m.message, true),
+  };
+
+  let row = -1;
+  try {
+    const sheet = messagesSheet_();
+    sheet.appendRow([msg.at, msg.firstName, msg.lastName, msg.email, msg.topic, msg.message, 'NE'].map(safeCell_));
+    row = sheet.getLastRow();
+  } catch (err) {
+    console.error('Poruka nije upisana u tabelu: ' + err.message);
+  }
+
+  let sent = false;
+  try {
+    sendMail_(settings, {
+      to: settings.adminEmail,
+      subject: 'Sajt · ' + msg.topic + ' · ' + msg.firstName + ' ' + msg.lastName,
+      body: msg.firstName + ' ' + msg.lastName + ' <' + msg.email + '>\nTema: ' + msg.topic + '\nPrimljeno: ' + stamp_() + '\n\n' + msg.message,
+      replyTo: msg.email,
+    });
+    sent = true;
+    if (row > 0) spreadsheet_().getSheetByName(SHEET_MESSAGES).getRange(row, MESSAGE_HEADERS.length).setValue('DA');
+  } catch (err) {
+    console.error('Poruka iz kontakt forme nije poslata mejlom.');
+  }
+
+  // Ako nema ni upisa ni mejla, posetilac mora da zna da poruka nije stigla.
+  if (row < 0 && !sent) return { ok: false, code: 'SERVER_ERROR' };
+  return { ok: true };
+}
+
+function messagesSheet_() {
+  const ss = spreadsheet_();
+  let sheet = ss.getSheetByName(SHEET_MESSAGES);
+  if (!sheet) {
+    sheet = ss.insertSheet(SHEET_MESSAGES);
+    sheet.appendRow(MESSAGE_HEADERS);
+  }
+  return sheet;
 }
 
 /**
@@ -332,8 +471,16 @@ function safeCell_(v) {
 // Tabela
 // ─────────────────────────────────────────────────────────────────────────────
 
+/**
+ * Tabela za koju je skripta vezana. Kad web aplikacija nema „aktivnu" tabelu, koristi ID koji je
+ * „Podesi tabelu" zapamtila — zato i kopija tabele (npr. na drugom nalogu) radi sa svojom tabelom.
+ */
 function spreadsheet_() {
-  return SpreadsheetApp.getActiveSpreadsheet() || SpreadsheetApp.openById(SPREADSHEET_ID);
+  const active = SpreadsheetApp.getActiveSpreadsheet();
+  if (active) return active;
+  const id = PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID');
+  if (!id) throw new Error('Skripta ne zna koju tabelu koristi. U tabeli pokrenite meni Sretenjski bal → Podesi tabelu.');
+  return SpreadsheetApp.openById(id);
 }
 
 function openTable_() {
@@ -438,6 +585,7 @@ function normalizeSettings_(raw) {
     adminEmail: String(get('ADMIN_EMAIL')).trim(),
     replyTo: String(get('REPLY_TO')).trim(),
     senderName: String(get('SENDER_NAME')).trim(),
+    senderEmail: text('SENDER_EMAIL').toLowerCase(),
     guestEmails: toBool_(get('GUEST_EMAILS')),
     currency: String(get('CURRENCY')).trim(),
     payee: text('PAYEE'),
@@ -875,12 +1023,11 @@ function sendGuestMail_(kind, r, settings, extra) {
     outro: outro,
     signoff: m.signoff,
   });
-  MailApp.sendEmail({
+  sendMail_(settings, {
     to: String(r.email).trim(),
     subject: k.subject(n),
     body: mail.text,
     htmlBody: mail.html,
-    name: settings.senderName,
     replyTo: settings.replyTo,
   });
 }
@@ -917,12 +1064,11 @@ function sendAdminNotification_(r, settings) {
     outro: ['Sledeći korak: proverite iznos u tabeli (po potrebi ga promenite), pa iz menija „Sretenjski bal" pošaljite instrukcije za uplatu.', 'Tabela: ' + link],
     signoff: [],
   });
-  MailApp.sendEmail({
+  sendMail_(settings, {
     to: settings.adminEmail,
     subject: 'Nova rezervacija za Sretenjski bal — ' + r.number + (r.diet ? ' · posebna ishrana' : ''),
     body: mail.text,
     htmlBody: mail.html,
-    name: settings.senderName,
     replyTo: r.email, // „Odgovori" ide direktno gostu
   });
 }
@@ -933,12 +1079,69 @@ function sendAdminDigest_(report, settings) {
   if (report.expired.length) lines.push('Isteklo, mesta oslobođena (status → ' + STATUS.EXPIRED + '): ' + report.expired.join(', '));
   if (report.problems.length) lines.push('Potrebna provera:\n- ' + report.problems.join('\n- '));
   lines.push('Tabela: ' + spreadsheet_().getUrl());
-  MailApp.sendEmail({
+  sendMail_(settings, {
     to: settings.adminEmail,
     subject: 'Sretenjski bal — provera rokova: ' + report.reminded.length + ' podsetnik(a), ' + report.expired.length + ' isteklo',
     body: lines.join('\n\n'),
-    name: settings.senderName,
   });
+}
+
+/**
+ * Šalje mejl. Ako je SENDER_EMAIL (npr. info@kcsretenje.si) dodat kao „Pošalji poštu kao" u Gmailu naloga
+ * pod kojim radi skripta, mejl ide sa te adrese (GmailApp); inače sa glavne adrese naloga (MailApp).
+ * Ime pošiljaoca je uvek SENDER_NAME. Vraća adresu sa koje je mejl poslat.
+ */
+function sendMail_(settings, m) {
+  const options = { name: settings.senderName };
+  if (m.replyTo) options.replyTo = m.replyTo;
+  if (m.htmlBody) options.htmlBody = m.htmlBody;
+  let from;
+  if (settings.senderEmail && senderAliases_().indexOf(settings.senderEmail) >= 0) {
+    options.from = settings.senderEmail;
+    GmailApp.sendEmail(m.to, m.subject, m.body, options);
+    from = settings.senderEmail;
+  } else {
+    MailApp.sendEmail(Object.assign({ to: m.to, subject: m.subject, body: m.body }, options));
+    from = Session.getEffectiveUser().getEmail() || 'glavna adresa naloga';
+  }
+  if (sentToOwnMailbox_(m.to)) moveSentToInbox_(m.subject);
+  return from;
+}
+
+/** Da li je primalac sanduče naloga pod kojim radi skripta (njegova glavna adresa ili alias, npr. info@). */
+function sentToOwnMailbox_(to) {
+  const own = senderAliases_().concat([String(Session.getEffectiveUser().getEmail() || '').toLowerCase()]);
+  return String(to).split(',').some(function (addr) { return own.indexOf(addr.trim().toLowerCase()) >= 0; });
+}
+
+/**
+ * Gmail mejl poslat samom sebi (npr. sa info@ na info@) ostavlja samo u „Poslato".
+ * Premeštamo ga u Inbox i označavamo kao nepročitan, da ekipa vidi novu rezervaciju ili poruku.
+ */
+function moveSentToInbox_(subject) {
+  try {
+    const query = 'in:sent subject:"' + String(subject).replace(/"/g, '') + '" newer_than:1d';
+    const thread = GmailApp.search(query, 0, 1)[0];
+    if (thread) {
+      thread.moveToInbox();
+      thread.markUnread();
+    }
+  } catch (err) {
+    console.error('Mejl nije premešten u Inbox: ' + err.message);
+  }
+}
+
+let senderAliasesCache_ = null;
+function senderAliases_() {
+  if (senderAliasesCache_ === null) {
+    try {
+      senderAliasesCache_ = GmailApp.getAliases().map(function (a) { return String(a).toLowerCase(); });
+    } catch (err) {
+      console.error('Gmail aliasi nisu dostupni: ' + err.message);
+      senderAliasesCache_ = [];
+    }
+  }
+  return senderAliasesCache_;
 }
 
 /** Isti sadržaj kao običan tekst i kao jednostavan HTML u bojama sajta. */
@@ -989,7 +1192,6 @@ function onOpen() {
     .addItem('Podesi tabelu (prvo pokretanje)', 'setup')
     .addItem('Uključi dnevnu proveru rokova', 'installTriggers')
     .addItem('Pošalji probni mejl organizatoru', 'sendTestEmail')
-    .addItem('Prikaži ključ za sajt (APPS_SCRIPT_SECRET)', 'showSecret')
     .addToUi();
 }
 
@@ -1079,15 +1281,26 @@ function setup() {
   setupReservationsSheet_(ss);
   setupSettingsSheet_(ss);
   setupStatsSheet_(ss);
+  setupMessagesSheet_(ss);
 
   const props = PropertiesService.getScriptProperties();
-  if (!props.getProperty('API_SECRET')) {
-    props.setProperty('API_SECRET', Utilities.getUuid().replace(/-/g, '') + Utilities.getUuid().replace(/-/g, ''));
+  props.setProperty('SPREADSHEET_ID', ss.getId());
+  props.deleteProperty('API_SECRET'); // ostatak ranije verzije (sajt više ne koristi tajni ključ)
+  if (!props.getProperty('TURNSTILE_SECRET')) {
+    notes.push('PAŽNJA: zaštita od botova još nije uključena — upišite TURNSTILE_SECRET u Svojstva skripte (docs/REZERVACIJE.md).');
   }
   SpreadsheetApp.getUi().alert(
     'Tabela je podešena.\n\n' + (notes.length ? notes.join('\n') + '\n\n' : '') +
-    'Sledeći koraci (docs/REZERVACIJE.md):\n1. Primena → Nova primena → Web aplikacija\n2. Meni → Uključi dnevnu proveru rokova\n3. Meni → Prikaži ključ za sajt, pa ga upišite u backend .env',
+    'Sledeći koraci (docs/REZERVACIJE.md):\n1. Primeni → Nova primena → Web aplikacija (prvi put) ili nova verzija postojeće\n2. Meni → Uključi dnevnu proveru rokova\n3. Adresu web aplikacije upišite u sajt (frontend/src/app/core/config/app.constants.ts)',
   );
+}
+
+function setupMessagesSheet_(ss) {
+  const sheet = messagesSheet_();
+  sheet.getRange(1, 1, 1, MESSAGE_HEADERS.length).setFontWeight('bold').setBackground('#5a1723').setFontColor('#ffffff');
+  sheet.setFrozenRows(1);
+  sheet.getRange(2, 1, Math.max(sheet.getMaxRows() - 1, 1), 1).setNumberFormat('dd.mm.yyyy hh:mm');
+  [140, 120, 140, 210, 170, 480, 90].forEach(function (w, i) { sheet.setColumnWidth(i + 1, w); });
 }
 
 function setupReservationsSheet_(ss) {
@@ -1228,6 +1441,19 @@ function setupSettingsSheet_(ss) {
   });
   sheet.getRange(2, 3, Math.max(sheet.getLastRow() - 1, 1), 1).setWrap(true);
 
+  // Polja za štikliranje (BOOKING_OPEN, GUEST_EMAILS) se uvek vraćaju, uz zadržavanje upisane vrednosti
+  // (npr. ako je neko u ćeliju otkucao TRUE/DA ili obrisao kvačicu).
+  const rows = sheet.getDataRange().getValues();
+  SETTINGS.filter(function (st) { return typeof st[1] === 'boolean'; }).forEach(function (st) {
+    for (let i = 1; i < rows.length; i++) {
+      if (String(rows[i][0]).trim() !== st[0]) continue;
+      const cell = sheet.getRange(i + 1, 2);
+      const value = rows[i][1] === '' || rows[i][1] === null ? st[1] : toBool_(rows[i][1]);
+      cell.insertCheckboxes();
+      cell.setValue(value);
+    }
+  });
+
   // Vrednosti koje još sadrže „TODO" označene su žuto, da se vidi šta treba popuniti.
   const values = sheet.getRange(2, 2, Math.max(sheet.getLastRow() - 1, 1), 1);
   const keep = sheet.getConditionalFormatRules().filter(function (rule) {
@@ -1297,18 +1523,16 @@ function installTriggers() {
 
 function sendTestEmail() {
   const s = readSettings_();
-  MailApp.sendEmail({
+  const from = sendMail_(s, {
     to: s.adminEmail,
     subject: 'Sretenjski bal — probni mejl',
     body: 'Slanje mejlova iz tabele radi. Preostalo slanja danas: ' + MailApp.getRemainingDailyQuota(),
-    name: s.senderName,
   });
-  SpreadsheetApp.getUi().alert('Probni mejl je poslat na ' + s.adminEmail + '. Preostalo slanja danas: ' + MailApp.getRemainingDailyQuota());
-}
-
-function showSecret() {
-  const secret = PropertiesService.getScriptProperties().getProperty('API_SECRET');
-  SpreadsheetApp.getUi().alert(secret
-    ? 'Upišite u backend/.env sajta:\n\nAPPS_SCRIPT_SECRET=' + secret + '\n\nNe delite ovaj ključ i ne stavljajte ga u kod sajta.'
-    : 'Ključ još ne postoji — pokrenite „Podesi tabelu".');
+  SpreadsheetApp.getUi().alert(
+    'Probni mejl je poslat na ' + s.adminEmail + '.\nPošiljalac: ' + from +
+    (s.senderEmail && from !== s.senderEmail
+      ? '\n\nPAŽNJA: ' + s.senderEmail + ' još nije dodat u Gmailu ovog naloga (Podešavanja → Nalozi → Pošalji poštu kao), pa mejlovi idu sa glavne adrese.'
+      : '') +
+    '\nPreostalo slanja danas: ' + MailApp.getRemainingDailyQuota(),
+  );
 }
