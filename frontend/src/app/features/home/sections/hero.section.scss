@@ -73,12 +73,12 @@
 
 .couple {
   position: absolute;
-  right: -0.5rem;
+  right: 1.5rem;
   bottom: 0;
   height: min(78%, 650px);
   aspect-ratio: 783 / 846;
-  // Linije crta sam SVG (public/brand/plesni-par-linije.svg, oko 6 s); posle toga par lagano lebdi.
-  animation: sway 16s ease-in-out 7s infinite alternate;
+  // Linije crta sam SVG (public/brand/plesni-par-linije.svg, oko 4 s); posle toga par lagano lebdi.
+  animation: sway 16s ease-in-out 4.5s infinite alternate;
 
   img {
     display: block;
