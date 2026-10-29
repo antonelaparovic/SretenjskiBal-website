@@ -72,6 +72,8 @@ export interface BookingStatus {
   open: boolean;
 }
 
+export type CompanyCountry = 'SI' | 'EU' | 'OTHER';
+
 export interface ReservationPayload {
   /** Isti za ponovljena slanja iste rezervacije — backend tako sprečava duplikat. */
   requestId: string;
@@ -80,7 +82,17 @@ export interface ReservationPayload {
   phone: string;
   /** Karte glase na osobu koja rezerviše. Lista da bi se kasnije mogli kombinovati tipovi; za sada jedna stavka. */
   tickets: { ticketType: TicketTypeCode; count: number }[];
-  invoice: { needed: boolean; companyName?: string; companyAddress?: string; taxId?: string };
+  invoice: {
+    needed: boolean;
+    companyName?: string;
+    companyAddress?: string;
+    /** SI = firma iz Slovenije, EU = druga država EU, OTHER = izvan EU. Od ovoga zavisi obračun DDV-a. */
+    companyCountry?: CompanyCountry;
+    /** Davčna številka (SI) odnosno ID za DDV (EU) / poreski broj (ostalo). */
+    taxId?: string;
+    /** Samo za slovenačke firme: da li je firma obveznik DDV-a (davčni zavezanec). */
+    vatPayer?: boolean;
+  };
   /** Posebna ishrana i alergije — posebna kolona u tabeli, zbog kuhinje. */
   diet: string;
   /** Izričita saglasnost za podatke o zdravlju (član 9 GDPR); true samo uz popunjenu ishranu. */

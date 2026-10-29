@@ -171,17 +171,48 @@
                   @if (invalid(form.controls.company.controls.name)) { <span class="field__error" id="err-company-name" i18n>Unesite naziv firme.</span> }
                 </label>
                 <label class="field">
-                  <span class="field__label" i18n>Adresa firme</span>
+                  <span class="field__label" i18n>Država sedeža firme</span>
+                  <select class="field__control" formControlName="country" required>
+                    <option value="SI" i18n>Slovenija</option>
+                    <option value="EU" i18n>Druga država članica EU</option>
+                    <option value="OTHER" i18n>Država izvan EU</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span class="field__label" i18n>Sedež firme (ulica, poštanski broj, mesto)</span>
                   <input class="field__control" formControlName="address" autocomplete="street-address" required
                     [attr.aria-invalid]="invalid(form.controls.company.controls.address)" aria-describedby="err-company-address" />
                   @if (invalid(form.controls.company.controls.address)) { <span class="field__error" id="err-company-address" i18n>Unesite adresu firme.</span> }
                 </label>
                 <label class="field">
-                  <span class="field__label" i18n>Poreski identifikacioni broj</span>
-                  <input class="field__control" formControlName="taxId" required
-                    [attr.aria-invalid]="invalid(form.controls.company.controls.taxId)" aria-describedby="err-company-tax" />
+                  @switch (companyCountry()) {
+                    @case ('SI') { <span class="field__label" i18n>Davčna številka (ID za DDV)</span> }
+                    @case ('EU') { <span class="field__label" i18n>ID za PDV (sa oznakom države, npr. HR12345678901)</span> }
+                    @default { <span class="field__label" i18n>Poreski identifikacioni broj</span> }
+                  }
+                  <input class="field__control" formControlName="taxId" required autocapitalize="characters"
+                    [attr.aria-invalid]="invalid(form.controls.company.controls.taxId) || taxIdInvalid()" aria-describedby="err-company-tax" />
                   @if (invalid(form.controls.company.controls.taxId)) { <span class="field__error" id="err-company-tax" i18n>Unesite poreski identifikacioni broj.</span> }
+                  @else if (taxIdInvalid()) {
+                    <span class="field__error" id="err-company-tax">
+                      @if (companyCountry() === 'SI') { <ng-container i18n>Slovenačka davčna številka ima 8 cifara (npr. 12345678 ili SI12345678).</ng-container> }
+                      @else { <ng-container i18n>ID za PDV počinje oznakom države, npr. HR12345678901 ili ATU12345678.</ng-container> }
+                    </span>
+                  }
                 </label>
+                @if (companyCountry() === 'SI') {
+                  <fieldset class="choice">
+                    <legend class="field__label" i18n>Da li je firma obveznik DDV-a (davčni zavezanec)?</legend>
+                    <div class="options">
+                      <label class="checkbox"><input type="radio" formControlName="vatPayer" [value]="true" /><span i18n>Da</span></label>
+                      <label class="checkbox"><input type="radio" formControlName="vatPayer" [value]="false" /><span i18n>Ne</span></label>
+                    </div>
+                    @if (invalid(form.controls.company.controls.vatPayer)) { <span class="field__error" i18n>Izaberite jednu od ponuđenih mogućnosti.</span> }
+                  </fieldset>
+                }
+                @if (companyCountry() === 'EU') {
+                  <p class="field__hint" i18n>Za firme iz EU sa važećim ID za PDV faktura se izdaje bez slovenačkog DDV-a (obrnuta naplata); ID proveravamo u sistemu VIES.</p>
+                }
               </div>
             }
 

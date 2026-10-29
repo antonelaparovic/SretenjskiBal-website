@@ -300,3 +300,22 @@ Automatski mejlovi postoje na srpskom, slovenačkom i engleskom (`MAIL` u `Code.
 - `cd frontend && npx ng test --watch=false`: provere forme.
 - Za testiranje sa pravom tabelom koristite **kopiju tabele** (Datoteka → Napravi kopiju, kopija dobija
   i skriptu) sa sopstvenom web aplikacijom i svojim mejlom, a ne produkcionu tabelu.
+
+## Faktura na firmu (podaci za Sloveniju)
+
+Ako gost traži fakturu na firmu, forma traži:
+
+| Polje | Zašto |
+|---|---|
+| Naziv firme | piše na fakturi |
+| Sedež (ulica, poštanski broj, mesto) | piše na fakturi |
+| Država sedišta: Slovenija / druga država EU / izvan EU | od toga zavisi obračun DDV-a |
+| Davčna številka (SI) odnosno ID za PDV sa oznakom države (EU) / poreski broj (ostalo) | obavezan podatak na fakturi; format se proverava (SI: 8 cifara, uz opcioni prefiks SI; EU: npr. HR12345678901) |
+| Obveznik DDV-a da/ne (samo za firme iz Slovenije) | slovenačka firma koja nije obveznik DDV-a nema ID za DDV, samo davčnu številku |
+
+U koloni „Podaci firme“ u tabeli ova polja stoje u jednoj ćeliji, uz napomenu o obračunu
+(EU: obrnuta naplata/reverse charge ako je ID za PDV važeći u sistemu VIES; izvan EU: proveriti sa računovođom).
+
+Uplata na slovenački račun (IBAN) ne zavisi od države firme: može je izvršiti firma iz bilo koje zemlje (SEPA ili međunarodni
+nalog; za uplatu van EU treba BIC/SWIFT i obično nastaju bankarske provizije). Država firme utiče samo na fakturu i DDV, zato
+konačan obračun uvek potvrditi sa računovođom organizatora.

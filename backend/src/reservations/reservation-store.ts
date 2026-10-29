@@ -1,4 +1,4 @@
-import type { Locale, ReservationSource, TicketTypeCode } from './reservation.dto.js';
+import type { CompanyCountry, Locale, ReservationSource, TicketTypeCode } from './reservation.dto.js';
 
 /** Očišćena rezervacija koja se šalje u tabelu. */
 export interface ReservationInput {
@@ -7,7 +7,14 @@ export interface ReservationInput {
   email: string;
   phone: string;
   tickets: { ticketType: TicketTypeCode; count: number }[];
-  invoice: { needed: boolean; companyName?: string; companyAddress?: string; taxId?: string };
+  invoice: {
+    needed: boolean;
+    companyName?: string;
+    companyAddress?: string;
+    companyCountry?: CompanyCountry;
+    taxId?: string;
+    vatPayer?: boolean;
+  };
   diet: string;
   /** true samo ako je `diet` popunjen i gost je izričito pristao na obradu. */
   dietConsent: boolean;

@@ -259,7 +259,9 @@ function validateReservation_(r) {
   if (inv.needed === true) {
     if (!str(inv.companyName, 2, 200)) bad.push('invoice.companyName');
     if (!str(inv.companyAddress, 2, 300)) bad.push('invoice.companyAddress');
-    if (!str(inv.taxId, 2, 40)) bad.push('invoice.taxId');
+    if (COMPANY_COUNTRIES_.indexOf(inv.companyCountry) < 0) bad.push('invoice.companyCountry');
+    if (!isValidTaxId_(inv.companyCountry, inv.taxId)) bad.push('invoice.taxId');
+    if (inv.companyCountry === 'SI' && typeof inv.vatPayer !== 'boolean') bad.push('invoice.vatPayer');
   }
   if (!SOURCES[r.source]) bad.push('source');
   if (LOCALES.indexOf(r.locale) < 0) bad.push('locale');
@@ -283,6 +285,34 @@ function nextNumber_(t, ballYear) {
   return ballYear + String(next).padStart(3, '0');
 }
 
+const COMPANY_COUNTRIES_ = ['SI', 'EU', 'OTHER'];
+const COMPANY_COUNTRY_LABELS_ = { SI: 'Slovenija', EU: 'Druga država EU', OTHER: 'Izvan EU' };
+
+/** Ista pravila kao isValidTaxId u backend/src/reservations/reservation.dto.ts. */
+function isValidTaxId_(country, taxId) {
+  const raw = typeof taxId === 'string' ? taxId : '';
+  const v = raw.replace(/[\s.-]/g, '').toUpperCase();
+  if (country === 'SI') return /^(SI)?\d{8}$/.test(v);
+  if (country === 'EU') return /^[A-Z]{2}[0-9A-Z+*]{2,12}$/.test(v) && v.indexOf('SI') !== 0;
+  return raw.trim().length >= 2 && raw.trim().length <= 40;
+}
+
+/** Podaci firme za fakturu, u jednoj ćeliji. Napomena o DDV-u pomaže knjigovođi da odmah vidi o kakvom je obračunu reč. */
+function companyDetails_(inv) {
+  const country = inv.companyCountry;
+  const taxLabel = country === 'SI' ? 'Davčna številka / ID za DDV' : country === 'EU' ? 'ID za DDV' : 'Poreski broj';
+  const lines = [
+    'Naziv: ' + clean_(inv.companyName),
+    'Sedež: ' + clean_(inv.companyAddress),
+    'Država: ' + (COMPANY_COUNTRY_LABELS_[country] || ''),
+    taxLabel + ': ' + clean_(inv.taxId).toUpperCase(),
+  ];
+  if (country === 'SI') lines.push('Obveznik DDV: ' + (inv.vatPayer === true ? 'DA' : 'NE'));
+  if (country === 'EU') lines.push('Obračun: reverse charge (0 % DDV) ako je ID za DDV važeći u VIES');
+  if (country === 'OTHER') lines.push('Obračun: izvan EU, proveriti sa računovođom');
+  return lines.join('\n');
+}
+
 function buildRecord_(r, number, now, settings) {
   const inv = r.invoice || {};
   const utm = r.utm || {};
@@ -298,7 +328,7 @@ function buildRecord_(r, number, now, settings) {
     amount: suggestedAmount_(r.tickets, settings.prices),
     invoice: inv.needed === true ? 'DA' : 'NE',
     company: inv.needed === true
-      ? ['Naziv: ' + clean_(inv.companyName), 'Adresa: ' + clean_(inv.companyAddress), 'Poreski broj: ' + clean_(inv.taxId)].join('\n')
+      ? companyDetails_(inv)
       : '',
     diet: clean_(r.diet || '', true),
     note: clean_(r.note || '', true),

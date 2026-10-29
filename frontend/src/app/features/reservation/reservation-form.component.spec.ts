@@ -155,7 +155,7 @@ describe('ReservationFormComponent', () => {
     await fillValid();
     await click('button[type=submit]');
     http.expectNone('/api/reservations');
-    expect(errors()).toEqual(['Unesite naziv firme.', 'Unesite adresu firme.', 'Unesite poreski identifikacioni broj.']);
+    expect(errors()).toEqual(['Unesite naziv firme.', 'Unesite adresu firme.', 'Unesite poreski identifikacioni broj.', 'Izaberite jednu od ponuđenih mogućnosti.']);
     await click($$('input[formcontrolname=invoiceNeeded]')[0]);
     expect($('[formcontrolname=name]')).toBeNull();
     await click('button[type=submit]');

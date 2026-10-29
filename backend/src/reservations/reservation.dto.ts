@@ -26,6 +26,23 @@ export type TicketTypeCode = (typeof TICKET_TYPES)[number];
 export const RESERVATION_SOURCES = ['PREPORUKA', 'DRUSTVENE_MREZE', 'RANIJI_DOLAZAK', 'SAJT', 'EMAIL', 'DRUGO'] as const;
 export type ReservationSource = (typeof RESERVATION_SOURCES)[number];
 
+/** SI = firma iz Slovenije, EU = druga država EU, OTHER = izvan EU. Od ovoga zavisi kako se na fakturi obračunava DDV. */
+export const COMPANY_COUNTRIES = ['SI', 'EU', 'OTHER'] as const;
+export type CompanyCountry = (typeof COMPANY_COUNTRIES)[number];
+
+/**
+ * Format poreskog broja po poreklu firme (ista pravila su u formi i u Apps Scriptu):
+ * SI: davčna številka = 8 cifara, uz opcioni prefiks SI (ID za DDV);
+ * EU: ID za DDV = dvoslovni kod države + 2-12 znakova (npr. HR12345678901, ATU12345678);
+ * OTHER: slobodan unos.
+ */
+export function isValidTaxId(country: CompanyCountry | undefined, taxId: string | undefined): boolean {
+  const v = (taxId ?? '').replace(/[\s.-]/g, '').toUpperCase();
+  if (country === 'SI') return /^(SI)?\d{8}$/.test(v);
+  if (country === 'EU') return /^[A-Z]{2}[0-9A-Z+*]{2,12}$/.test(v) && !v.startsWith('SI');
+  return (taxId ?? '').trim().length >= 2 && (taxId ?? '').trim().length <= 40;
+}
+
 export const LOCALES = ['sr', 'sl', 'en'] as const;
 export type Locale = (typeof LOCALES)[number];
 
@@ -62,10 +79,19 @@ export class InvoiceDto {
   companyAddress?: string;
 
   @ValidateIf((o: InvoiceDto) => o.needed)
+  @IsIn(COMPANY_COUNTRIES)
+  companyCountry?: CompanyCountry;
+
+  @ValidateIf((o: InvoiceDto) => o.needed)
   @Transform(trim)
   @IsString()
   @Length(2, 40)
   taxId?: string;
+
+  /** Samo za firme iz Slovenije: da li je firma obveznik DDV-a. */
+  @ValidateIf((o: InvoiceDto) => o.needed && o.companyCountry === 'SI')
+  @IsBoolean()
+  vatPayer?: boolean;
 }
 
 export class UtmDto {

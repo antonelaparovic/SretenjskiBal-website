@@ -39,7 +39,7 @@ function payload(overrides: Record<string, unknown> = {}) {
     diet: ' <b>Bez glutena</b> ',
     dietConsent: true,
     privacyPolicyVersion: '2026-10-27',
-    invoice: { needed: false, companyName: '', companyAddress: '', taxId: '' },
+    invoice: { needed: false, companyName: '', companyAddress: '', companyCountry: 'SI', taxId: '' },
     note: '',
     source: 'DRUGO',
     sourceOther: 'Plakat u gradu',
@@ -128,9 +128,17 @@ describe('HTTP /api/reservations', () => {
 
   it('faktura na firmu zahteva podatke firme', async () => {
     expect((await post(payload({ invoice: { needed: true, companyName: 'Firma' } }))).status).toBe(400);
-    const ok = await post(payload({ invoice: { needed: true, companyName: 'Firma d.o.o.', companyAddress: 'Glavni trg 1', taxId: 'SI12345678' } }));
+    const si = { needed: true, companyName: 'Firma d.o.o.', companyAddress: 'Glavni trg 1', companyCountry: 'SI', vatPayer: true };
+    expect((await post(payload({ invoice: { ...si, taxId: '1234' } }))).status).toBe(400);
+    expect((await post(payload({ invoice: { ...si, taxId: 'SI12345678', vatPayer: undefined } }))).status).toBe(400);
+    expect((await post(payload({ invoice: { ...si, companyCountry: 'EU', taxId: 'SI12345678' } }))).status).toBe(400);
+    expect((await post(payload({ invoice: { ...si, companyCountry: 'XX', taxId: 'SI12345678' } }))).status).toBe(400);
+    const ok = await post(payload({ invoice: { ...si, taxId: 'si12345678' } }));
     expect(ok.status).toBe(200);
-    expect(store.received[0].invoice).toEqual({ needed: true, companyName: 'Firma d.o.o.', companyAddress: 'Glavni trg 1', taxId: 'SI12345678' });
+    expect(store.received[0].invoice).toEqual({ needed: true, companyName: 'Firma d.o.o.', companyAddress: 'Glavni trg 1', companyCountry: 'SI', taxId: 'SI12345678', vatPayer: true });
+    const eu = await post(payload({ requestId: '5b0c1c7e-3c1b-4a39-9a55-0e1d7b9d3f10', invoice: { needed: true, companyName: 'Firma d.o.o.', companyAddress: 'Ilica 1, Zagreb', companyCountry: 'EU', taxId: 'HR12345678901', vatPayer: true } }));
+    expect(eu.status).toBe(200);
+    expect(store.received[1].invoice).toEqual({ needed: true, companyName: 'Firma d.o.o.', companyAddress: 'Ilica 1, Zagreb', companyCountry: 'EU', taxId: 'HR12345678901' });
   });
 
   it.each([

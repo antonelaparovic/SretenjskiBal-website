@@ -7,7 +7,7 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { cleanText } from '../common/text.js';
-import { CreateReservationDto, MAX_TICKETS_PER_RESERVATION } from './reservation.dto.js';
+import { CreateReservationDto, MAX_TICKETS_PER_RESERVATION, isValidTaxId } from './reservation.dto.js';
 import {
   BookingStatus,
   RESERVATION_STORE,
@@ -56,6 +56,10 @@ export class ReservationsService {
       throw new BadRequestException({ code: 'INVALID', fields: ['dietConsent'] });
     }
 
+    if (dto.invoice.needed && !isValidTaxId(dto.invoice.companyCountry, dto.invoice.taxId)) {
+      throw new BadRequestException({ code: 'INVALID', fields: ['invoice.taxId'] });
+    }
+
     let result;
     try {
       result = await this.store.create(this.toInput(dto));
@@ -83,7 +87,9 @@ export class ReservationsService {
           needed: true,
           companyName: cleanText(dto.invoice.companyName ?? ''),
           companyAddress: cleanText(dto.invoice.companyAddress ?? ''),
-          taxId: cleanText(dto.invoice.taxId ?? ''),
+          companyCountry: dto.invoice.companyCountry,
+          taxId: cleanText(dto.invoice.taxId ?? '').toUpperCase(),
+          ...(dto.invoice.companyCountry === 'SI' ? { vatPayer: dto.invoice.vatPayer === true } : {}),
         }
       : { needed: false };
     const utm: Record<string, string> = {};
