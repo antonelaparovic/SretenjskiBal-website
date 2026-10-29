@@ -1,0 +1,1349 @@
+/**
+ * Sretenjski bal — rezervacije karata.
+ * Google Apps Script vezan za tabelu „Bal rezervacije" (Proširenja → Apps Script).
+ *
+ * Šta radi:
+ *  - prima rezervacije sa sajta (doPost), dodeljuje broj (npr. 27001) i upisuje jedan red po rezervaciji
+ *  - šalje obaveštenje organizatoru i potvrdu gostu
+ *  - meni „Sretenjski bal": instrukcije za uplatu, potvrda uplate, ručna provera rokova
+ *  - dnevna provera rokova: podsetnik posle roka za uplatu, ISTEKLO posle perioda tolerancije
+ *
+ * Uputstvo za postavljanje: docs/REZERVACIJE.md u repozitorijumu sajta.
+ * Lične podatke ne upisujemo u log (console) — samo brojeve rezervacija.
+ */
+
+const SPREADSHEET_ID = '15mmdOh8e6veaV5-kH7Co3ANUHmtnl5f9wXDEdbKVAZ4';
+const SHEET_RESERVATIONS = 'Rezervacije';
+const SHEET_SETTINGS = 'Podešavanja';
+const SHEET_STATS = 'Statistika';
+const TIME_ZONE = 'Europe/Ljubljana';
+
+const STATUS = {
+  NEW: 'NOVA',
+  AWAITING: 'ČEKA NA UPLATU',
+  REMINDED: 'PODSETNIK POSLAT',
+  PAID: 'PLAĆENO',
+  EXPIRED: 'ISTEKLO',
+  CANCELLED: 'OTKAZANO',
+};
+
+/**
+ * Kolone taba „Rezervacije", redom kojim se prikazuju (po grupama iz COLUMN_GROUPS).
+ * Skripta ih traži po nazivu — nazive ne menjati; redosled „Podesi tabelu" sama sređuje.
+ */
+const COL = {
+  // Rezervacija
+  number: 'Broj rezervacije',
+  status: 'Status rezervacije',
+  fullName: 'Ime i prezime kontakt osobe',
+  ticketType: 'Tip karte',
+  ticketCount: 'Broj karata',
+  amount: 'Iznos za uplatu',
+  diet: 'Ishrana i alergije',
+  note: 'Napomena',
+  createdAt: 'Datum i vreme prijave',
+  email: 'E-mail',
+  phone: 'Telefon',
+  // Uplata
+  instructionsAt: 'Datum slanja instrukcija za uplatu',
+  deadline: 'Rok za uplatu',
+  reminderAt: 'Datum slanja podsetnika',
+  paidAt: 'Datum evidentirane uplate',
+  paymentConfirmedAt: 'Datum slanja potvrde uplate',
+  closedAt: 'Datum isteka/otkazivanja',
+  adminNote: 'Administrativna napomena',
+  // Faktura i izvor
+  invoice: 'Faktura na firmu',
+  company: 'Podaci firme',
+  source: 'Izvor prijave',
+  sourceOther: 'Dodatak za izvor prijave',
+  locale: 'Jezik prijave',
+  // Tehnički podaci
+  pageUrl: 'Stranica prijave',
+  utm: 'UTM parametri',
+  systemNote: 'Sistemska napomena',
+  consent: 'Saglasnost',
+  requestId: 'Jedinstveni identifikator zahteva',
+};
+
+/** Grupe kolona: boja zaglavlja; tehnički podaci su skupljeni (otvaraju se klikom na „+" iznad kolona). */
+const COLUMN_GROUPS = [
+  { color: '#5a1723', keys: ['number', 'status', 'fullName', 'ticketType', 'ticketCount', 'amount', 'diet', 'note', 'createdAt', 'email', 'phone'] },
+  { color: '#26352c', keys: ['instructionsAt', 'deadline', 'reminderAt', 'paidAt', 'paymentConfirmedAt', 'closedAt', 'adminNote'] },
+  { color: '#7a6438', keys: ['invoice', 'company', 'source', 'sourceOther', 'locale'] },
+  { color: '#5b4f48', keys: ['pageUrl', 'utm', 'systemNote', 'consent', 'requestId'], collapsed: true },
+];
+
+/** Objašnjenja koja se vide kad se pređe mišem preko zaglavlja. */
+const HEADER_NOTES = {
+  status: 'Menja se iz padajuće liste. PLAĆENO postavljate vi kad uplatu vidite na izvodu.',
+  amount: 'Upisuje se automatski po cenama iz taba Podešavanja. Možete ga promeniti pre slanja instrukcija (npr. popust).',
+  diet: 'Posebna ishrana i alergije koje je gost naveo. Filtrirajte ovu kolonu za spisak za kuhinju.',
+  note: 'Napomena gosta: za koga kupuje karte, želje u vezi sa sedenjem i slično.',
+  instructionsAt: 'Upisuje se automatski kad iz menija pošaljete instrukcije za uplatu.',
+  deadline: 'Upisuje se automatski pri slanju instrukcija (danas + broj dana iz Podešavanja). Crveno = rok je prošao.',
+  reminderAt: 'Upisuje dnevna provera rokova kad pošalje podsetnik.',
+  paidAt: 'Datum kad je uplata viđena na izvodu. Ako ostane prazno, upisuje se pri slanju potvrde uplate.',
+  paymentConfirmedAt: 'Upisuje se kad iz menija pošaljete potvrdu uplate. Obrišite ga samo ako potvrdu treba poslati ponovo.',
+  adminNote: 'Slobodno polje za ekipu — skripta ga nikad ne menja.',
+  systemNote: 'Upisuje skripta (npr. da li su mejlovi poslati).',
+  consent: 'Dokaz o obaveštavanju i saglasnosti: verzija politike privatnosti koju je gost video i, ako je naveo ishranu, izričita saglasnost za podatke o zdravlju (član 9 GDPR). Ne brisati dok se rezervacija čuva.',
+};
+
+const HEADERS = Object.keys(COL).map(function (k) { return COL[k]; });
+const DATE_KEYS = ['instructionsAt', 'deadline', 'reminderAt', 'paidAt', 'paymentConfirmedAt', 'closedAt'];
+
+/** Šifre su iste kao na sajtu i u backendu; nazivi su ono što se vidi u tabeli. */
+const TICKET_TYPES = { SVECANA: 'Svečana', GALERIJA: 'Galerija' };
+const SOURCES = {
+  PREPORUKA: 'Preporuka prijatelja',
+  DRUSTVENE_MREZE: 'Društvene mreže',
+  RANIJI_DOLAZAK: 'Raniji dolazak na bal',
+  SAJT: 'Sajt',
+  EMAIL: 'E-mail',
+  DRUGO: 'Drugo',
+};
+const LOCALES = ['sr', 'sl', 'en'];
+/** Tehnička zaštita od zloupotrebe forme (nije prodajno ograničenje). */
+const MAX_TICKETS_PER_RESERVATION = 100;
+
+/** [ključ, početna vrednost, opis] — upisuje se u tab „Podešavanja" pri prvom pokretanju. */
+const SETTINGS = [
+  ['BOOKING_OPEN', false, 'Označeno = sajt prima nove rezervacije. Isključite kad se mesta popune — već upisane rezervacije ostaju.'],
+  ['BALL_YEAR', '27', 'Dve cifre godine bala, početak broja rezervacije (27 → 27001, 27002…). Promenite pred sledeći bal.'],
+  ['PRICE_SVECANA', 140, 'Cena karte Svečana (EUR). Iznos za uplatu se upisuje automatski kao predlog — pre slanja instrukcija možete ga promeniti.'],
+  ['PRICE_GALERIJA', 70, 'Cena karte Galerija (EUR).'],
+  ['PAYMENT_DAYS', 7, 'Rok za uplatu u danima, računa se od dana slanja instrukcija za uplatu.'],
+  ['GRACE_DAYS', 2, 'Koliko dana posle podsetnika gost još može da plati. Sledećeg dana neplaćena rezervacija prelazi u ISTEKLO.'],
+  ['ADMIN_EMAIL', 'fbozic7@gmail.com', 'Adresa na koju stižu obaveštenja o novim rezervacijama i dnevni izveštaj o rokovima.'],
+  ['REPLY_TO', 'fbozic7@gmail.com', 'Adresa na koju gosti odgovaraju na automatske mejlove.'],
+  ['SENDER_NAME', 'Sretenjski bal', 'Ime pošiljaoca u mejlovima.'],
+  ['GUEST_EMAILS', true, 'Označeno = gost odmah dobija mejl da je rezervacija evidentirana.'],
+  ['CURRENCY', 'EUR', 'Valuta iznosa za uplatu.'],
+  // TODO: privremene vrednosti dok ne stignu pravi podaci za uplatu. Dok u nekoj od njih piše „TODO",
+  // instrukcije za uplatu se ne šalju, a podsetnik ih izostavlja — gost nikad ne dobija izmišljen račun.
+  ['PAYEE', 'TODO: Kulturni centar Sretenje, [ulica i broj], 2000 Maribor', 'Primalac uplate (naziv i adresa) — obavezno za slanje instrukcija za uplatu.'],
+  ['IBAN', 'TODO: SI56 0000 0000 0000 000', 'Broj računa (IBAN) — obavezno za slanje instrukcija za uplatu.'],
+  ['BIC', 'TODO: BIC/SWIFT banke', 'BIC/SWIFT (opciono — obrišite ako nije potreban).'],
+  ['BANK', 'TODO: naziv banke', 'Naziv banke (opciono — obrišite ako nije potreban).'],
+  ['PAYMENT_NOTE', '', 'Dodatna rečenica u instrukcijama za uplatu (opciono).'],
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Web app — poziva ga isključivo backend sajta (sa tajnim ključem)
+// ─────────────────────────────────────────────────────────────────────────────
+
+function doGet() {
+  return json_({ ok: true, service: 'sretenjski-bal-rezervacije' });
+}
+
+function doPost(e) {
+  let req;
+  try {
+    req = JSON.parse(e.postData.contents);
+  } catch (err) {
+    return json_({ ok: false, code: 'BAD_REQUEST' });
+  }
+  if (!checkSecret_(req && req.secret)) return json_({ ok: false, code: 'UNAUTHORIZED' });
+  try {
+    if (req.action === 'status') return json_(getStatus_());
+    if (req.action === 'create') return json_(createReservation_(req.reservation || {}));
+    return json_({ ok: false, code: 'BAD_REQUEST' });
+  } catch (err) {
+    console.error('doPost greška: ' + err.message);
+    return json_({ ok: false, code: 'SERVER_ERROR' });
+  }
+}
+
+function json_(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+}
+
+function checkSecret_(given) {
+  const secret = PropertiesService.getScriptProperties().getProperty('API_SECRET');
+  if (!secret || typeof given !== 'string' || given.length !== secret.length) return false;
+  let diff = 0;
+  for (let i = 0; i < secret.length; i++) diff |= secret.charCodeAt(i) ^ given.charCodeAt(i);
+  return diff === 0;
+}
+
+function getStatus_() {
+  const s = readSettings_();
+  return { ok: true, open: s.bookingOpen };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Nova rezervacija
+// ─────────────────────────────────────────────────────────────────────────────
+
+function createReservation_(input) {
+  const settings = readSettings_();
+  if (!settings.bookingOpen) return { ok: false, code: 'BOOKING_CLOSED' };
+  const invalid = validateReservation_(input);
+  if (invalid.length) return { ok: false, code: 'INVALID', fields: invalid };
+
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(20000)) return { ok: false, code: 'BUSY' };
+  let record;
+  try {
+    const t = openTable_();
+    // Isti zahtev poslat ponovo (npr. posle mrežne greške) — vraćamo već dodeljen broj, bez novog reda i mejlova.
+    const existing = t.rows.filter(function (row) {
+      return String(row[t.idx[COL.requestId]]).trim() === input.requestId;
+    })[0];
+    if (existing) {
+      return { ok: true, duplicate: true, reservationNumber: String(existing[t.idx[COL.number]]).trim() };
+    }
+    record = buildRecord_(input, nextNumber_(t, settings.ballYear), new Date(), settings);
+    appendRecord_(t, record);
+    SpreadsheetApp.flush();
+  } finally {
+    lock.releaseLock();
+  }
+
+  // Rezervacija je trajno upisana. Greška u slanju mejla je ne poništava.
+  const result = { ok: true, duplicate: false, reservationNumber: record.number, adminMailSent: false, guestMailSent: false };
+  const notes = [];
+  try {
+    sendAdminNotification_(record, settings);
+    result.adminMailSent = true;
+    notes.push('Obaveštenje organizatoru poslato.');
+  } catch (err) {
+    console.error('Rezervacija ' + record.number + ': obaveštenje organizatoru nije poslato.');
+    notes.push('Obaveštenje organizatoru NIJE poslato: ' + err.message);
+  }
+  if (settings.guestEmails) {
+    try {
+      sendGuestMail_('received', record, settings);
+      result.guestMailSent = true;
+      notes.push('Potvrda gostu poslata.');
+    } catch (err) {
+      console.error('Rezervacija ' + record.number + ': potvrda gostu nije poslata.');
+      notes.push('Potvrda gostu NIJE poslata: ' + err.message);
+    }
+  }
+  try {
+    updateReservation_(record.number, function () {
+      return { systemNote: stamp_() + ' ' + notes.join(' ') };
+    });
+  } catch (err) {
+    console.error('Rezervacija ' + record.number + ': sistemska napomena nije upisana.');
+  }
+  return result;
+}
+
+/** Druga linija odbrane — backend već proverava sve ovo. Vraća listu neispravnih polja. */
+function validateReservation_(r) {
+  const bad = [];
+  const str = function (v, min, max) {
+    return typeof v === 'string' && v.trim().length >= min && v.trim().length <= max;
+  };
+  if (!str(r.requestId, 8, 64) || !/^[A-Za-z0-9-]+$/.test(r.requestId)) bad.push('requestId');
+  if (!str(r.fullName, 2, 120)) bad.push('fullName');
+  if (!str(r.email, 3, 254) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(r.email)) bad.push('email');
+  if (!str(r.phone, 6, 30)) bad.push('phone');
+  const tickets = Array.isArray(r.tickets) ? r.tickets : [];
+  const seen = {};
+  let total = 0;
+  tickets.forEach(function (t, i) {
+    if (!t || !TICKET_TYPES[t.ticketType] || seen[t.ticketType]) bad.push('tickets.' + i + '.ticketType');
+    if (!t || !(Number.isInteger(t.count) && t.count >= 1)) bad.push('tickets.' + i + '.count');
+    if (t) { seen[t.ticketType] = true; total += Number(t.count) || 0; }
+  });
+  if (!tickets.length || total > MAX_TICKETS_PER_RESERVATION) bad.push('tickets');
+  if (r.diet != null && typeof r.diet !== 'string') bad.push('diet');
+  // Ishrana i alergije su podaci o zdravlju: bez izričite saglasnosti se ne upisuju.
+  if (typeof r.diet === 'string' && r.diet.trim() && r.dietConsent !== true) bad.push('dietConsent');
+  if (!str(r.privacyPolicyVersion, 1, 20)) bad.push('privacyPolicyVersion');
+  const inv = r.invoice || {};
+  if (inv.needed === true) {
+    if (!str(inv.companyName, 2, 200)) bad.push('invoice.companyName');
+    if (!str(inv.companyAddress, 2, 300)) bad.push('invoice.companyAddress');
+    if (COMPANY_COUNTRIES_.indexOf(inv.companyCountry) < 0) bad.push('invoice.companyCountry');
+    if (!isValidTaxId_(inv.companyCountry, inv.taxId)) bad.push('invoice.taxId');
+    if (inv.companyCountry === 'SI' && typeof inv.vatPayer !== 'boolean') bad.push('invoice.vatPayer');
+  }
+  if (!SOURCES[r.source]) bad.push('source');
+  if (LOCALES.indexOf(r.locale) < 0) bad.push('locale');
+  return bad;
+}
+
+/**
+ * Sledeći broj za godinu bala: veći od najvećeg broja u tabeli i od zapamćenog brojača
+ * (brojač sprečava ponovnu upotrebu broja ako se poslednji red obriše). Poziva se samo pod zaključavanjem.
+ */
+function nextNumber_(t, ballYear) {
+  const props = PropertiesService.getScriptProperties();
+  const key = 'COUNTER_' + ballYear;
+  let max = Number(props.getProperty(key)) || 0;
+  t.rows.forEach(function (row) {
+    const n = String(row[t.idx[COL.number]]).trim();
+    if (/^\d{5,}$/.test(n) && n.indexOf(ballYear) === 0) max = Math.max(max, Number(n.slice(2)));
+  });
+  const next = max + 1;
+  props.setProperty(key, String(next));
+  return ballYear + String(next).padStart(3, '0');
+}
+
+const COMPANY_COUNTRIES_ = ['SI', 'EU', 'OTHER'];
+const COMPANY_COUNTRY_LABELS_ = { SI: 'Slovenija', EU: 'Druga država EU', OTHER: 'Izvan EU' };
+
+/** Ista pravila kao isValidTaxId u backend/src/reservations/reservation.dto.ts. */
+function isValidTaxId_(country, taxId) {
+  const raw = typeof taxId === 'string' ? taxId : '';
+  const v = raw.replace(/[\s.-]/g, '').toUpperCase();
+  if (country === 'SI') return /^(SI)?\d{8}$/.test(v);
+  if (country === 'EU') return /^[A-Z]{2}[0-9A-Z+*]{2,12}$/.test(v) && v.indexOf('SI') !== 0;
+  return raw.trim().length >= 2 && raw.trim().length <= 40;
+}
+
+/** Podaci firme za fakturu, u jednoj ćeliji. Napomena o DDV-u pomaže knjigovođi da odmah vidi o kakvom je obračunu reč. */
+function companyDetails_(inv) {
+  const country = inv.companyCountry;
+  const taxLabel = country === 'SI' ? 'Davčna številka / ID za DDV' : country === 'EU' ? 'ID za DDV' : 'Poreski broj';
+  const lines = [
+    'Naziv: ' + clean_(inv.companyName),
+    'Sedež: ' + clean_(inv.companyAddress),
+    'Država: ' + (COMPANY_COUNTRY_LABELS_[country] || ''),
+    taxLabel + ': ' + clean_(inv.taxId).toUpperCase(),
+  ];
+  if (country === 'SI') lines.push('Obveznik DDV: ' + (inv.vatPayer === true ? 'DA' : 'NE'));
+  if (country === 'EU') lines.push('Obračun: reverse charge (0 % DDV) ako je ID za DDV važeći u VIES');
+  if (country === 'OTHER') lines.push('Obračun: izvan EU, proveriti sa računovođom');
+  return lines.join('\n');
+}
+
+function buildRecord_(r, number, now, settings) {
+  const inv = r.invoice || {};
+  const utm = r.utm || {};
+  return {
+    number: number,
+    createdAt: now,
+    status: STATUS.NEW,
+    fullName: clean_(r.fullName),
+    email: clean_(r.email).toLowerCase(),
+    phone: clean_(r.phone),
+    ticketType: ticketSummary_(r.tickets),
+    ticketCount: r.tickets.reduce(function (sum, t) { return sum + t.count; }, 0),
+    amount: suggestedAmount_(r.tickets, settings.prices),
+    invoice: inv.needed === true ? 'DA' : 'NE',
+    company: inv.needed === true
+      ? companyDetails_(inv)
+      : '',
+    diet: clean_(r.diet || '', true),
+    note: clean_(r.note || '', true),
+    source: SOURCES[r.source],
+    sourceOther: r.source === 'DRUGO' ? clean_(r.sourceOther || '') : '',
+    locale: r.locale,
+    pageUrl: clean_(r.pageUrl || '').slice(0, 500),
+    utm: Object.keys(utm).filter(function (k) { return utm[k]; }).map(function (k) { return 'utm_' + k + '=' + clean_(String(utm[k])).slice(0, 100); }).join('; '),
+    consent: 'Politika privatnosti v' + clean_(r.privacyPolicyVersion) + (String(r.diet || '').trim() ? '; ishrana: izričita saglasnost data' : '; ishrana: nije navedena'),
+    requestId: r.requestId,
+  };
+}
+
+/** „Svečana" ili, kad se kasnije budu kombinovali tipovi, „Svečana ×2, Galerija ×1". */
+function ticketSummary_(tickets) {
+  if (tickets.length === 1) return TICKET_TYPES[tickets[0].ticketType];
+  return tickets.map(function (t) { return TICKET_TYPES[t.ticketType] + ' ×' + t.count; }).join(', ');
+}
+
+/** Običan tekst: bez HTML-a i kontrolnih znakova. */
+function clean_(v, multiline) {
+  let s = String(v == null ? '' : v).replace(/<[^>]*>/g, '');
+  s = multiline
+    ? s.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '').replace(/\r\n?/g, '\n')
+    : s.replace(/[\u0000-\u001F\u007F]/g, ' ').replace(/\s+/g, ' ');
+  return s.trim();
+}
+
+/** Tekst koji počinje sa = + - @ tabela bi protumačila kao formulu — apostrof ga čuva kao običan tekst. */
+function safeCell_(v) {
+  if (typeof v !== 'string') return v;
+  return /^[=+\-@\t\r]/.test(v) ? "'" + v : v;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Tabela
+// ─────────────────────────────────────────────────────────────────────────────
+
+function spreadsheet_() {
+  return SpreadsheetApp.getActiveSpreadsheet() || SpreadsheetApp.openById(SPREADSHEET_ID);
+}
+
+function openTable_() {
+  const sheet = spreadsheet_().getSheetByName(SHEET_RESERVATIONS);
+  if (!sheet) throw new Error('Nema taba „' + SHEET_RESERVATIONS + '". Pokrenite meni Sretenjski bal → Podesi tabelu.');
+  addMissingColumns_(sheet);
+  const values = sheet.getDataRange().getValues();
+  const header = (values[0] || []).map(function (h) { return String(h).trim(); });
+  const idx = {};
+  header.forEach(function (h, i) { if (h && !(h in idx)) idx[h] = i; });
+  return { sheet: sheet, header: header, idx: idx, rows: values.slice(1) };
+}
+
+/** Nova kolona (npr. posle izmene skripte) dodaje se na kraj zaglavlja; postojeće se ne diraju. */
+function addMissingColumns_(sheet) {
+  const lastCol = sheet.getLastColumn();
+  const existing = lastCol ? sheet.getRange(1, 1, 1, lastCol).getValues()[0].map(function (h) { return String(h).trim(); }) : [];
+  const missing = HEADERS.filter(function (h) { return existing.indexOf(h) < 0; });
+  if (missing.length) sheet.getRange(1, existing.length + 1, 1, missing.length).setValues([missing]);
+}
+
+function rowToObj_(t, row) {
+  const o = {};
+  Object.keys(COL).forEach(function (k) { o[k] = row[t.idx[COL[k]]]; });
+  return o;
+}
+
+/** Broj reda u tabeli (od 1) za broj rezervacije, ili -1. */
+function findRow_(t, number) {
+  for (let i = 0; i < t.rows.length; i++) {
+    if (String(t.rows[i][t.idx[COL.number]]).trim() === String(number)) return i + 2;
+  }
+  return -1;
+}
+
+function appendRecord_(t, record) {
+  const byHeader = {};
+  Object.keys(record).forEach(function (k) { byHeader[COL[k]] = record[k]; });
+  t.sheet.appendRow(t.header.map(function (h) { return h in byHeader ? safeCell_(byHeader[h]) : ''; }));
+}
+
+function writeFields_(t, rowNumber, fields) {
+  Object.keys(fields).forEach(function (k) {
+    t.sheet.getRange(rowNumber, t.idx[COL[k]] + 1).setValue(safeCell_(fields[k]));
+  });
+}
+
+/**
+ * Bezbedna izmena jednog reda: pod zaključavanjem ponovo pronalazi red po broju rezervacije
+ * (red se mogao pomeriti ako je neko sortirao tabelu). fn(rezervacija) vraća polja za upis ili null.
+ */
+function updateReservation_(number, fn) {
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(30000)) throw new Error('Tabela je zauzeta, pokušajte ponovo.');
+  try {
+    const t = openTable_();
+    const rowNumber = findRow_(t, number);
+    if (rowNumber < 0) throw new Error('Rezervacija ' + number + ' nije pronađena.');
+    const r = rowToObj_(t, t.rows[rowNumber - 2]);
+    const fields = fn(r);
+    if (fields) writeFields_(t, rowNumber, fields);
+    return r;
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Podešavanja
+// ─────────────────────────────────────────────────────────────────────────────
+
+function readSettings_() {
+  const raw = {};
+  const sheet = spreadsheet_().getSheetByName(SHEET_SETTINGS);
+  if (sheet) {
+    sheet.getDataRange().getValues().slice(1).forEach(function (row) {
+      const key = String(row[0]).trim();
+      if (key) raw[key] = row[1];
+    });
+  }
+  return normalizeSettings_(raw);
+}
+
+function normalizeSettings_(raw) {
+  const def = {};
+  SETTINGS.forEach(function (s) { def[s[0]] = s[1]; });
+  const get = function (k) { return raw[k] === undefined || raw[k] === '' || raw[k] === null ? def[k] : raw[k]; };
+  // Podaci za uplatu: obrisano polje ostaje prazno (početna vrednost važi samo kad red ne postoji).
+  const text = function (k) { return String(raw[k] === undefined || raw[k] === null ? def[k] : raw[k]).trim(); };
+  const int = function (k, min, max) {
+    const n = parseInt(get(k), 10);
+    return isNaN(n) ? def[k] : Math.min(max, Math.max(min, n));
+  };
+  const digits = String(get('BALL_YEAR')).replace(/\D/g, '');
+  return {
+    // Bez taba „Podešavanja" rezervacije su zatvorene — bezbedno podrazumevano stanje.
+    bookingOpen: raw.BOOKING_OPEN === undefined ? false : toBool_(raw.BOOKING_OPEN),
+    ballYear: digits.length >= 2 ? digits.slice(-2) : String(def.BALL_YEAR),
+    prices: prices_(raw, def),
+    paymentDays: int('PAYMENT_DAYS', 1, 60),
+    graceDays: int('GRACE_DAYS', 0, 60),
+    adminEmail: String(get('ADMIN_EMAIL')).trim(),
+    replyTo: String(get('REPLY_TO')).trim(),
+    senderName: String(get('SENDER_NAME')).trim(),
+    guestEmails: toBool_(get('GUEST_EMAILS')),
+    currency: String(get('CURRENCY')).trim(),
+    payee: text('PAYEE'),
+    iban: text('IBAN'),
+    bic: text('BIC'),
+    bank: text('BANK'),
+    paymentNote: text('PAYMENT_NOTE'),
+  };
+}
+
+/** Cena po šifri tipa karte iz redova PRICE_<ŠIFRA>; 0 = cena nije podešena. */
+function prices_(raw, def) {
+  const out = {};
+  Object.keys(TICKET_TYPES).forEach(function (code) {
+    const k = 'PRICE_' + code;
+    const v = raw[k] === undefined || raw[k] === null ? def[k] : raw[k];
+    const n = Number(String(v).replace(',', '.'));
+    out[code] = n > 0 ? n : 0;
+  });
+  return out;
+}
+
+/** Predlog iznosa po cenama iz podešavanja, ili '' ako za neki tip cena nije podešena. */
+function suggestedAmount_(tickets, prices) {
+  let sum = 0;
+  for (let i = 0; i < tickets.length; i++) {
+    const p = prices[tickets[i].ticketType];
+    if (!(p > 0)) return '';
+    sum += p * tickets[i].count;
+  }
+  return sum;
+}
+
+function toBool_(v) {
+  if (v === true || v === 1) return true;
+  return ['true', 'da', 'yes', '1', 'x', 'otvoreno'].indexOf(String(v).trim().toLowerCase()) >= 0;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Datumi
+// ─────────────────────────────────────────────────────────────────────────────
+
+function sheetTimeZone_() {
+  try {
+    return spreadsheet_().getSpreadsheetTimeZone() || TIME_ZONE;
+  } catch (err) {
+    return TIME_ZONE;
+  }
+}
+
+/** Datum iz ćelije: pravi datum ili tekst „25.11.2026" / „2026-11-25". Inače null. */
+function parseDate_(v) {
+  if (v instanceof Date) return isNaN(v.getTime()) ? null : v;
+  const s = String(v == null ? '' : v).trim();
+  let m = /^(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})\.?$/.exec(s);
+  if (m) return new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]));
+  m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+  if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  return null;
+}
+
+/** 'yyyy-MM-dd' u vremenskoj zoni tabele — poredimo dane, ne sate. */
+function dayKey_(date, tz) {
+  return Utilities.formatDate(date, tz, 'yyyy-MM-dd');
+}
+
+function addDaysKey_(key, days) {
+  const p = key.split('-').map(Number);
+  const d = new Date(Date.UTC(p[0], p[1] - 1, p[2] + days));
+  return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0') + '-' + String(d.getUTCDate()).padStart(2, '0');
+}
+
+/** 'yyyy-MM-dd' → '25.11.2026' */
+function formatKey_(key) {
+  const p = key.split('-');
+  return p[2] + '.' + p[1] + '.' + p[0];
+}
+
+function stamp_() {
+  return Utilities.formatDate(new Date(), sheetTimeZone_(), 'dd.MM.yyyy HH:mm');
+}
+
+/** Datum od kog važi rok: današnji dan + n dana, kao datum (ponoć) u vremenskoj zoni skripte. */
+function dateFromKey_(key) {
+  const p = key.split('-').map(Number);
+  return new Date(p[0], p[1] - 1, p[2]);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Rokovi: podsetnik i isticanje
+// ─────────────────────────────────────────────────────────────────────────────
+
+function isPaid_(r) {
+  return normStatus_(r.status) === STATUS.PAID || parseDate_(r.paidAt) !== null;
+}
+
+function normStatus_(s) {
+  return String(s == null ? '' : s).trim().toUpperCase();
+}
+
+/**
+ * Šta dnevna provera treba da uradi sa rezervacijom: { action: 'REMIND' | 'EXPIRE' | null, problem }.
+ *  - REMIND: status ČEKA NA UPLATU, instrukcije poslate, rok unet i prošao, podsetnik još nije slat.
+ *  - EXPIRE: status PODSETNIK POSLAT, podsetnik zaista poslat i prošao je ceo period tolerancije.
+ * Plaćene, otkazane, istekle i rezervacije bez roka se nikad ne diraju.
+ */
+function decideAction_(r, todayKey, graceDays, tz) {
+  const status = normStatus_(r.status);
+  if (isPaid_(r) || status === STATUS.EXPIRED || status === STATUS.CANCELLED) return { action: null };
+
+  if (status === STATUS.AWAITING) {
+    if (parseDate_(r.reminderAt)) return { action: null };
+    const sentAt = parseDate_(r.instructionsAt);
+    const deadline = parseDate_(r.deadline);
+    if (!sentAt || !deadline) {
+      return { action: null, problem: 'status je ČEKA NA UPLATU, ali nedostaje datum slanja instrukcija ili rok za uplatu — podsetnik se ne šalje automatski.' };
+    }
+    if (todayKey <= dayKey_(deadline, tz)) return { action: null };
+    if (!String(r.email || '').trim()) return { action: null, problem: 'rok je prošao, ali nema e-mail adrese za podsetnik.' };
+    return { action: 'REMIND' };
+  }
+
+  if (status === STATUS.REMINDED) {
+    const remindedAt = parseDate_(r.reminderAt);
+    if (!remindedAt) {
+      return { action: null, problem: 'status je PODSETNIK POSLAT, ali datum slanja podsetnika nije upisan — rezervacija ne ističe automatski.' };
+    }
+    // Gost može da plati zaključno sa danom podsetnik + period tolerancije; ističe sledećeg dana.
+    if (todayKey > addDaysKey_(dayKey_(remindedAt, tz), graceDays)) return { action: 'EXPIRE' };
+  }
+  return { action: null };
+}
+
+/** Pokreće se svakog jutra (okidač iz menija „Uključi dnevnu proveru rokova"), a može i ručno iz menija. */
+function dailyCheck() {
+  const settings = readSettings_();
+  const tz = sheetTimeZone_();
+  const today = dayKey_(new Date(), tz);
+  const report = { reminded: [], expired: [], problems: [] };
+
+  const t = openTable_();
+  t.rows.forEach(function (row) {
+    const r = rowToObj_(t, row);
+    const number = String(r.number == null ? '' : r.number).trim();
+    if (!number) return;
+    const d = decideAction_(r, today, settings.graceDays, tz);
+    if (d.problem) report.problems.push(number + ': ' + d.problem);
+    if (d.action) processDeadline_(number, d.action, settings, tz, today, report);
+  });
+
+  if (report.reminded.length || report.expired.length || report.problems.length) {
+    try {
+      sendAdminDigest_(report, settings);
+    } catch (err) {
+      console.error('Dnevni izveštaj nije poslat: ' + err.message);
+    }
+  }
+  console.log('Provera rokova: podsetnika ' + report.reminded.length + ', isteklo ' + report.expired.length + ', upozorenja ' + report.problems.length);
+  return report;
+}
+
+function processDeadline_(number, action, settings, tz, today, report) {
+  try {
+    updateReservation_(number, function (r) {
+      // Ponovna provera pod zaključavanjem — sprečava dupli podsetnik ako se provera pokrene dvaput.
+      if (decideAction_(r, today, settings.graceDays, tz).action !== action) return null;
+      if (action === 'REMIND') {
+        try {
+          sendGuestMail_('reminder', r, settings, { expiresOn: formatKey_(addDaysKey_(today, settings.graceDays)) });
+        } catch (err) {
+          // Bez poslatog podsetnika status se ne menja, pa mesto ne može da se oslobodi.
+          report.problems.push(number + ': podsetnik NIJE poslat (' + err.message + '), status nije menjan.');
+          return null;
+        }
+        report.reminded.push(number);
+        return { reminderAt: new Date(), status: STATUS.REMINDED };
+      }
+      report.expired.push(number);
+      return {
+        status: STATUS.EXPIRED,
+        closedAt: new Date(),
+        systemNote: stamp_() + ' Isteklo automatski — uplata nije evidentirana ' + settings.graceDays + ' dana posle podsetnika.',
+      };
+    });
+  } catch (err) {
+    report.problems.push(number + ': ' + err.message);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Instrukcije za uplatu i potvrda uplate (pokreće osoba zadužena za karte iz menija)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Zašto instrukcije ne mogu da se pošalju, ili null. */
+function instructionsBlocker_(r, settings) {
+  const status = normStatus_(r.status);
+  if (isPaid_(r) || [STATUS.EXPIRED, STATUS.CANCELLED].indexOf(status) >= 0) {
+    return 'Rezervacija ima status ' + (status || 'PLAĆENO') + ' — instrukcije se ne šalju.';
+  }
+  if (!(Number(r.amount) > 0)) return 'Upišite iznos u kolonu „' + COL.amount + '".';
+  if (!settings.payee || !settings.iban) return 'U tabu „' + SHEET_SETTINGS + '" popunite PAYEE i IBAN.';
+  const todo = paymentTodo_(settings);
+  if (todo.length) return 'U tabu „' + SHEET_SETTINGS + '" još piše TODO za: ' + todo.join(', ') + '. Upišite prave podatke za uplatu (ili obrišite opciona polja).';
+  if (!String(r.email || '').trim()) return 'Rezervacija nema e-mail adresu.';
+  return null;
+}
+
+/** Podešavanja za uplatu u kojima još stoji privremena vrednost sa „TODO". */
+function paymentTodo_(settings) {
+  const keys = { PAYEE: settings.payee, IBAN: settings.iban, BIC: settings.bic, BANK: settings.bank, PAYMENT_NOTE: settings.paymentNote };
+  return Object.keys(keys).filter(function (k) { return /todo/i.test(keys[k]); });
+}
+
+/** Podaci za uplatu su pravi i potpuni — tek tada idu u mejl gostu. */
+function paymentDetailsReady_(settings) {
+  return Boolean(settings.payee && settings.iban) && paymentTodo_(settings).length === 0;
+}
+
+/** Šalje instrukcije i upisuje datum slanja, rok i status ČEKA NA UPLATU. */
+function sendPaymentInstructionsFor_(number) {
+  const settings = readSettings_();
+  const tz = sheetTimeZone_();
+  let deadlineText = '';
+  updateReservation_(number, function (r) {
+    const blocker = instructionsBlocker_(r, settings);
+    if (blocker) throw new Error(blocker);
+    const existing = parseDate_(r.deadline);
+    const deadline = existing || dateFromKey_(addDaysKey_(dayKey_(new Date(), tz), settings.paymentDays));
+    deadlineText = Utilities.formatDate(deadline, tz, 'dd.MM.yyyy');
+    sendGuestMail_('instructions', r, settings, { deadline: deadlineText });
+    const fields = { instructionsAt: new Date(), deadline: deadline };
+    if (normStatus_(r.status) !== STATUS.REMINDED) fields.status = STATUS.AWAITING;
+    return fields;
+  });
+  return deadlineText;
+}
+
+/** Šalje potvrdu uplate samo za PLAĆENO i samo jednom (datum slanja se upisuje). */
+function sendPaymentConfirmationFor_(number) {
+  const settings = readSettings_();
+  updateReservation_(number, function (r) {
+    if (normStatus_(r.status) !== STATUS.PAID) throw new Error('Prvo promenite status u ' + STATUS.PAID + '.');
+    if (parseDate_(r.paymentConfirmedAt)) throw new Error('Potvrda uplate je već poslata. Da biste je poslali ponovo, obrišite datum u koloni „' + COL.paymentConfirmedAt + '".');
+    if (!String(r.email || '').trim()) throw new Error('Rezervacija nema e-mail adresu.');
+    sendGuestMail_('paid', r, settings);
+    const fields = { paymentConfirmedAt: new Date() };
+    if (!parseDate_(r.paidAt)) fields.paidAt = new Date();
+    return fields;
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Mejlovi
+// ─────────────────────────────────────────────────────────────────────────────
+
+const MAIL = {
+  sr: {
+    greeting: function (n) { return 'Dobar dan, ' + n + ','; },
+    signoff: ['Srdačan pozdrav,', 'Sretenjski bal'],
+    labels: { number: 'Broj rezervacije', ticketType: 'Tip karte', ticketCount: 'Broj karata', diet: 'Ishrana i alergije', amount: 'Iznos za uplatu', deadline: 'Rok za uplatu', payee: 'Primalac', iban: 'IBAN', bic: 'BIC/SWIFT', bank: 'Banka', purpose: 'Svrha uplate' },
+    received: {
+      subject: function (n) { return 'Sretenjski bal — rezervacija ' + n + ' je evidentirana'; },
+      intro: ['Hvala vam na rezervaciji za Sretenjski bal. Vaš zahtev je evidentiran pod brojem rezervacije navedenim ispod.'],
+      outro: function (n) {
+        return [
+          'Javićemo vam se u roku od 3 dana sa detaljima za uplatu.',
+          'Sačuvajte broj rezervacije i navedite ga prilikom uplate, u svrsi uplate: „Sretenjski bal ' + n + '".',
+          'Ako imate pitanja ili želite nešto da izmenite, samo odgovorite na ovaj mejl.',
+        ];
+      },
+    },
+    instructions: {
+      subject: function (n) { return 'Sretenjski bal — instrukcije za uplatu, rezervacija ' + n; },
+      intro: ['pregledali smo vašu rezervaciju. U nastavku su iznos i podaci za uplatu.'],
+      outro: function (n, x) {
+        return [
+          'Molimo vas da uplatu izvršite najkasnije do ' + x.deadline + ' i da u svrsi uplate obavezno navedete „Sretenjski bal ' + n + '", kako bismo uplatu povezali sa vašom rezervacijom.',
+          'Kada uplatu evidentiramo na izvodu, poslaćemo vam potvrdu.',
+          'Ako imate pitanja, samo odgovorite na ovaj mejl.',
+        ];
+      },
+    },
+    reminder: {
+      subject: function (n) { return 'Sretenjski bal — podsetnik za uplatu, rezervacija ' + n; },
+      intro: ['ljubazno vas podsećamo da uplatu za vašu rezervaciju još nismo evidentirali, a rok za uplatu je istekao.'],
+      outro: function (n, x) {
+        return [
+          'Ako uplata ne bude evidentirana do ' + x.expiresOn + ', rezervacija ističe i mesta se oslobađaju.',
+          'Ako ste uplatu već izvršili, a ona još nije vidljiva na našem izvodu, samo odgovorite na ovaj mejl — proverićemo i javiti vam se.',
+          'U svrsi uplate navedite „Sretenjski bal ' + n + '".',
+        ];
+      },
+    },
+    paid: {
+      subject: function (n) { return 'Sretenjski bal — uplata za rezervaciju ' + n + ' je evidentirana'; },
+      intro: ['potvrđujemo da je uplata za vašu rezervaciju evidentirana. Hvala vam!'],
+      outro: function () { return ['Radujemo se vašem dolasku na Sretenjski bal.', 'Ako imate pitanja, samo odgovorite na ovaj mejl.']; },
+    },
+  },
+  sl: {
+    greeting: function (n) { return 'Pozdravljeni, ' + n + ','; },
+    signoff: ['Lep pozdrav,', 'Sretenjski bal'],
+    labels: { number: 'Številka rezervacije', ticketType: 'Vrsta vstopnice', ticketCount: 'Število vstopnic', diet: 'Prehrana in alergije', amount: 'Znesek za plačilo', deadline: 'Rok plačila', payee: 'Prejemnik', iban: 'IBAN', bic: 'BIC/SWIFT', bank: 'Banka', purpose: 'Namen plačila' },
+    received: {
+      subject: function (n) { return 'Sretenjski bal — rezervacija ' + n + ' je evidentirana'; },
+      intro: ['hvala za rezervacijo za Sretenjski bal. Vaša zahteva je evidentirana pod spodnjo številko rezervacije.'],
+      outro: function (n) {
+        return [
+          'V 3 dneh vam bomo poslali podatke za plačilo.',
+          'Shranite številko rezervacije in jo navedite pri plačilu, v namenu plačila: »Sretenjski bal ' + n + '«.',
+          'Če imate vprašanja ali želite kaj spremeniti, preprosto odgovorite na to sporočilo.',
+        ];
+      },
+    },
+    instructions: {
+      subject: function (n) { return 'Sretenjski bal — navodila za plačilo, rezervacija ' + n; },
+      intro: ['pregledali smo vašo rezervacijo. Spodaj sta znesek in podatki za plačilo.'],
+      outro: function (n, x) {
+        return [
+          'Prosimo, da plačilo izvedete najpozneje do ' + x.deadline + ' in v namenu plačila obvezno navedete »Sretenjski bal ' + n + '«, da ga bomo lahko povezali z vašo rezervacijo.',
+          'Ko bo plačilo vidno na izpisku, vam bomo poslali potrditev.',
+          'Če imate vprašanja, preprosto odgovorite na to sporočilo.',
+        ];
+      },
+    },
+    reminder: {
+      subject: function (n) { return 'Sretenjski bal — opomnik za plačilo, rezervacija ' + n; },
+      intro: ['prijazno vas opominjamo, da plačila za vašo rezervacijo še nismo prejeli, rok plačila pa je potekel.'],
+      outro: function (n, x) {
+        return [
+          'Če plačilo do ' + x.expiresOn + ' ne bo evidentirano, rezervacija poteče in mesta se sprostijo.',
+          'Če ste plačilo že izvedli, vendar še ni vidno na našem izpisku, preprosto odgovorite na to sporočilo — preverili bomo in se vam oglasili.',
+          'V namen plačila navedite »Sretenjski bal ' + n + '«.',
+        ];
+      },
+    },
+    paid: {
+      subject: function (n) { return 'Sretenjski bal — plačilo za rezervacijo ' + n + ' je evidentirano'; },
+      intro: ['potrjujemo, da je plačilo za vašo rezervacijo evidentirano. Hvala!'],
+      outro: function () { return ['Veselimo se vašega obiska na Sretenjskem balu.', 'Če imate vprašanja, preprosto odgovorite na to sporočilo.']; },
+    },
+  },
+  en: {
+    greeting: function (n) { return 'Dear ' + n + ','; },
+    signoff: ['Kind regards,', 'Sretenjski bal'],
+    labels: { number: 'Reservation number', ticketType: 'Ticket type', ticketCount: 'Number of tickets', diet: 'Dietary requirements', amount: 'Amount due', deadline: 'Payment deadline', payee: 'Payee', iban: 'IBAN', bic: 'BIC/SWIFT', bank: 'Bank', purpose: 'Payment reference' },
+    received: {
+      subject: function (n) { return 'Sretenjski bal — reservation ' + n + ' received'; },
+      intro: ['thank you for your reservation for Sretenjski bal. Your request has been recorded under the reservation number below.'],
+      outro: function (n) {
+        return [
+          'We will contact you within 3 days with the payment details.',
+          'Please keep your reservation number and quote it when paying, as the payment reference: "Sretenjski bal ' + n + '".',
+          'If you have any questions or would like to change something, simply reply to this email.',
+        ];
+      },
+    },
+    instructions: {
+      subject: function (n) { return 'Sretenjski bal — payment instructions, reservation ' + n; },
+      intro: ['we have reviewed your reservation. The amount and payment details are below.'],
+      outro: function (n, x) {
+        return [
+          'Please make the payment by ' + x.deadline + ' and be sure to use the payment reference "Sretenjski bal ' + n + '" so we can match it to your reservation.',
+          'Once the payment appears on our bank statement, we will send you a confirmation.',
+          'If you have any questions, simply reply to this email.',
+        ];
+      },
+    },
+    reminder: {
+      subject: function (n) { return 'Sretenjski bal — payment reminder, reservation ' + n; },
+      intro: ['this is a friendly reminder that we have not yet recorded the payment for your reservation, and the payment deadline has passed.'],
+      outro: function (n, x) {
+        return [
+          'If the payment is not recorded by ' + x.expiresOn + ', the reservation will expire and the seats will be released.',
+          'If you have already paid but the payment is not yet visible on our bank statement, simply reply to this email — we will check and get back to you.',
+          'Please use the payment reference "Sretenjski bal ' + n + '".',
+        ];
+      },
+    },
+    paid: {
+      subject: function (n) { return 'Sretenjski bal — payment for reservation ' + n + ' received'; },
+      intro: ['we confirm that the payment for your reservation has been recorded. Thank you!'],
+      outro: function () { return ['We look forward to welcoming you at Sretenjski bal.', 'If you have any questions, simply reply to this email.']; },
+    },
+  },
+};
+
+/** Nazivi tipova karata u mejlovima gostima (u tabeli su uvek na srpskom). */
+const TICKET_TYPE_TRANSLATIONS = {
+  sl: { Svečana: 'Svečana vstopnica' },
+  en: { Svečana: 'Gala', Galerija: 'Gallery' },
+};
+
+function localizeTickets_(text, lang) {
+  const map = TICKET_TYPE_TRANSLATIONS[lang] || {};
+  return Object.keys(map).reduce(function (s, k) { return s.split(k).join(map[k]); }, String(text || ''));
+}
+
+function formatAmount_(v, currency, lang) {
+  const s = Number(v).toFixed(2);
+  return lang === 'en' ? currency + ' ' + s : s.replace('.', ',') + ' ' + currency;
+}
+
+/** Mejl gostu na jeziku na kom je popunio formu. kind: received | instructions | reminder | paid */
+function sendGuestMail_(kind, r, settings, extra) {
+  const lang = MAIL[r.locale] ? r.locale : 'sr';
+  const m = MAIL[lang];
+  const k = m[kind];
+  const n = String(r.number).trim();
+  const x = extra || {};
+  const details = [
+    [m.labels.ticketType, localizeTickets_(r.ticketType, lang)],
+    [m.labels.ticketCount, String(r.ticketCount)],
+  ];
+  if (kind === 'received' && String(r.diet || '').trim()) details.push([m.labels.diet, String(r.diet)]);
+  if (kind === 'instructions' || kind === 'reminder') {
+    if (Number(r.amount) > 0) details.push([m.labels.amount, formatAmount_(r.amount, settings.currency, lang)]);
+    if (kind === 'instructions') details.push([m.labels.deadline, x.deadline]);
+    // Podsetnik može da ide i kad su instrukcije poslate ručno — bez pravih podataka za uplatu izostavljamo ih.
+    if (paymentDetailsReady_(settings)) {
+      details.push([m.labels.payee, settings.payee], [m.labels.iban, settings.iban]);
+      if (settings.bic) details.push([m.labels.bic, settings.bic]);
+      if (settings.bank) details.push([m.labels.bank, settings.bank]);
+    }
+    details.push([m.labels.purpose, 'Sretenjski bal ' + n]);
+  }
+  const outro = k.outro(n, x);
+  if (kind === 'instructions' && settings.paymentNote) outro.splice(1, 0, settings.paymentNote);
+
+  const mail = renderMail_({
+    greeting: m.greeting(String(r.fullName).trim()),
+    intro: k.intro,
+    highlight: [m.labels.number, n],
+    details: details,
+    outro: outro,
+    signoff: m.signoff,
+  });
+  MailApp.sendEmail({
+    to: String(r.email).trim(),
+    subject: k.subject(n),
+    body: mail.text,
+    htmlBody: mail.html,
+    name: settings.senderName,
+    replyTo: settings.replyTo,
+  });
+}
+
+function sendAdminNotification_(r, settings) {
+  const ss = spreadsheet_();
+  const sheet = ss.getSheetByName(SHEET_RESERVATIONS);
+  const link = ss.getUrl() + (sheet ? '#gid=' + sheet.getSheetId() : '');
+  const tz = sheetTimeZone_();
+  const details = [
+    ['Vreme prijave', Utilities.formatDate(r.createdAt, tz, 'dd.MM.yyyy HH:mm')],
+    ['Ime i prezime', r.fullName],
+    ['E-mail', r.email],
+    ['Telefon', r.phone],
+    ['Tip karte', r.ticketType],
+    ['Broj karata', String(r.ticketCount)],
+    ['ISHRANA I ALERGIJE', r.diet || '—'],
+    ['Iznos (po cenama iz podešavanja)', r.amount ? formatAmount_(r.amount, settings.currency, 'sr') : 'cena nije podešena — upišite iznos u tabelu'],
+    ['Faktura na firmu', r.invoice],
+  ];
+  if (r.company) details.push(['Podaci firme', r.company]);
+  details.push(
+    ['Napomena', r.note || '—'],
+    ['Izvor prijave', r.source + (r.sourceOther ? ' — ' + r.sourceOther : '')],
+    ['Jezik forme', r.locale],
+  );
+  if (r.utm) details.push(['UTM', r.utm]);
+
+  const mail = renderMail_({
+    greeting: 'Nova rezervacija sa sajta.',
+    intro: [],
+    highlight: ['Broj rezervacije', r.number],
+    details: details,
+    outro: ['Sledeći korak: proverite iznos u tabeli (po potrebi ga promenite), pa iz menija „Sretenjski bal" pošaljite instrukcije za uplatu.', 'Tabela: ' + link],
+    signoff: [],
+  });
+  MailApp.sendEmail({
+    to: settings.adminEmail,
+    subject: 'Nova rezervacija za Sretenjski bal — ' + r.number + (r.diet ? ' · posebna ishrana' : ''),
+    body: mail.text,
+    htmlBody: mail.html,
+    name: settings.senderName,
+    replyTo: r.email, // „Odgovori" ide direktno gostu
+  });
+}
+
+function sendAdminDigest_(report, settings) {
+  const lines = [];
+  if (report.reminded.length) lines.push('Poslat podsetnik (status → ' + STATUS.REMINDED + '): ' + report.reminded.join(', '));
+  if (report.expired.length) lines.push('Isteklo, mesta oslobođena (status → ' + STATUS.EXPIRED + '): ' + report.expired.join(', '));
+  if (report.problems.length) lines.push('Potrebna provera:\n- ' + report.problems.join('\n- '));
+  lines.push('Tabela: ' + spreadsheet_().getUrl());
+  MailApp.sendEmail({
+    to: settings.adminEmail,
+    subject: 'Sretenjski bal — provera rokova: ' + report.reminded.length + ' podsetnik(a), ' + report.expired.length + ' isteklo',
+    body: lines.join('\n\n'),
+    name: settings.senderName,
+  });
+}
+
+/** Isti sadržaj kao običan tekst i kao jednostavan HTML u bojama sajta. */
+function renderMail_(m) {
+  const text = [m.greeting, '']
+    .concat(m.intro.length ? m.intro.concat(['']) : [])
+    .concat([m.highlight[0] + ': ' + m.highlight[1], ''])
+    .concat(m.details.map(function (d) { return d[0] + ':' + (String(d[1]).indexOf('\n') >= 0 ? '\n' : ' ') + d[1]; }))
+    .concat([''])
+    .concat(m.outro)
+    .concat(m.signoff.length ? [''].concat(m.signoff) : [])
+    .join('\n');
+
+  const esc = function (s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/\n/g, '<br>');
+  };
+  const p = function (s) { return '<p style="margin:0 0 14px">' + esc(s) + '</p>'; };
+  const rows = m.details.map(function (d) {
+    return '<tr><td style="padding:6px 16px 6px 0;color:#5b4f48;vertical-align:top;white-space:nowrap">' + esc(d[0]) +
+      '</td><td style="padding:6px 0;vertical-align:top">' + esc(d[1]) + '</td></tr>';
+  }).join('');
+  const html =
+    '<div style="background:#eee7da;padding:24px 12px;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:#171413">' +
+    '<div style="max-width:560px;margin:0 auto;background:#f6f1e8;padding:32px 28px;border-top:3px solid #5a1723">' +
+    '<p style="margin:0 0 20px;font-family:Georgia,serif;font-size:22px;color:#5a1723">Sretenjski bal</p>' +
+    p(m.greeting) + m.intro.map(p).join('') +
+    '<p style="margin:20px 0 4px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#5a1723">' + esc(m.highlight[0]) + '</p>' +
+    '<p style="margin:0 0 20px;font-family:Georgia,serif;font-size:36px;color:#5a1723">' + esc(m.highlight[1]) + '</p>' +
+    '<table style="border-collapse:collapse;margin:0 0 20px;border-top:1px solid #b49a63;width:100%">' + rows + '</table>' +
+    m.outro.map(p).join('') +
+    (m.signoff.length ? '<p style="margin:20px 0 0">' + m.signoff.map(esc).join('<br>') + '</p>' : '') +
+    '</div></div>';
+  return { text: text, html: html };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Meni u tabeli
+// ─────────────────────────────────────────────────────────────────────────────
+
+function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu('Sretenjski bal')
+    .addItem('Pošalji instrukcije za uplatu (izabrani red)', 'menuSendPaymentInstructions')
+    .addItem('Pošalji potvrdu uplate (izabrani red)', 'menuSendPaymentConfirmation')
+    .addSeparator()
+    .addItem('Proveri rokove sada', 'menuDailyCheck')
+    .addSeparator()
+    .addItem('Podesi tabelu (prvo pokretanje)', 'setup')
+    .addItem('Uključi dnevnu proveru rokova', 'installTriggers')
+    .addItem('Pošalji probni mejl organizatoru', 'sendTestEmail')
+    .addItem('Prikaži ključ za sajt (APPS_SCRIPT_SECRET)', 'showSecret')
+    .addToUi();
+}
+
+/** Broj rezervacije iz izabranog reda taba „Rezervacije", ili null (uz poruku). */
+function selectedReservation_() {
+  const ui = SpreadsheetApp.getUi();
+  const sheet = SpreadsheetApp.getActiveSheet();
+  if (sheet.getName() !== SHEET_RESERVATIONS) {
+    ui.alert('Otvorite tab „' + SHEET_RESERVATIONS + '" i kliknite na bilo koju ćeliju u redu rezervacije.');
+    return null;
+  }
+  const rowNumber = sheet.getActiveRange().getRow();
+  const t = openTable_();
+  if (rowNumber < 2 || rowNumber - 2 >= t.rows.length) {
+    ui.alert('Kliknite na red sa rezervacijom (ne na zaglavlje).');
+    return null;
+  }
+  const r = rowToObj_(t, t.rows[rowNumber - 2]);
+  if (!String(r.number).trim()) {
+    ui.alert('U izabranom redu nema broja rezervacije.');
+    return null;
+  }
+  return r;
+}
+
+function menuSendPaymentInstructions() {
+  const ui = SpreadsheetApp.getUi();
+  const r = selectedReservation_();
+  if (!r) return;
+  const settings = readSettings_();
+  const blocker = instructionsBlocker_(r, settings);
+  if (blocker) return ui.alert(blocker);
+  const n = String(r.number).trim();
+  const already = parseDate_(r.instructionsAt);
+  const deadline = parseDate_(r.deadline);
+  const question =
+    (already ? 'PAŽNJA: instrukcije su već poslate ' + Utilities.formatDate(already, sheetTimeZone_(), 'dd.MM.yyyy') + '.\n\n' : '') +
+    'Poslati instrukcije za uplatu?\n\n' +
+    'Rezervacija: ' + n + '\nGost: ' + r.fullName + ' <' + r.email + '>\n' +
+    'Iznos: ' + formatAmount_(r.amount, settings.currency, 'sr') + '\n' +
+    'Rok: ' + (deadline ? Utilities.formatDate(deadline, sheetTimeZone_(), 'dd.MM.yyyy') + ' (iz tabele)' : settings.paymentDays + ' dana od danas') + '\n' +
+    'Jezik mejla: ' + r.locale;
+  if (ui.alert('Instrukcije za uplatu', question, ui.ButtonSet.YES_NO) !== ui.Button.YES) return;
+  try {
+    const deadlineText = sendPaymentInstructionsFor_(n);
+    ui.alert('Instrukcije su poslate. Rok za uplatu: ' + deadlineText + '. Status: ' + STATUS.AWAITING + '.');
+  } catch (err) {
+    ui.alert('Instrukcije NISU poslate: ' + err.message);
+  }
+}
+
+function menuSendPaymentConfirmation() {
+  const ui = SpreadsheetApp.getUi();
+  const r = selectedReservation_();
+  if (!r) return;
+  const n = String(r.number).trim();
+  if (normStatus_(r.status) !== STATUS.PAID) return ui.alert('Prvo proverite uplatu na izvodu i promenite status u ' + STATUS.PAID + '.');
+  if (parseDate_(r.paymentConfirmedAt)) return ui.alert('Potvrda uplate za ' + n + ' je već poslata.');
+  if (ui.alert('Potvrda uplate', 'Poslati gostu potvrdu da je uplata evidentirana?\n\nRezervacija: ' + n + '\nGost: ' + r.fullName + ' <' + r.email + '>', ui.ButtonSet.YES_NO) !== ui.Button.YES) return;
+  try {
+    sendPaymentConfirmationFor_(n);
+    ui.alert('Potvrda uplate je poslata.');
+  } catch (err) {
+    ui.alert('Potvrda NIJE poslata: ' + err.message);
+  }
+}
+
+function menuDailyCheck() {
+  const r = dailyCheck();
+  SpreadsheetApp.getUi().alert(
+    'Provera rokova je završena.\n\nPoslato podsetnika: ' + r.reminded.length + '\nIsteklo: ' + r.expired.length +
+    (r.problems.length ? '\n\nPotrebna provera:\n- ' + r.problems.join('\n- ') : ''),
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Podešavanje tabele (bezbedno za ponovno pokretanje: ništa ne briše i ne preimenuje)
+// ─────────────────────────────────────────────────────────────────────────────
+
+function setup() {
+  const ss = spreadsheet_();
+  const notes = [];
+  if (ss.getSpreadsheetTimeZone() !== TIME_ZONE) {
+    ss.setSpreadsheetTimeZone(TIME_ZONE);
+    notes.push('Vremenska zona tabele podešena na ' + TIME_ZONE + '.');
+  }
+  setupReservationsSheet_(ss);
+  setupSettingsSheet_(ss);
+  setupStatsSheet_(ss);
+
+  const props = PropertiesService.getScriptProperties();
+  if (!props.getProperty('API_SECRET')) {
+    props.setProperty('API_SECRET', Utilities.getUuid().replace(/-/g, '') + Utilities.getUuid().replace(/-/g, ''));
+  }
+  SpreadsheetApp.getUi().alert(
+    'Tabela je podešena.\n\n' + (notes.length ? notes.join('\n') + '\n\n' : '') +
+    'Sledeći koraci (docs/REZERVACIJE.md):\n1. Primena → Nova primena → Web aplikacija\n2. Meni → Uključi dnevnu proveru rokova\n3. Meni → Prikaži ključ za sajt, pa ga upišite u backend .env',
+  );
+}
+
+function setupReservationsSheet_(ss) {
+  let sheet = ss.getSheetByName(SHEET_RESERVATIONS);
+  if (!sheet) sheet = ss.insertSheet(SHEET_RESERVATIONS);
+  addMissingColumns_(sheet);
+
+  // Filter se pravi iznova jer se kolone premeštaju (uključeni filteri se tada isključe).
+  if (sheet.getFilter()) sheet.getFilter().remove();
+  reorderColumns_(sheet);
+
+  const t = openTable_();
+  const width = t.header.length;
+  const maxRows = Math.max(sheet.getMaxRows(), 1000);
+  if (sheet.getMaxRows() < maxRows) sheet.insertRowsAfter(sheet.getMaxRows(), maxRows - sheet.getMaxRows());
+  const col = function (key) { return t.idx[COL[key]] + 1; };
+  const body = function (key) { return sheet.getRange(2, col(key), maxRows - 1, 1); };
+  const all = sheet.getRange(2, 1, maxRows - 1, width);
+
+  // Zaglavlje: boja po grupi, objašnjenja na prelazu mišem. Kolone koje skripta ne poznaje ostaju sive.
+  const header = sheet.getRange(1, 1, 1, width);
+  header.setFontWeight('bold').setFontColor('#ffffff').setBackground('#8a817a').setWrap(true)
+    .setVerticalAlignment('middle').setHorizontalAlignment('center');
+  COLUMN_GROUPS.forEach(function (g) {
+    g.keys.forEach(function (k) { sheet.getRange(1, col(k)).setBackground(g.color); });
+  });
+  Object.keys(HEADER_NOTES).forEach(function (k) { sheet.getRange(1, col(k)).setNote(HEADER_NOTES[k]); });
+  sheet.setRowHeight(1, 52);
+  sheet.setFrozenRows(1);
+  sheet.setFrozenColumns(3); // broj, status, ime — uvek vidljivi
+  sheet.setTabColor('#5a1723');
+
+  // Telo: naizmenično osenčeni redovi, tekst se ne razvlači preko više redova (osim ishrane).
+  sheet.getBandings().forEach(function (b) { b.remove(); });
+  all.applyRowBanding(SpreadsheetApp.BandingTheme.LIGHT_GREY, false, false)
+    .setFirstRowColor('#ffffff').setSecondRowColor('#f7f3ec');
+  all.setVerticalAlignment('middle').setWrapStrategy(SpreadsheetApp.WrapStrategy.CLIP);
+  body('diet').setWrapStrategy(SpreadsheetApp.WrapStrategy.WRAP);
+  ['number', 'status', 'ticketCount', 'createdAt', 'invoice', 'locale'].concat(DATE_KEYS).forEach(function (k) {
+    body(k).setHorizontalAlignment('center');
+  });
+  body('number').setNumberFormat('@').setFontWeight('bold');
+  body('phone').setNumberFormat('@');
+  body('createdAt').setNumberFormat('dd.mm.yyyy hh:mm');
+  body('amount').setNumberFormat('#,##0.00 "€"');
+  sheet.getRange(1, 1, maxRows, width).createFilter();
+
+  body('status').setDataValidation(
+    SpreadsheetApp.newDataValidation().requireValueInList(Object.keys(STATUS).map(function (k) { return STATUS[k]; }), true).setAllowInvalid(false).build(),
+  );
+  body('amount').setDataValidation(
+    SpreadsheetApp.newDataValidation().requireNumberGreaterThanOrEqualTo(0).setAllowInvalid(false).setHelpText('Iznos u evrima, npr. 130 ili 130,50').build(),
+  );
+  DATE_KEYS.forEach(function (k) {
+    body(k).setNumberFormat('dd.mm.yyyy').setDataValidation(
+      SpreadsheetApp.newDataValidation().requireDate().setAllowInvalid(false).setHelpText('Datum, npr. 25.11.2026 (dvoklik otvara kalendar)').build(),
+    );
+  });
+
+  // Uslovno bojenje (tab pripada skripti, pa se pravila postavljaju iznova). Prvo pravilo koje važi za ćeliju pobeđuje.
+  const L = function (key) { return columnLetter_(col(key)); };
+  const S = '$' + L('status') + '2';
+  const rule = function () { return SpreadsheetApp.newConditionalFormatRule(); };
+  const rules = [
+    [STATUS.NEW, '#dbe7f5', '#1d3b5c'],
+    [STATUS.AWAITING, '#fdf0c8', '#6b4e00'],
+    [STATUS.REMINDED, '#fbd9b5', '#7a3a00'],
+    [STATUS.PAID, '#d4ecd5', '#1f5126'],
+    [STATUS.EXPIRED, '#e4e0dc', '#5b4f48'],
+    [STATUS.CANCELLED, '#e4e0dc', '#7a1f1f'],
+  ].map(function (c) {
+    return rule().whenTextEqualTo(c[0]).setBackground(c[1]).setFontColor(c[2]).setBold(true).setRanges([body('status')]).build();
+  });
+  // Rok za uplatu je prošao, a uplata nije evidentirana.
+  rules.push(rule().whenFormulaSatisfied(
+    '=AND($' + L('deadline') + '2<>"", $' + L('deadline') + '2<TODAY(), OR(' + S + '="' + STATUS.AWAITING + '", ' + S + '="' + STATUS.REMINDED + '"))',
+  ).setFontColor('#9b1c1c').setBold(true).setRanges([body('deadline')]).build());
+  // Iznos nedostaje (cena za tip karte nije podešena) — mora se upisati pre slanja instrukcija.
+  rules.push(rule().whenFormulaSatisfied('=AND(' + S + '="' + STATUS.NEW + '", $' + L('amount') + '2="", $' + L('number') + '2<>"")')
+    .setBackground('#f8d7d7').setRanges([body('amount')]).build());
+  // Posebna ishrana je istaknuta.
+  rules.push(rule().whenCellNotEmpty().setBackground('#fdf0c8').setFontColor('#6b4e00').setBold(true).setRanges([body('diet')]).build());
+  // Istekle i otkazane rezervacije su sive.
+  rules.push(rule().whenFormulaSatisfied('=OR(' + S + '="' + STATUS.EXPIRED + '", ' + S + '="' + STATUS.CANCELLED + '")')
+    .setFontColor('#9a8f87').setRanges([all]).build());
+  sheet.setConditionalFormatRules(rules);
+
+  const widths = {
+    number: 95, status: 150, fullName: 190, ticketType: 150, ticketCount: 70, amount: 100, diet: 220, note: 240,
+    createdAt: 125, email: 210, phone: 130, instructionsAt: 115, deadline: 100, reminderAt: 115, paidAt: 115,
+    paymentConfirmedAt: 115, closedAt: 115, adminNote: 220, invoice: 75, company: 200, source: 160, sourceOther: 160,
+    locale: 70, pageUrl: 140, utm: 160, systemNote: 260, requestId: 120,
+  };
+  Object.keys(widths).forEach(function (k) { sheet.setColumnWidth(col(k), widths[k]); });
+
+  // Tehnički podaci su skupljeni u grupu; „+" iznad kolona ih otvara.
+  COLUMN_GROUPS.filter(function (g) { return g.collapsed; }).forEach(function (g) {
+    const first = col(g.keys[0]);
+    if (sheet.getColumnGroupDepth(first) === 0) sheet.getRange(1, first, 1, g.keys.length).shiftColumnGroupDepth(1);
+    sheet.getColumnGroup(first, 1).collapse();
+  });
+}
+
+/**
+ * Premešta kolone u redosled iz COL (podaci se premeštaju zajedno sa kolonom, ništa se ne briše).
+ * Kolone koje skripta ne poznaje (npr. dodate ručno) ostaju desno od njenih.
+ */
+function reorderColumns_(sheet) {
+  for (let target = 0; target < HEADERS.length; target++) {
+    const header = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(function (h) { return String(h).trim(); });
+    const from = header.indexOf(HEADERS[target]);
+    if (from > target) sheet.moveColumns(sheet.getRange(1, from + 1, 1, 1), target + 1);
+  }
+}
+
+function columnLetter_(n) {
+  let s = '';
+  while (n > 0) { const m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = Math.floor((n - 1) / 26); }
+  return s;
+}
+
+function setupSettingsSheet_(ss) {
+  let sheet = ss.getSheetByName(SHEET_SETTINGS);
+  if (!sheet) {
+    sheet = ss.insertSheet(SHEET_SETTINGS);
+    sheet.getRange(1, 1, 1, 3).setValues([['Podešavanje', 'Vrednost', 'Opis']]).setFontWeight('bold').setBackground('#5a1723').setFontColor('#f6f1e8');
+    sheet.setFrozenRows(1);
+    sheet.setColumnWidth(1, 160);
+    sheet.setColumnWidth(2, 240);
+    sheet.setColumnWidth(3, 560);
+  }
+  const keys = sheet.getDataRange().getValues().map(function (r) { return String(r[0]).trim(); });
+  SETTINGS.forEach(function (s) {
+    if (keys.indexOf(s[0]) >= 0) return; // postojeće vrednosti se ne diraju
+    sheet.appendRow([s[0], s[1], s[2]]);
+    if (typeof s[1] === 'boolean') sheet.getRange(sheet.getLastRow(), 2).insertCheckboxes();
+    if (s[0] === 'BALL_YEAR') sheet.getRange(sheet.getLastRow(), 2).setNumberFormat('@').setValue(s[1]);
+  });
+  sheet.getRange(2, 3, Math.max(sheet.getLastRow() - 1, 1), 1).setWrap(true);
+
+  // Vrednosti koje još sadrže „TODO" označene su žuto, da se vidi šta treba popuniti.
+  const values = sheet.getRange(2, 2, Math.max(sheet.getLastRow() - 1, 1), 1);
+  const keep = sheet.getConditionalFormatRules().filter(function (rule) {
+    return !rule.getRanges().some(function (rg) { return rg.getColumn() === 2; });
+  });
+  sheet.setConditionalFormatRules(keep.concat([
+    SpreadsheetApp.newConditionalFormatRule().whenTextContains('TODO').setBackground('#fdf0c8').setFontColor('#6b4e00').setRanges([values]).build(),
+  ]));
+}
+
+/** Tab „Statistika" pripada skripti i pravi se iznova pri svakom pokretanju podešavanja. */
+function setupStatsSheet_(ss) {
+  let sheet = ss.getSheetByName(SHEET_STATS);
+  if (!sheet) sheet = ss.insertSheet(SHEET_STATS);
+  sheet.clear();
+  const t = openTable_();
+  const letter = function (key) { return columnLetter_(t.idx[COL[key]] + 1); };
+  const R = function (key) { return "'" + SHEET_RESERVATIONS + "'!" + letter(key) + '2:' + letter(key); };
+  const active = ', ' + R('status') + ', "<>' + STATUS.EXPIRED + '", ' + R('status') + ', "<>' + STATUS.CANCELLED + '"';
+  const rows = [
+    ['Pokazatelj', 'Vrednost'],
+    ['Broj prijava (sve rezervacije)', '=COUNTA(' + R('number') + ')'],
+    ['Ukupno rezervisanih karata (sve prijave)', '=SUM(' + R('ticketCount') + ')'],
+    ['Aktivne karte (bez isteklih i otkazanih)', '=SUMIFS(' + R('ticketCount') + active + ')'],
+    ['', ''],
+    ['Status: ' + STATUS.NEW, '=COUNTIF(' + R('status') + ', "' + STATUS.NEW + '")'],
+    ['Status: ' + STATUS.AWAITING, '=COUNTIF(' + R('status') + ', "' + STATUS.AWAITING + '")'],
+    ['Status: ' + STATUS.REMINDED, '=COUNTIF(' + R('status') + ', "' + STATUS.REMINDED + '")'],
+    ['Status: ' + STATUS.PAID, '=COUNTIF(' + R('status') + ', "' + STATUS.PAID + '")'],
+    ['Status: ' + STATUS.EXPIRED, '=COUNTIF(' + R('status') + ', "' + STATUS.EXPIRED + '")'],
+    ['Status: ' + STATUS.CANCELLED, '=COUNTIF(' + R('status') + ', "' + STATUS.CANCELLED + '")'],
+    ['Procenat plaćenih rezervacija', '=IFERROR(COUNTIF(' + R('status') + ', "' + STATUS.PAID + '") / COUNTA(' + R('number') + '), 0)'],
+    ['Plaćene karte', '=SUMIF(' + R('status') + ', "' + STATUS.PAID + '", ' + R('ticketCount') + ')'],
+    ['Evidentirane uplate (iznos)', '=SUMIF(' + R('status') + ', "' + STATUS.PAID + '", ' + R('amount') + ')'],
+    ['Prosečan broj dana od prijave do uplate', '=IFERROR(AVERAGE(FILTER(INT(' + R('paidAt') + ') - INT(' + R('createdAt') + '), ' + R('paidAt') + ' <> "")), "—")'],
+    ['', ''],
+  ];
+  Object.keys(TICKET_TYPES).forEach(function (k) {
+    rows.push(['Karte — ' + TICKET_TYPES[k] + ' (aktivne)', '=SUMIFS(' + R('ticketCount') + ', ' + R('ticketType') + ', "' + TICKET_TYPES[k] + '"' + active + ')']);
+  });
+  rows.push(['', '']);
+  Object.keys(SOURCES).forEach(function (k) {
+    rows.push(['Izvor — ' + SOURCES[k], '=COUNTIF(' + R('source') + ', "' + SOURCES[k] + '")']);
+  });
+  rows.push(['', '']);
+  LOCALES.forEach(function (l) { rows.push(['Jezik forme — ' + l, '=COUNTIF(' + R('locale') + ', "' + l + '")']); });
+  rows.push(['', ''], ['Zahtevi za fakturu na firmu', '=COUNTIF(' + R('invoice') + ', "DA")']);
+  rows.push(['Rezervacije sa posebnom ishranom', '=COUNTIF(' + R('diet') + ', "?*")']);
+
+  sheet.getRange(1, 1, rows.length, 2).setValues(rows);
+  sheet.getRange(1, 1, 1, 2).setFontWeight('bold').setBackground('#5a1723').setFontColor('#f6f1e8');
+  sheet.getRange(12, 2).setNumberFormat('0%');
+  sheet.getRange(14, 2).setNumberFormat('#,##0.00');
+  sheet.getRange(15, 2).setNumberFormat('0.0');
+  sheet.setColumnWidth(1, 340);
+  sheet.setColumnWidth(2, 140);
+  sheet.setFrozenRows(1);
+}
+
+function installTriggers() {
+  ScriptApp.getProjectTriggers().forEach(function (tr) {
+    if (tr.getHandlerFunction() === 'dailyCheck') ScriptApp.deleteTrigger(tr);
+  });
+  ScriptApp.newTrigger('dailyCheck').timeBased().everyDays(1).atHour(9).inTimezone(TIME_ZONE).create();
+  SpreadsheetApp.getUi().alert('Dnevna provera rokova je uključena — pokreće se svakog dana između 9 i 10 časova.');
+}
+
+function sendTestEmail() {
+  const s = readSettings_();
+  MailApp.sendEmail({
+    to: s.adminEmail,
+    subject: 'Sretenjski bal — probni mejl',
+    body: 'Slanje mejlova iz tabele radi. Preostalo slanja danas: ' + MailApp.getRemainingDailyQuota(),
+    name: s.senderName,
+  });
+  SpreadsheetApp.getUi().alert('Probni mejl je poslat na ' + s.adminEmail + '. Preostalo slanja danas: ' + MailApp.getRemainingDailyQuota());
+}
+
+function showSecret() {
+  const secret = PropertiesService.getScriptProperties().getProperty('API_SECRET');
+  SpreadsheetApp.getUi().alert(secret
+    ? 'Upišite u backend/.env sajta:\n\nAPPS_SCRIPT_SECRET=' + secret + '\n\nNe delite ovaj ključ i ne stavljajte ga u kod sajta.'
+    : 'Ključ još ne postoji — pokrenite „Podesi tabelu".');
+}

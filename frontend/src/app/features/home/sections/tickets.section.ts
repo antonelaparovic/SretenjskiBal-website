@@ -1,16 +1,18 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { EVENT, TICKETS } from '../../../core/content/site-content';
 import { TicketListComponent } from '../../../shared/components/ticket-list/ticket-list.component';
 import { RevealDirective } from '../../../shared/directives/reveal.directive';
 
 @Component({
   selector: 'app-tickets-section',
-  imports: [TicketListComponent, RevealDirective],
+  imports: [TicketListComponent, RevealDirective, RouterLink],
   template: `
     <section id="karte" class="section bg-wine" aria-labelledby="tickets-title">
       <div class="container grid">
         <div class="intro" appReveal>
-          <h2 id="tickets-title" class="display title" i18n>Karte</h2>
+          <h2 id="tickets-title" class="display title" i18n>Ulaznice</h2>
+          <p class="quote tag" i18n>Neke večeri ostaju zauvek u sećanju. Neke postaju tradicija.</p>
           @switch (salesStatus) {
             @case ('COMING_SOON') { <p class="quote status" i18n>Prodaja uskoro počinje.</p> }
             @case ('SOLD_OUT') { <p class="quote status" i18n>Sve karte su rasprodate.</p> }
@@ -18,6 +20,9 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
         </div>
         <div class="list">
           <app-ticket-list [tickets]="tickets" [salesStatus]="salesStatus" />
+          @if (salesStatus === 'OPEN') {
+            <a class="btn cta" routerLink="/rezervacija" appReveal i18n>Rezerviši ulaznice</a>
+          }
         </div>
       </div>
     </section>
@@ -25,8 +30,11 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
   styles: `
     .intro { grid-column: 1 / span 4; display: flex; flex-direction: column; gap: 1.75rem; }
     .title { font-size: clamp(5rem, 9vw, 8rem); line-height: 0.9; }
+    .tag { max-width: 14em; color: var(--c-on-dark-soft); }
     .status { color: var(--c-brass); }
     .list { grid-column: 6 / span 7; }
+    .cta { margin-top: clamp(2rem, 4vw, 3rem); background: var(--c-ivory); color: var(--c-wine); }
+    .cta:hover { background: transparent; color: var(--c-ivory); border-color: var(--c-brass); }
     @media (max-width: 1023.98px) { .intro, .list { grid-column: 1 / -1; } .list { margin-top: 2.5rem; } }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -3,9 +3,12 @@
 Sajt za Sretenjski bal (13. februar 2027, Maribor).
 
 - **frontend/** — Angular 22 sa server-side renderingom (SSR). Ceo sajt, dizajn i sadržaj.
-- **backend/** — mali NestJS 12 servis koji ima samo jedan zadatak: prima poruke iz kontakt forme i šalje ih mejlom.
+- **backend/** — mali NestJS 12 servis: prima poruke iz kontakt forme i šalje ih mejlom, i prima rezervacije karata.
+- **google-apps-script/** — skripta u Google tabeli „Bal rezervacije": broj rezervacije, upis, mejlovi, podsetnici.
+  Uputstvo za postavljanje i rad: **[docs/REZERVACIJE.md](docs/REZERVACIJE.md)**.
 
 Nema baze podataka. Sav sadržaj (program, karte, mesto, partneri) je u jednom fajlu u frontendu.
+Rezervacije karata se čuvaju u Google tabeli.
 
 ---
 
@@ -59,10 +62,14 @@ Skoro sve što se menja pred bal je u **jednom fajlu**:
 | Mesto, adresa, link ka mapi | `EVENT.venueName`, `EVENT.venueAddress`, `EVENT.mapUrl` |
 | Početak prodaje karata | `EVENT.salesStatus`: `'COMING_SOON'` → `'OPEN'` (ili `'SOLD_OUT'`) |
 | Satnica večeri | `PROGRAM` |
-| Cene i linkovi za kupovinu | `TICKETS` — cena u centima (`6500` = 65 €), `ctaUrl` = link prodavca karata |
+| Cene i linkovi za kupovinu | `TICKETS` — cena u centima (`6500` = 65 €), `ctaUrl` = `'/rezervacija'` (forma na sajtu) ili link prodavca karata |
+| Otvaranje/zatvaranje rezervacija | tab „Podešavanja" u Google tabeli → `BOOKING_OPEN` (bez izmene koda) |
 | Partneri | `SPONSORS` — logo stavi u `frontend/public/partners/` |
 
 Tekstovi sekcija na početnoj su u `frontend/src/app/features/home/sections/`, svaka sekcija u svom fajlu.
+
+**Fotografija u heru (početna):** stavi je u `frontend/public/images/` i upiši putanju u `HERO_IMAGE` u istom fajlu
+(`site-content.ts`). Sajt je sam tonira u bordo, pa slika ne mora da bude u bojama sajta. Bez fotografije hero je čist bordo.
 
 **Fotografije:** dok ih nema, na njihovom mestu stoji tonirana površina sa opisom šta treba da bude na slici.
 Kad stignu, stavi ih u `frontend/public/images/` i u sekciji upiši `[src]="'/images/ime-slike.jpg'"`
@@ -128,7 +135,7 @@ Ako sajt ide na drugi domen, dodaj ga u `frontend/angular.json` → `security.al
 - SEO: naslov, opis, canonical, OpenGraph i Event podaci za Google na početnoj.
 - Tekstovi su obeleženi za prevod (`i18n`), pa se slovenački kasnije dodaje bez prepravljanja koda.
 
-**Backend** — samo `POST /api/contact` i `GET /api/health`
+**Backend** — `POST /api/contact`, `GET /api/reservations/status`, `POST /api/reservations` i `GET /api/health`
 - provera svih polja, uklanjanje HTML-a iz poruke
 - najviše 5 poruka sa iste adrese u 10 minuta
 - zaštita od botova: skriveno polje + prebrzo popunjena forma (botu se vrati „uspeh", ali se ništa ne šalje)

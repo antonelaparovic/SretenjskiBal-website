@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { EmblemComponent } from '../../shared/components/emblem/emblem.component';
+import { ORGANIZER } from '../../core/content/site-content';
 import { FOOTER_NAV, LEGAL_NAV } from '../nav';
 
 @Component({
@@ -13,5 +14,6 @@ import { FOOTER_NAV, LEGAL_NAV } from '../nav';
 export class FooterComponent {
   protected readonly nav = FOOTER_NAV;
   protected readonly legal = LEGAL_NAV;
+  protected readonly org = ORGANIZER;
   protected readonly year = 2027;
 }
