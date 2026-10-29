@@ -13,6 +13,24 @@ export const MAIN_NAV: NavItem[] = [
   // { label: $localize`Partneri`, path: '/partneri' }, // vratiti kad se pojave partneri
 ];
 
+/** Padajući meni „Sekcije“: `id` je sekcija na početnoj (glatko skrolovanje), `path` je zasebna stranica. */
+export interface SectionNavItem {
+  label: string;
+  id?: string;
+  path?: string;
+}
+
+export const SECTION_NAV: SectionNavItem[] = [
+  { label: $localize`Zašto Sretenje`, id: 'sretenje' },
+  { label: $localize`O balu`, id: 'bal' },
+  { label: $localize`Izvođači`, id: 'izvodjaci' },
+  { label: $localize`Prostor`, id: 'prostor' },
+  { label: $localize`Pravila oblačenja`, id: 'pravila-oblacenja' },
+  { label: $localize`Ulaznice`, id: 'karte' },
+  { label: $localize`Organizator`, id: 'organizator' },
+  { label: $localize`Priča o balskoj tradiciji`, path: '/balska-tradicija' },
+];
+
 export const FOOTER_NAV: NavItem[] = [
   // { label: $localize`Bal`, path: '/o-balu' },
   // { label: $localize`Program`, path: '/program' },

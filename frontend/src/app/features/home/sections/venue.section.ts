@@ -8,7 +8,7 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
   selector: 'app-venue-section',
   imports: [SectionHeadingComponent, RevealDirective],
   template: `
-    <section class="bg-parchment venue" aria-labelledby="venue-title">
+    <section id="prostor" class="bg-parchment venue" aria-labelledby="venue-title">
       <div class="container grid">
         <div class="text">
           <div appReveal>

@@ -20,7 +20,7 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
   selector: 'app-performers-section',
   imports: [SectionHeadingComponent, RevealDirective],
   template: `
-    <section class="section bg-ivory performers" aria-labelledby="performers-title">
+    <section id="izvodjaci" class="section bg-ivory performers" aria-labelledby="performers-title">
       <div class="container">
         <div class="head" appReveal>
           <app-section-heading headingId="performers-title" i18n-eyebrow eyebrow="Muzika večeri">

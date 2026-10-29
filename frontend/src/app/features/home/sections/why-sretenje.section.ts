@@ -11,7 +11,7 @@ interface Moment {
   selector: 'app-why-sretenje-section',
   imports: [SectionHeadingComponent, RevealDirective],
   template: `
-    <section class="section bg-parchment paper" aria-labelledby="sretenje-title">
+    <section id="sretenje" class="section bg-parchment paper" aria-labelledby="sretenje-title">
       <div class="container grid">
         <div class="intro" appReveal>
           <app-section-heading headingId="sretenje-title">

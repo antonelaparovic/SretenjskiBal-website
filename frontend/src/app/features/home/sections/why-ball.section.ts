@@ -6,7 +6,7 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
   selector: 'app-why-ball-section',
   imports: [RouterLink, RevealDirective],
   template: `
-    <section class="section bg-forest" aria-labelledby="ball-title">
+    <section id="bal" class="section bg-forest" aria-labelledby="ball-title">
       <div class="container grid">
         <h2 id="ball-title" class="h1 title" appReveal i18n>Bal nikada nije bio samo ples.</h2>
         <div class="body" appReveal [appRevealDelay]="120">
