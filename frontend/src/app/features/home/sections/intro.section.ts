@@ -1,30 +1,33 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { RevealDirective } from '../../../shared/directives/reveal.directive';
 
+/**
+ * Predah između dva bordo bloka: pergament, centrirana kompozicija.
+ * Naslov, mesingana linija i tri rečenice kao glavni element.
+ */
 @Component({
   selector: 'app-intro-section',
-  imports: [RouterLink, RevealDirective],
+  imports: [RevealDirective],
   template: `
-    <section class="section bg-parchment paper" aria-labelledby="intro-title">
-      <div class="container grid">
+    <section class="intro bg-parchment paper" aria-labelledby="intro-title">
+      <div class="container inner">
         <h2 id="intro-title" class="h1 title" appReveal i18n>Neke tradicije počinju tiho.</h2>
-        <div class="body" appReveal [appRevealDelay]="120">
-          <p class="quote accent" i18n>Jednim susretom.<br />Jednom večeri.<br />Jednom idejom.</p>
-          <p class="lead" i18n>
-            13. februara 2027. u Mariboru počinje Sretenjski bal — kulturno-muzičko veče posvećeno susretu,
-            zajedništvu i savremenom nastavku građanske balske kulture.
-          </p>
-          <a class="text-link accent" routerLink="/o-balu" i18n>Otkrijte priču</a>
-        </div>
+        <span class="rule" aria-hidden="true" appReveal [appRevealDelay]="160"></span>
+        <p class="quote lines" appReveal [appRevealDelay]="240" i18n>
+          <span>Jednim susretom.</span>
+          <span>Jednom večeri.</span>
+          <span>Jednom idejom.</span>
+        </p>
       </div>
     </section>
   `,
   styles: `
-    .title { grid-column: 1 / span 8; }
-    .body { grid-column: 8 / span 5; margin-top: clamp(2rem, 7vw, 6rem); display: flex; flex-direction: column; align-items: flex-start; gap: 2rem; }
-    .accent { color: var(--c-burgundy); }
-    @media (max-width: 1023.98px) { .title, .body { grid-column: 1 / -1; } }
+    .intro { padding-block: clamp(5rem, 9vw, 8.5rem); }
+    .inner { display: flex; flex-direction: column; align-items: center; text-align: center; }
+    .title { max-width: 14em; font-size: clamp(2.75rem, 6vw, 5.25rem); }
+    .rule { display: block; width: 64px; height: 1px; margin: clamp(2rem, 3.5vw, 3rem) 0; background: var(--c-brass); }
+    .lines { display: flex; flex-direction: column; gap: 0.15em; color: var(--c-burgundy); font-size: clamp(1.75rem, 3vw, 2.5rem); }
+    .lines span { display: block; }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

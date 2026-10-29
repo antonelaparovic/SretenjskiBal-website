@@ -42,7 +42,7 @@
 
     <label class="checkbox">
       <input type="checkbox" formControlName="consent" [attr.aria-invalid]="invalid('consent')" />
-      <span i18n>Saglasan/na sam sa <a href="/privacy" class="inline-link">politikom privatnosti</a>.</span>
+      <span i18n>Pristajem da organizator obradi moje ime, e-adresu i poruku radi odgovora na upit, i da ih čuva do 12 meseci. Saglasnost mogu opozvati u svakom trenutku. Više u <a href="/privacy" target="_blank" rel="noopener" class="inline-link">politici privatnosti</a>.</span>
     </label>
     @if (invalid('consent')) { <span class="field__error" i18n>Potrebna je vaša saglasnost.</span> }
 

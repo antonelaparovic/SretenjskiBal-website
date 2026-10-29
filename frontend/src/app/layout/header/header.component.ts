@@ -16,7 +16,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
 import { EmblemComponent } from '../../shared/components/emblem/emblem.component';
 import { LanguageSwitcherComponent } from '../../shared/components/language-switcher/language-switcher.component';
-import { MAIN_NAV } from '../nav';
+import { MAIN_NAV, SECTION_NAV, SectionNavItem } from '../nav';
 
 @Component({
   selector: 'app-header',
@@ -24,11 +24,15 @@ import { MAIN_NAV } from '../nav';
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { '(document:keydown.escape)': 'closeMenu()' },
+  host: {
+    '(document:keydown.escape)': 'closeMenu()',
+  },
 })
 export class HeaderComponent {
   protected readonly nav = MAIN_NAV;
+  protected readonly sections = SECTION_NAV;
   protected readonly menuOpen = signal(false);
+  private readonly router = inject(Router);
   private readonly scrolled = signal(false);
   private readonly doc = inject(DOCUMENT);
   private readonly menuButton = viewChild<ElementRef<HTMLButtonElement>>('menuButton');
@@ -63,6 +67,22 @@ export class HeaderComponent {
     effect(() => {
       this.doc.body.style.overflow = this.menuOpen() ? 'hidden' : '';
     });
+  }
+
+  /** Skroluje do sekcije na početnoj; sa drugih stranica prvo vodi na početnu (Angular tada skroluje do sidra). */
+  protected goTo(item: SectionNavItem, event: Event): void {
+    if (item.path) return; // običan link
+    event.preventDefault();
+    this.menuOpen.set(false);
+    const onHome = this.url().split(/[?#]/)[0] === '/';
+    const el = this.doc.getElementById(item.id!);
+    if (onHome && el) {
+      // Telo je bilo zaključano dok je mobilni meni otvoren; pustimo da se otključa pa skrolujemo.
+      setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+      history.replaceState(null, '', `/#${item.id}`);
+    } else {
+      void this.router.navigate(['/'], { fragment: item.id });
+    }
   }
 
   protected toggleMenu(): void {

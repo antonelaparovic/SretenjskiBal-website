@@ -56,7 +56,7 @@ describe('ReservationFormComponent', () => {
     await type('[formcontrolname=fullName]', 'Ana Anić');
     await type('[formcontrolname=email]', 'ana@primer.si');
     await type('[formcontrolname=phone]', '+386 40 123 456');
-    await click(ticketRadios()[1]); // Balkon
+    await click(ticketRadios()[1]); // Galerija
     await type(count(), '2');
     await choose('[formcontrolname=source]', 2); // Društvene mreže
   }
@@ -126,17 +126,13 @@ describe('ReservationFormComponent', () => {
     expect(errors()).toEqual([]);
   });
 
-  it('tri tipa karata kao kartice sa cenom; uz studentsku ulaznicu napomena o ispravi', async () => {
+  it('dva tipa karata kao kartice sa cenom', async () => {
     await open();
     const cards = $$('.ticket').map((c) => [c.querySelector('.ticket__name')!.textContent!.trim(), c.querySelector('.ticket__price')!.textContent!.replace(/\s+/g, ' ').trim()]);
     expect(cards).toEqual([
-      ['All inclusive', '140 €'],
-      ['Balkon', '80 €'],
-      ['Studentska ulaznica', '60 €'],
+      ['Svečana', '140 €'],
+      ['Galerija', '70 €'],
     ]);
-    expect(el.textContent).not.toContain('studentsku ispravu');
-    await click(ticketRadios()[2]);
-    expect(el.textContent).toContain('Studentska ulaznica važi uz važeću studentsku ispravu.');
   });
 
   it('okvirni iznos prati tip i broj karata', async () => {
@@ -147,7 +143,7 @@ describe('ReservationFormComponent', () => {
     await type(count(), '3');
     expect($('.estimate__value').textContent).toContain('420');
     await click(ticketRadios()[1]);
-    expect($('.estimate__value').textContent).toContain('240');
+    expect($('.estimate__value').textContent).toContain('210');
   });
 
   it('ne šalje formu bez obaveznih podataka i označava greške', async () => {
@@ -180,11 +176,22 @@ describe('ReservationFormComponent', () => {
     await fillValid();
     await click('button[type=submit]');
     noScript('create');
-    expect(errors()).toEqual(['Unesite naziv firme.', 'Unesite adresu firme.', 'Unesite poreski identifikacioni broj.']);
+    expect(errors()).toEqual(['Unesite naziv firme.', 'Unesite adresu firme.', 'Unesite poreski identifikacioni broj.', 'Izaberite jednu od ponuđenih mogućnosti.']);
     await click($$('input[formcontrolname=invoiceNeeded]')[0]);
     expect($('[formcontrolname=name]')).toBeNull();
     await click('button[type=submit]');
     script('create').flush({ ok: true, reservationNumber: '27001', guestMailSent: false });
+  });
+
+  it('ishrana bez izričite saglasnosti se ne šalje; bez ishrane saglasnost nije potrebna', async () => {
+    await open();
+    await fillValid();
+    expect($('input[formcontrolname=dietConsent]')).toBeNull();
+    await type('[formcontrolname=diet]', 'Bez glutena');
+    expect($('input[formcontrolname=dietConsent]')).toBeTruthy();
+    await click('button[type=submit]');
+    noScript('create');
+    expect(errors()).toContain('Bez saglasnosti ne možemo da primimo podatke o ishrani — uklonite ih ili potvrdite saglasnost.');
   });
 
   it('polje „Drugo" za izvor prijave', async () => {
@@ -198,6 +205,7 @@ describe('ReservationFormComponent', () => {
     await open();
     await fillValid();
     await type('[formcontrolname=diet]', 'Jedna osoba bez glutena.');
+    await click('input[formcontrolname=dietConsent]');
     await type('[formcontrolname=note]', 'Kupujem i za sestru, Maju Anić.');
     await click('button[type=submit]');
     await click('button[type=submit]'); // drugi klik dok se šalje
@@ -209,9 +217,11 @@ describe('ReservationFormComponent', () => {
       fullName: 'Ana Anić',
       email: 'ana@primer.si',
       phone: '+386 40 123 456',
-      tickets: [{ ticketType: 'BALKON', count: 2 }],
+      tickets: [{ ticketType: 'GALERIJA', count: 2 }],
       invoice: { needed: false },
       diet: 'Jedna osoba bez glutena.',
+      dietConsent: true,
+      privacyPolicyVersion: '2026-10-28',
       note: 'Kupujem i za sestru, Maju Anić.',
       source: 'DRUSTVENE_MREZE',
       sourceOther: '',
@@ -229,7 +239,7 @@ describe('ReservationFormComponent', () => {
     expect($('.number__value').textContent).toBe('27001');
     expect(el.textContent).toContain('Javićemo vam se u roku od 3 dana sa detaljima za uplatu.');
     expect(el.textContent).toContain('Sretenjski bal 27001');
-    expect($('.summary').textContent).toContain('Balkon');
+    expect($('.summary').textContent).toContain('Galerija');
     expect($('.summary').textContent).toContain('2');
     expect(el.textContent).toContain('ana@primer.si');
   });

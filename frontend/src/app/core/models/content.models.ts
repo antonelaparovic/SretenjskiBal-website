@@ -25,6 +25,8 @@ export interface TicketType {
   code?: TicketTypeCode;
   name: string;
   description?: string;
+  /** Šta je uključeno u ulaznicu (prikazuje se kao lista ispod naziva). */
+  includes?: string[];
   priceCents: number;
   /** Link za kupovinu kad prodaja počne: '/rezervacija' (forma na sajtu) ili spoljni prodavac. */
   ctaUrl: string | null;
@@ -36,6 +38,14 @@ export interface Sponsor {
   tier: SponsorTier;
   logoUrl?: string;
   url?: string;
+}
+
+export interface Performer {
+  name: string;
+  /** Kratko: instrument, glas ili ansambl, npr. „sopran", „gudački kvartet". */
+  role: string;
+  /** Portret, npr. '/images/izvodjaci/ime-prezime.jpg' (uspravna fotografija, najmanje 800 px širine). */
+  photo?: string;
 }
 
 export type ContactTopic = 'OPSTE' | 'PARTNERSTVO' | 'KARTE' | 'MEDIJI' | 'SARADNJA';
@@ -54,13 +64,15 @@ export interface ContactPayload {
 }
 
 /** Šifre tipova karata za rezervaciju — iste u backendu i u Google Apps Scriptu. */
-export type TicketTypeCode = 'ALL_INCLUSIVE' | 'BALKON' | 'STUDENT';
+export type TicketTypeCode = 'SVECANA' | 'GALERIJA';
 
 export type ReservationSource = 'PREPORUKA' | 'DRUSTVENE_MREZE' | 'RANIJI_DOLAZAK' | 'SAJT' | 'EMAIL' | 'DRUGO';
 
 export interface BookingStatus {
   open: boolean;
 }
+
+export type CompanyCountry = 'SI' | 'EU' | 'OTHER';
 
 export interface ReservationPayload {
   /** Isti za ponovljena slanja iste rezervacije — backend tako sprečava duplikat. */
@@ -70,9 +82,23 @@ export interface ReservationPayload {
   phone: string;
   /** Karte glase na osobu koja rezerviše. Lista da bi se kasnije mogli kombinovati tipovi; za sada jedna stavka. */
   tickets: { ticketType: TicketTypeCode; count: number }[];
-  invoice: { needed: boolean; companyName?: string; companyAddress?: string; taxId?: string };
+  invoice: {
+    needed: boolean;
+    companyName?: string;
+    companyAddress?: string;
+    /** SI = firma iz Slovenije, EU = druga država EU, OTHER = izvan EU. Od ovoga zavisi obračun DDV-a. */
+    companyCountry?: CompanyCountry;
+    /** Davčna številka (SI) odnosno ID za DDV (EU) / poreski broj (ostalo). */
+    taxId?: string;
+    /** Samo za slovenačke firme: da li je firma obveznik DDV-a (davčni zavezanec). */
+    vatPayer?: boolean;
+  };
   /** Posebna ishrana i alergije — posebna kolona u tabeli, zbog kuhinje. */
   diet: string;
+  /** Izričita saglasnost za podatke o zdravlju (član 9 GDPR); true samo uz popunjenu ishranu. */
+  dietConsent: boolean;
+  /** Verzija politike privatnosti koju je gost video. */
+  privacyPolicyVersion: string;
   note: string;
   source: ReservationSource;
   sourceOther: string;

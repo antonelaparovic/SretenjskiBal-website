@@ -14,21 +14,21 @@ export const routes: Routes = [
   },
 
   // Faza 4 — sadržajne stranice
-  { path: 'o-balu', ...soon($localize`O balu`) },
-  { path: 'sretenje', ...soon($localize`Sretenje`) },
-  { path: 'balska-tradicija', ...soon($localize`Balska tradicija`) },
+  // Stranica O balu je privremeno uklonjena (link vodi na 404 dok se ne vrati).
+  // { path: 'o-balu', ...soon($localize`O balu`) },
+  {
+    path: 'balska-tradicija',
+    loadComponent: () => import('./features/ball-tradition/ball-tradition.page').then((m) => m.BallTraditionPage),
+  },
   { path: 'program', ...soon($localize`Program`) },
   // Stari link na karte vodi na formu za rezervaciju.
   { path: 'karte', redirectTo: 'rezervacija' },
   { path: 'prostor', ...soon($localize`Prostor`) },
-  { path: 'pravila-oblacenja', ...soon($localize`Pravila oblačenja`) },
   { path: 'partneri', ...soon($localize`Partneri`) },
-  { path: 'faq', ...soon($localize`Česta pitanja`) },
-  { path: 'organizator', ...soon($localize`Kulturni centar Sretenje`) },
-  // TODO: tekst politike privatnosti — forma za rezervaciju i kontakt forma linkuju ovde.
-  { path: 'privacy', ...soon($localize`Politika privatnosti`) },
-  { path: 'cookies', ...soon($localize`Kolačići`) },
-  { path: 'uslovi', ...soon($localize`Uslovi korišćenja`) },
+  { path: 'privacy', loadComponent: () => import('./features/legal/legal.page').then((m) => m.LegalPage), data: { kind: 'privacy' } },
+  { path: 'cookies', loadComponent: () => import('./features/legal/legal.page').then((m) => m.LegalPage), data: { kind: 'cookies' } },
+  // Uslovi korišćenja: sakriveno dok ne budu napisani.
+  // { path: 'uslovi', ...soon($localize`Uslovi korišćenja`) },
 
   // Stranica „ne postoji": prerender je pravi kao /404, a build je kopira u 404.html koji hosting vraća za nepoznate adrese.
   { path: '404', loadComponent: () => import('./features/pages/not-found.page').then((m) => m.NotFoundPage) },

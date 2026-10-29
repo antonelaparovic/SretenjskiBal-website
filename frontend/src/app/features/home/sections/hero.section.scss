@@ -1,0 +1,246 @@
+@use 'tokens' as *;
+
+.hero {
+  position: relative;
+  min-height: max(660px, 100svh);
+  display: flex;
+  align-items: flex-end;
+  color: var(--c-ivory);
+  background: var(--c-wine);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+// ── Pozadina ───────────────────────────────────────────────
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+
+// Fotografija se prvo obezboji, pa joj se da bordo nijansa (blend „color"
+// zadržava svetla i senke slike) — svaka fotografija tako dobija ton sajta,
+// a lusteri i dalje svetle.
+.photo {
+  object-fit: cover;
+  object-position: center 40%;
+  filter: grayscale(1) contrast(1.1) brightness(0.8);
+  transform: scale(1.04);
+  animation: settle 2400ms var(--ease) both;
+}
+
+.tint {
+  position: absolute;
+  inset: 0;
+  background: #7a2433;
+  mix-blend-mode: color;
+}
+
+// Bez fotografije: topao odsjaj, kao od lustera u mraku.
+.glow {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(60% 55% at 78% 30%, rgba(180, 154, 99, 0.16), transparent 70%),
+    radial-gradient(70% 60% at 20% 110%, rgba(90, 23, 35, 0.9), transparent 70%),
+    var(--c-burgundy);
+  animation: breathe 9s ease-in-out infinite alternate;
+}
+
+// Tamniji levi deo, da beli tekst bude čitljiv preko bilo koje fotografije.
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(64, 16, 24, 0.82) 0%,
+    rgba(64, 16, 24, 0.55) 45%,
+    rgba(64, 16, 24, 0.15) 100%
+  );
+}
+
+.hero--photo .scrim {
+  background: linear-gradient(
+    90deg,
+    rgba(64, 16, 24, 0.88) 0%,
+    rgba(64, 16, 24, 0.6) 45%,
+    rgba(64, 16, 24, 0.25) 100%
+  );
+}
+
+// ── Plesni par ─────────────────────────────────────────────
+
+.couple {
+  position: absolute;
+  right: 1.5rem;
+  bottom: 0;
+  height: min(78%, 650px);
+  aspect-ratio: 783 / 846;
+  // Linije crta sam SVG (public/brand/plesni-par-linije.svg, oko 2,8 s); posle toga par lagano lebdi.
+  animation: sway 16s ease-in-out 3.5s infinite alternate;
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    opacity: 0.95;
+  }
+}
+
+.hero--photo .couple img {
+  opacity: 0.85;
+}
+
+@keyframes sway {
+  from {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  to {
+    transform: translate3d(0, -10px, 0) rotate(0.5deg);
+  }
+}
+
+// ── Sadržaj ────────────────────────────────────────────────
+
+.content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2rem;
+  padding-top: calc(var(--header-h) + 4rem);
+  padding-bottom: clamp(4rem, 10vh, 7rem);
+}
+
+.title {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: var(--fs-hero);
+  line-height: 0.86;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+.line {
+  display: block;
+  width: 180px;
+  height: 1px;
+  background: var(--c-brass);
+  transform-origin: left;
+  animation: draw-line 600ms var(--ease) 500ms both;
+}
+
+.when {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 2.5rem;
+  font-size: 0.9375rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+.place {
+  color: var(--c-brass);
+}
+
+.tagline {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(1.75rem, 2.6vw, 2.125rem);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.5rem 2.25rem;
+  margin-top: 0.5rem;
+
+  .text-link {
+    color: var(--c-ivory);
+  }
+}
+
+// Svetlo dugme na bordou: jedino puno dugme u heru.
+.btn--light {
+  background: var(--c-ivory);
+  color: var(--c-wine);
+
+  &:hover {
+    background: var(--c-brass);
+    color: var(--c-wine);
+  }
+}
+
+.credit {
+  position: absolute;
+  right: var(--gutter);
+  bottom: 1.25rem;
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  color: rgba(246, 241, 232, 0.6);
+}
+
+.rise {
+  animation: rise 600ms var(--ease) both;
+}
+.d1 { animation-delay: 100ms; }
+.d2 { animation-delay: 220ms; }
+.d3 { animation-delay: 420ms; }
+.d4 { animation-delay: 540ms; }
+.d5 { animation-delay: 660ms; }
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes settle {
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes breathe {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.88;
+  }
+}
+
+// Telefon: naslov se smanjuje da „SRETENJSKI" stane u širinu ekrana,
+// a lukovi idu iza teksta i postaju jedva vidljivi.
+@include down(md) {
+  .title {
+    font-size: min(15vw, 6rem);
+  }
+
+  .couple {
+    right: -12%;
+    height: 62%;
+    opacity: 0.4;
+  }
+
+  .scrim {
+    background: linear-gradient(180deg, rgba(64, 16, 24, 0.2) 0%, rgba(64, 16, 24, 0.75) 70%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .couple {
+    animation: none;
+  }
+
+  .glow,
+  .photo {
+    animation: none;
+    transform: none;
+  }
+}

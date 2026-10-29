@@ -12,9 +12,9 @@ import { DOCUMENT } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { TICKETS } from '../../core/content/site-content';
+import { ORGANIZER, PRIVACY_POLICY_VERSION, TICKETS } from '../../core/content/site-content';
 import { currentLocale } from '../../core/i18n/locale';
-import { ReservationPayload, ReservationSource, TicketTypeCode } from '../../core/models/content.models';
+import { CompanyCountry, ReservationPayload, ReservationSource, TicketTypeCode } from '../../core/models/content.models';
 import { FormsApiService, ScriptError } from '../../core/services/forms-api.service';
 import { TurnstileComponent } from '../../shared/components/turnstile/turnstile.component';
 import { formatPrice } from '../../core/util/format';
@@ -23,9 +23,8 @@ type Booking = 'loading' | 'open' | 'closed' | 'error';
 
 /** Šifre moraju biti iste kao u google-apps-script/Code.gs (TICKET_TYPES); naziv i cena su u site-content.ts (TICKETS). */
 export const TICKET_TYPE_OPTIONS: { value: TicketTypeCode; label: string }[] = [
-  { value: 'ALL_INCLUSIVE', label: $localize`All inclusive` },
-  { value: 'BALKON', label: $localize`Balkon` },
-  { value: 'STUDENT', label: $localize`Studentska ulaznica` },
+  { value: 'SVECANA', label: $localize`Svečana` },
+  { value: 'GALERIJA', label: $localize`Galerija` },
 ];
 
 export const SOURCE_OPTIONS: { value: ReservationSource; label: string }[] = [
@@ -44,6 +43,20 @@ const PHONE = /^(?=(?:\D*\d){6})[+0-9 ()/.-]{6,30}$/;
 const UTM_KEYS = ['source', 'medium', 'campaign', 'term', 'content'] as const;
 
 /** Ime i prezime: najmanje 2 znaka bez razmaka na krajevima. */
+/** Ista pravila kao isValidTaxId u backendu i u Apps Scriptu. */
+export function taxIdValid(country: CompanyCountry, taxId: string): boolean {
+  const v = taxId.replace(/[\s.-]/g, '').toUpperCase();
+  if (country === 'SI') return /^(SI)?\d{8}$/.test(v);
+  if (country === 'EU') return /^[A-Z]{2}[0-9A-Z+*]{2,12}$/.test(v) && !v.startsWith('SI');
+  return taxId.trim().length >= 2;
+}
+
+function companyTaxId(group: AbstractControl): ValidationErrors | null {
+  const country = group.get('country')?.value as CompanyCountry;
+  const taxId = (group.get('taxId')?.value as string) ?? '';
+  return taxId.trim() && !taxIdValid(country, taxId) ? { taxId: true } : null;
+}
+
 function personName(c: AbstractControl<string>): ValidationErrors | null {
   return (c.value ?? '').trim().length >= 2 ? null : { name: true };
 }
@@ -95,6 +108,7 @@ export class ReservationFormComponent {
   /** Ostaje isti dok rezervacija ne uspe, pa ponovno slanje posle greške ne pravi duplikat. */
   private requestId: string | null = null;
 
+  protected readonly organizerName = ORGANIZER.name;
   protected readonly form = this.fb.group({
     fullName: ['', [Validators.required, personName, Validators.maxLength(120)]],
     email: ['', [Validators.required, Validators.email, Validators.maxLength(254)]],
@@ -102,18 +116,27 @@ export class ReservationFormComponent {
     ticketCount: [1 as number | null, [Validators.required, wholeNumber, Validators.min(1), Validators.max(MAX_TICKETS)]],
     ticketType: ['' as TicketTypeCode | '', Validators.required],
     diet: ['', Validators.maxLength(1000)],
+    dietConsent: [false, Validators.requiredTrue],
     note: ['', Validators.maxLength(2000)],
     invoiceNeeded: [false],
     company: this.fb.group({
       name: ['', [Validators.required, personName, Validators.maxLength(200)]],
       address: ['', [Validators.required, personName, Validators.maxLength(300)]],
+      country: ['SI' as CompanyCountry, Validators.required],
       taxId: ['', [Validators.required, personName, Validators.maxLength(40)]],
-    }),
+      vatPayer: [null as boolean | null, Validators.required],
+    }, { validators: companyTaxId }),
     source: ['' as ReservationSource | '', Validators.required],
     sourceOther: ['', Validators.maxLength(200)],
     website: [''],
   });
 
+  protected readonly dietText = toSignal(this.form.controls.diet.valueChanges, { initialValue: '' });
+  protected readonly companyCountry = toSignal(this.form.controls.company.controls.country.valueChanges, { initialValue: 'SI' as CompanyCountry });
+  protected taxIdInvalid(): boolean {
+    const g = this.form.controls.company;
+    return g.controls.taxId.touched && !!g.controls.taxId.value.trim() && !!g.errors?.['taxId'];
+  }
   protected readonly invoiceNeeded = toSignal(this.form.controls.invoiceNeeded.valueChanges, { initialValue: false });
   protected readonly ticketCount = toSignal(this.form.controls.ticketCount.valueChanges, { initialValue: 1 as number | null });
   protected readonly ticketType = toSignal(this.form.controls.ticketType.valueChanges, { initialValue: '' as TicketTypeCode | '' });
@@ -130,7 +153,23 @@ export class ReservationFormComponent {
   constructor() {
     const c = this.form.controls;
     c.company.disable();
-    c.invoiceNeeded.valueChanges.subscribe((needed) => (needed ? c.company.enable() : c.company.disable()));
+    // Saglasnost za podatke o zdravlju traži se samo kad je ishrana popunjena.
+    c.dietConsent.disable();
+    c.diet.valueChanges.subscribe((text) => {
+      if (text.trim()) c.dietConsent.enable({ emitEvent: false });
+      else c.dietConsent.disable({ emitEvent: false });
+    });
+    const syncVatPayer = () => {
+      const vat = c.company.controls.vatPayer;
+      if (c.company.controls.country.value === 'SI' && c.invoiceNeeded.value) vat.enable({ emitEvent: false });
+      else vat.disable({ emitEvent: false });
+    };
+    c.invoiceNeeded.valueChanges.subscribe((needed) => {
+      if (needed) c.company.enable();
+      else c.company.disable();
+      syncVatPayer();
+    });
+    c.company.controls.country.valueChanges.subscribe(syncVatPayer);
     // Status (otvoreno/zatvoreno) proveravamo u browseru, da ne bi ostao zapamćen u HTML-u sa servera.
     afterNextRender(() => this.loadStatus());
   }
@@ -230,9 +269,18 @@ export class ReservationFormComponent {
       phone: v.phone.trim(),
       tickets: [{ ticketType: v.ticketType as TicketTypeCode, count: v.ticketCount as number }],
       invoice: v.invoiceNeeded
-        ? { needed: true, companyName: v.company.name.trim(), companyAddress: v.company.address.trim(), taxId: v.company.taxId.trim() }
+        ? {
+            needed: true,
+            companyName: v.company.name.trim(),
+            companyAddress: v.company.address.trim(),
+            companyCountry: v.company.country,
+            taxId: v.company.taxId.trim().toUpperCase(),
+            ...(v.company.country === 'SI' ? { vatPayer: v.company.vatPayer === true } : {}),
+          }
         : { needed: false },
       diet: v.diet.trim(),
+      dietConsent: v.diet.trim() !== '' && v.dietConsent === true,
+      privacyPolicyVersion: PRIVACY_POLICY_VERSION,
       note: v.note.trim(),
       source: v.source as ReservationSource,
       sourceOther: v.source === 'DRUGO' ? v.sourceOther.trim() : '',

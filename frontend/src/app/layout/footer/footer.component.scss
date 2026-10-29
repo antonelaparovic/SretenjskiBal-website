@@ -60,7 +60,8 @@
 }
 
 .links a,
-.org a {
+.org a,
+.org-name {
   font-size: 0.875rem;
   color: var(--c-on-dark-soft);
   transition: color var(--dur-base) var(--ease);

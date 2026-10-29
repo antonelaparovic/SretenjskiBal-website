@@ -1,4 +1,4 @@
-<header class="header" [class.header--solid]="!transparent()" [class.header--open]="menuOpen()">
+<header class="header" [class.header--solid]="!transparent()" [class.header--hero-top]="transparent()" [class.header--open]="menuOpen()">
   <div class="container bar">
     <a class="brand" routerLink="/" i18n-aria-label aria-label="Sretenjski bal, početna">
       <app-emblem [size]="48" />
@@ -15,7 +15,7 @@
 
     <div class="tools">
       <app-language-switcher />
-      <a class="btn btn--outline-light cta" routerLink="/rezervacija" i18n>Rezervacija</a>
+      <a class="btn btn--outline-light cta" routerLink="/rezervacija" i18n>Ulaznice</a>
       <button
         #menuButton
         class="burger"
@@ -33,13 +33,19 @@
     </div>
   </div>
 
+  <div class="backdrop" [class.is-open]="menuOpen()" (click)="menuOpen.set(false)" aria-hidden="true"></div>
+
   <div id="mobile-menu" class="overlay" [class.is-open]="menuOpen()" [attr.inert]="menuOpen() ? null : ''">
     <nav class="container overlay__nav" i18n-aria-label aria-label="Meni">
       <ul>
         @for (item of nav; track item.path; let i = $index) {
           <li [style.--i]="i"><a [routerLink]="item.path" routerLinkActive="is-active">{{ item.label }}</a></li>
         }
+        @for (s of sections; track s.label; let i = $index) {
+          <li [style.--i]="i"><a [routerLink]="s.path ?? '/'" [fragment]="s.id" (click)="goTo(s, $event)">{{ s.label }}</a></li>
+        }
       </ul>
+      <a class="btn btn--outline-light overlay__cta" routerLink="/rezervacija" i18n>Ulaznice</a>
     </nav>
     <div class="container overlay__foot">
       <app-language-switcher />

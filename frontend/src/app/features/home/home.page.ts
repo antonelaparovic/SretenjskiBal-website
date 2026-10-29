@@ -4,7 +4,7 @@ import { SITE_URL } from '../../core/config/app.constants';
 import { EVENT } from '../../core/content/site-content';
 import { HeroSectionComponent } from './sections/hero.section';
 import { IntroSectionComponent } from './sections/intro.section';
-import { EncounterSectionComponent } from './sections/encounter.section';
+// import { EncounterSectionComponent } from './sections/encounter.section';
 import { DateMomentSectionComponent } from './sections/date-moment.section';
 import { WhySretenjeSectionComponent } from './sections/why-sretenje.section';
 import { WhyBallSectionComponent } from './sections/why-ball.section';
@@ -13,37 +13,41 @@ import { VenueSectionComponent } from './sections/venue.section';
 import { DressCodeSectionComponent } from './sections/dress-code.section';
 import { TicketsSectionComponent } from './sections/tickets.section';
 import { OrganizerSectionComponent } from './sections/organizer.section';
-import { PartnersSectionComponent } from './sections/partners.section';
+// Partneri su sakriveni dok ih ne bude.
+// import { PartnersSectionComponent } from './sections/partners.section';
+import { PerformersSectionComponent } from './sections/performers.section';
 
 @Component({
   selector: 'app-home-page',
   imports: [
     HeroSectionComponent,
     IntroSectionComponent,
-    EncounterSectionComponent,
     DateMomentSectionComponent,
     WhySretenjeSectionComponent,
     WhyBallSectionComponent,
     ProgramPreviewSectionComponent,
+    PerformersSectionComponent,
     VenueSectionComponent,
     DressCodeSectionComponent,
     TicketsSectionComponent,
     OrganizerSectionComponent,
-    PartnersSectionComponent,
   ],
   template: `
     <app-hero-section />
     <app-intro-section />
-    <app-encounter-section />
-    <app-date-moment-section [startsAt]="event.startsAt" [city]="event.city" />
+    <!-- Susret („Kultura koja spaja") — sakriveno, nije u dogovorenom redosledu:
+    <app-encounter-section /> -->
+    <app-date-moment-section [startsAt]="event.startsAt" />
     <app-why-sretenje-section />
     <app-why-ball-section />
-    <app-program-preview-section />
+    <app-performers-section />
     <app-venue-section />
+    <app-program-preview-section />
     <app-dress-code-section />
     <app-tickets-section />
     <app-organizer-section />
-    <app-partners-section />
+    <!-- Partneri — sakriveno dok ih ne bude:
+    <app-partners-section /> -->
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -28,10 +28,10 @@ Sve ove stavke su u kodu označene sa `TODO`. Spisak u kodu daje komanda
 |---|---|---|
 | 1 | **Ograničiti deljenje tabele** (sada je javna) | Google tabela → Deli (odeljak 1.1) |
 | 2 | **Pravi podaci za uplatu**: primalac sa adresom, IBAN, BIC, banka. Sada stoje izmišljene vrednosti sa „TODO", obojene žuto. | Tabela → tab „Podešavanja" (početne vrednosti su u `google-apps-script/Code.gs`, `SETTINGS`) |
-| 3 | Opisi (šta je uključeno) za All inclusive i Balkon | `frontend/src/app/core/content/site-content.ts`, `TICKETS` |
+| 3 | Opisi (šta je uključeno) za Svečanu i Galeriju | `frontend/src/app/core/content/site-content.ts`, `TICKETS` |
 | 4 | Otvaranje prodaje na sajtu: `salesStatus: 'OPEN'` | `site-content.ts`, `EVENT` |
 | 5 | Objava sajta (Cloudflare Pages) i Turnstile ključevi | uputstvo: [DEPLOY.md](DEPLOY.md); `frontend/src/app/core/config/app.constants.ts` |
-| 6 | Tekst politike privatnosti | `frontend/src/app/app.routes.ts`, ruta `privacy` |
+| 6 | Politika privatnosti: tekst je napisan, treba upisati podatke organizatora | [GDPR.md](GDPR.md); `frontend/src/app/core/content/legal-content.ts` |
 
 Dok u podacima za uplatu piše „TODO", meni „Pošalji instrukcije za uplatu" odbija slanje i kaže šta
 nedostaje. Podsetnik tada izostavlja primaoca i IBAN. **Gost nikad ne dobija izmišljen broj računa.**
@@ -107,7 +107,7 @@ Tabela → **Deli (Share)** → Opšti pristup → **Ograničeno (Restricted)** 
 |---|---|
 | `BOOKING_OPEN` | ☑ = sajt prima rezervacije. **Početno je isključeno.** |
 | `BALL_YEAR` | Dve cifre godine bala, početak broja rezervacije: `27` → 27001, 27002… |
-| `PRICE_ALL_INCLUSIVE`, `PRICE_BALKON`, `PRICE_STUDENT` | Cene u evrima (140, 80, 60). Po njima se iznos za uplatu upisuje automatski kao predlog. Ako cenu menjate, promenite je i na sajtu (`site-content.ts`, `TICKETS`). |
+| `PRICE_SVECANA`, `PRICE_GALERIJA` | Cene u evrima (140, 70). Po njima se iznos za uplatu upisuje automatski kao predlog. Ako cenu menjate, promenite je i na sajtu (`site-content.ts`, `TICKETS`). |
 | `PAYMENT_DAYS` | Rok za uplatu u danima od slanja instrukcija (7). |
 | `GRACE_DAYS` | Dani posle podsetnika u kojima gost još može da plati (2). Sutradan rezervacija postaje ISTEKLO. |
 | `ADMIN_EMAIL` | Kome stižu nove rezervacije i dnevni izveštaj (info@kcsretenje.si). |
@@ -166,7 +166,7 @@ Forma je na `/rezervacija`. Dugmad „Rezerviši kartu" u sekciji Karte na poče
 pojavljuju se kad u `frontend/src/app/core/content/site-content.ts` postavite `EVENT.salesStatus: 'OPEN'`.
 Do tada sekcija prikazuje karte sa cenama i „Prodaja uskoro počinje".
 
-Tipovi karata su **All inclusive**, **Balkon** i **Studentska ulaznica**, isti na početnoj i u formi.
+Tipovi karata su **Svečana** (140 €) i **Galerija** (70 €), isti na početnoj i u formi.
 Ako se menjaju, menjaju se na dva mesta (iste šifre): `reservation-form.component.ts` (`TICKET_TYPE_OPTIONS`)
 i `google-apps-script/Code.gs` (`TICKET_TYPES`), a naziv i cena još u `site-content.ts` (`TICKETS`).
 Posle izmene `Code.gs` ponovo pokrenite „Podesi tabelu", da tab Statistika dobije red za novi tip.
@@ -218,7 +218,7 @@ PLAĆENO, sivo ISTEKLO/OTKAZANO. Filtrom u zaglavlju lako izdvojite npr. sve koj
 ### Nova rezervacija → instrukcije za uplatu
 
 1. Stiže mejl „Nova rezervacija za Sretenjski bal — 27001". *Odgovori* u mejlu ide direktno gostu.
-2. Kolona **Iznos za uplatu** je već popunjena po cenama (npr. 2 × All inclusive = 280). Proverite je i,
+2. Kolona **Iznos za uplatu** je već popunjena po cenama (npr. 2 × Svečana = 280). Proverite je i,
    ako treba (popust, dogovor), upišite drugi iznos.
 3. Kliknite bilo gde u redu → **Sretenjski bal → Pošalji instrukcije za uplatu (izabrani red)**.
    Prikazaće se kome se šalje, koji je iznos i koji je rok. Potvrdite sa **Da**.
@@ -342,3 +342,22 @@ Automatski mejlovi postoje na srpskom, slovenačkom i engleskom (`MAIL` u `Code.
 - `cd frontend && npx ng test --watch=false`: provere formi.
 - Za testiranje sa pravom tabelom koristite **kopiju tabele** (Datoteka → Napravi kopiju, kopija dobija
   i skriptu) sa sopstvenom web aplikacijom i svojim mejlom, a ne produkcionu tabelu.
+
+## Faktura na firmu (podaci za Sloveniju)
+
+Ako gost traži fakturu na firmu, forma traži:
+
+| Polje | Zašto |
+|---|---|
+| Naziv firme | piše na fakturi |
+| Sedež (ulica, poštanski broj, mesto) | piše na fakturi |
+| Država sedišta: Slovenija / druga država EU / izvan EU | od toga zavisi obračun DDV-a |
+| Davčna številka (SI) odnosno ID za PDV sa oznakom države (EU) / poreski broj (ostalo) | obavezan podatak na fakturi; format se proverava (SI: 8 cifara, uz opcioni prefiks SI; EU: npr. HR12345678901) |
+| Obveznik DDV-a da/ne (samo za firme iz Slovenije) | slovenačka firma koja nije obveznik DDV-a nema ID za DDV, samo davčnu številku |
+
+U koloni „Podaci firme“ u tabeli ova polja stoje u jednoj ćeliji, uz napomenu o obračunu
+(EU: obrnuta naplata/reverse charge ako je ID za PDV važeći u sistemu VIES; izvan EU: proveriti sa računovođom).
+
+Uplata na slovenački račun (IBAN) ne zavisi od države firme: može je izvršiti firma iz bilo koje zemlje (SEPA ili međunarodni
+nalog; za uplatu van EU treba BIC/SWIFT i obično nastaju bankarske provizije). Država firme utiče samo na fakturu i DDV, zato
+konačan obračun uvek potvrditi sa računovođom organizatora.

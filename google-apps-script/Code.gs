@@ -66,6 +66,7 @@ const COL = {
   pageUrl: 'Stranica prijave',
   utm: 'UTM parametri',
   systemNote: 'Sistemska napomena',
+  consent: 'Saglasnost',
   requestId: 'Jedinstveni identifikator zahteva',
 };
 
@@ -74,7 +75,7 @@ const COLUMN_GROUPS = [
   { color: '#5a1723', keys: ['number', 'status', 'fullName', 'ticketType', 'ticketCount', 'amount', 'diet', 'note', 'createdAt', 'email', 'phone'] },
   { color: '#26352c', keys: ['instructionsAt', 'deadline', 'reminderAt', 'paidAt', 'paymentConfirmedAt', 'closedAt', 'adminNote'] },
   { color: '#7a6438', keys: ['invoice', 'company', 'source', 'sourceOther', 'locale'] },
-  { color: '#5b4f48', keys: ['pageUrl', 'utm', 'systemNote', 'requestId'], collapsed: true },
+  { color: '#5b4f48', keys: ['pageUrl', 'utm', 'systemNote', 'consent', 'requestId'], collapsed: true },
 ];
 
 /** Objašnjenja koja se vide kad se pređe mišem preko zaglavlja. */
@@ -90,13 +91,14 @@ const HEADER_NOTES = {
   paymentConfirmedAt: 'Upisuje se kad iz menija pošaljete potvrdu uplate. Obrišite ga samo ako potvrdu treba poslati ponovo.',
   adminNote: 'Slobodno polje za ekipu — skripta ga nikad ne menja.',
   systemNote: 'Upisuje skripta (npr. da li su mejlovi poslati).',
+  consent: 'Dokaz o obaveštavanju i saglasnosti: verzija politike privatnosti koju je gost video i, ako je naveo ishranu, izričita saglasnost za podatke o zdravlju (član 9 GDPR). Ne brisati dok se rezervacija čuva.',
 };
 
 const HEADERS = Object.keys(COL).map(function (k) { return COL[k]; });
 const DATE_KEYS = ['instructionsAt', 'deadline', 'reminderAt', 'paidAt', 'paymentConfirmedAt', 'closedAt'];
 
 /** Šifre su iste kao na sajtu i u backendu; nazivi su ono što se vidi u tabeli. */
-const TICKET_TYPES = { ALL_INCLUSIVE: 'All inclusive', BALKON: 'Balkon', STUDENT: 'Studentska ulaznica' };
+const TICKET_TYPES = { SVECANA: 'Svečana', GALERIJA: 'Galerija' };
 const SOURCES = {
   PREPORUKA: 'Preporuka prijatelja',
   DRUSTVENE_MREZE: 'Društvene mreže',
@@ -137,9 +139,8 @@ const TURNSTILE_VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/sit
 const SETTINGS = [
   ['BOOKING_OPEN', false, 'Označeno = sajt prima nove rezervacije. Isključite kad se mesta popune — već upisane rezervacije ostaju.'],
   ['BALL_YEAR', '27', 'Dve cifre godine bala, početak broja rezervacije (27 → 27001, 27002…). Promenite pred sledeći bal.'],
-  ['PRICE_ALL_INCLUSIVE', 140, 'Cena karte All inclusive (EUR). Iznos za uplatu se upisuje automatski kao predlog — pre slanja instrukcija možete ga promeniti.'],
-  ['PRICE_BALKON', 80, 'Cena karte Balkon (EUR).'],
-  ['PRICE_STUDENT', 60, 'Cena studentske ulaznice (EUR).'],
+  ['PRICE_SVECANA', 140, 'Cena karte Svečana (EUR). Iznos za uplatu se upisuje automatski kao predlog — pre slanja instrukcija možete ga promeniti.'],
+  ['PRICE_GALERIJA', 70, 'Cena karte Galerija (EUR).'],
   ['PAYMENT_DAYS', 7, 'Rok za uplatu u danima, računa se od dana slanja instrukcija za uplatu.'],
   ['GRACE_DAYS', 2, 'Koliko dana posle podsetnika gost još može da plati. Sledećeg dana neplaćena rezervacija prelazi u ISTEKLO.'],
   ['ADMIN_EMAIL', 'info@kcsretenje.si', 'Adresa na koju stižu obaveštenja o novim rezervacijama i dnevni izveštaj o rokovima.'],
@@ -321,6 +322,9 @@ function validateReservation_(r) {
   });
   if (!tickets.length || total > MAX_TICKETS_PER_RESERVATION) bad.push('tickets');
   if (!optionalStr_(r.diet, 1000)) bad.push('diet');
+  // Ishrana i alergije su podaci o zdravlju: bez izričite saglasnosti se ne upisuju.
+  if (typeof r.diet === 'string' && r.diet.trim() && r.dietConsent !== true) bad.push('dietConsent');
+  if (!str(r.privacyPolicyVersion, 1, 20)) bad.push('privacyPolicyVersion');
   if (!optionalStr_(r.note, 2000)) bad.push('note');
   if (!optionalStr_(r.sourceOther, 200)) bad.push('sourceOther');
   if (!optionalStr_(r.pageUrl, 500)) bad.push('pageUrl');
@@ -329,7 +333,9 @@ function validateReservation_(r) {
   if (inv.needed === true) {
     if (!str(inv.companyName, 2, 200)) bad.push('invoice.companyName');
     if (!str(inv.companyAddress, 2, 300)) bad.push('invoice.companyAddress');
-    if (!str(inv.taxId, 2, 40)) bad.push('invoice.taxId');
+    if (COMPANY_COUNTRIES_.indexOf(inv.companyCountry) < 0) bad.push('invoice.companyCountry');
+    if (!isValidTaxId_(inv.companyCountry, inv.taxId)) bad.push('invoice.taxId');
+    if (inv.companyCountry === 'SI' && typeof inv.vatPayer !== 'boolean') bad.push('invoice.vatPayer');
   }
   if (!SOURCES[r.source]) bad.push('source');
   if (LOCALES.indexOf(r.locale) < 0) bad.push('locale');
@@ -418,6 +424,34 @@ function nextNumber_(t, ballYear) {
   return ballYear + String(next).padStart(3, '0');
 }
 
+const COMPANY_COUNTRIES_ = ['SI', 'EU', 'OTHER'];
+const COMPANY_COUNTRY_LABELS_ = { SI: 'Slovenija', EU: 'Druga država EU', OTHER: 'Izvan EU' };
+
+/** Ista pravila kao u formi za rezervaciju na sajtu (format poreskog broja po državi firme). */
+function isValidTaxId_(country, taxId) {
+  const raw = typeof taxId === 'string' ? taxId : '';
+  const v = raw.replace(/[\s.-]/g, '').toUpperCase();
+  if (country === 'SI') return /^(SI)?\d{8}$/.test(v);
+  if (country === 'EU') return /^[A-Z]{2}[0-9A-Z+*]{2,12}$/.test(v) && v.indexOf('SI') !== 0;
+  return raw.trim().length >= 2 && raw.trim().length <= 40;
+}
+
+/** Podaci firme za fakturu, u jednoj ćeliji. Napomena o DDV-u pomaže knjigovođi da odmah vidi o kakvom je obračunu reč. */
+function companyDetails_(inv) {
+  const country = inv.companyCountry;
+  const taxLabel = country === 'SI' ? 'Davčna številka / ID za DDV' : country === 'EU' ? 'ID za DDV' : 'Poreski broj';
+  const lines = [
+    'Naziv: ' + clean_(inv.companyName),
+    'Sedež: ' + clean_(inv.companyAddress),
+    'Država: ' + (COMPANY_COUNTRY_LABELS_[country] || ''),
+    taxLabel + ': ' + clean_(inv.taxId).toUpperCase(),
+  ];
+  if (country === 'SI') lines.push('Obveznik DDV: ' + (inv.vatPayer === true ? 'DA' : 'NE'));
+  if (country === 'EU') lines.push('Obračun: reverse charge (0 % DDV) ako je ID za DDV važeći u VIES');
+  if (country === 'OTHER') lines.push('Obračun: izvan EU, proveriti sa računovođom');
+  return lines.join('\n');
+}
+
 function buildRecord_(r, number, now, settings) {
   const inv = r.invoice || {};
   const utm = r.utm || {};
@@ -433,7 +467,7 @@ function buildRecord_(r, number, now, settings) {
     amount: suggestedAmount_(r.tickets, settings.prices),
     invoice: inv.needed === true ? 'DA' : 'NE',
     company: inv.needed === true
-      ? ['Naziv: ' + clean_(inv.companyName), 'Adresa: ' + clean_(inv.companyAddress), 'Poreski broj: ' + clean_(inv.taxId)].join('\n')
+      ? companyDetails_(inv)
       : '',
     diet: clean_(r.diet || '', true),
     note: clean_(r.note || '', true),
@@ -442,11 +476,12 @@ function buildRecord_(r, number, now, settings) {
     locale: r.locale,
     pageUrl: clean_(r.pageUrl || '').slice(0, 500),
     utm: Object.keys(utm).filter(function (k) { return utm[k]; }).map(function (k) { return 'utm_' + k + '=' + clean_(String(utm[k])).slice(0, 100); }).join('; '),
+    consent: 'Politika privatnosti v' + clean_(r.privacyPolicyVersion) + (String(r.diet || '').trim() ? '; ishrana: izričita saglasnost data' : '; ishrana: nije navedena'),
     requestId: r.requestId,
   };
 }
 
-/** „All inclusive" ili, kad se kasnije budu kombinovali tipovi, „All inclusive ×2, Balkon ×1". */
+/** „Svečana" ili, kad se kasnije budu kombinovali tipovi, „Svečana ×2, Galerija ×1". */
 function ticketSummary_(tickets) {
   if (tickets.length === 1) return TICKET_TYPES[tickets[0].ticketType];
   return tickets.map(function (t) { return TICKET_TYPES[t.ticketType] + ' ×' + t.count; }).join(', ');
@@ -975,8 +1010,8 @@ const MAIL = {
 
 /** Nazivi tipova karata u mejlovima gostima (u tabeli su uvek na srpskom). */
 const TICKET_TYPE_TRANSLATIONS = {
-  sl: { 'Studentska ulaznica': 'Študentska vstopnica' },
-  en: { Balkon: 'Balcony', 'Studentska ulaznica': 'Student ticket' },
+  sl: { Svečana: 'Svečana vstopnica' },
+  en: { Svečana: 'Gala', Galerija: 'Gallery' },
 };
 
 function localizeTickets_(text, lang) {
