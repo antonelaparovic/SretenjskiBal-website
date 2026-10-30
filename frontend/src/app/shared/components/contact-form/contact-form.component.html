@@ -1,7 +1,7 @@
 @if (status() === 'sent') {
   <div class="sent" role="status" tabindex="-1">
     <p class="quote" i18n>Hvala na poruci.</p>
-    <p class="lead" i18n>Odgovorićemo vam u najkraćem roku.</p>
+    <p class="lead" i18n>Odgovorićemo Vam u najkraćem roku.</p>
     <button type="button" class="text-link link-btn" (click)="reset()" i18n>Pošalji novu poruku</button>
   </div>
 } @else {
@@ -44,7 +44,7 @@
       <input type="checkbox" formControlName="consent" [attr.aria-invalid]="invalid('consent')" />
       <span i18n>Pristajem da organizator obradi moje ime, e-adresu i poruku radi odgovora na upit, i da ih čuva do 12 meseci. Saglasnost mogu opozvati u svakom trenutku. Više u <a href="/privacy" target="_blank" rel="noopener" class="inline-link">politici privatnosti</a>.</span>
     </label>
-    @if (invalid('consent')) { <span class="field__error" i18n>Potrebna je vaša saglasnost.</span> }
+    @if (invalid('consent')) { <span class="field__error" i18n>Potrebna je Vaša saglasnost.</span> }
 
     @if (serverError()) { <p class="server-error" role="alert">{{ serverError() }}</p> }
 

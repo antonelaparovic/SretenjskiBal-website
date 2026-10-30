@@ -15,7 +15,7 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
           <p class="quote tag" i18n>Neke večeri ostaju zauvek u sećanju. Neke postaju tradicija.</p>
           @switch (salesStatus) {
             @case ('COMING_SOON') { <p class="quote status" i18n>Prodaja uskoro počinje.</p> }
-            @case ('SOLD_OUT') { <p class="quote status" i18n>Sve karte su rasprodate.</p> }
+            @case ('SOLD_OUT') { <p class="quote status" i18n>Sve ulaznice su rasprodate.</p> }
           }
         </div>
         <div class="list">

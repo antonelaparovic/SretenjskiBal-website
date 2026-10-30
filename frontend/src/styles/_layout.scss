@@ -39,12 +39,12 @@
   color: var(--c-ivory);
 
   .field__control::placeholder { color: rgba(246, 241, 232, 0.4); }
-  .field__error { color: #f2a6a6; }
-  .field__control[aria-invalid='true'] { border-bottom-color: #f2a6a6; }
+  .field__error { color: #ff9a8a; }
+  .field__control[aria-invalid='true'] { border-bottom-color: #ff9a8a; }
   select.field__control option { background: var(--c-wine); color: var(--c-ivory); }
   .btn--primary { background: var(--c-brass); color: var(--c-wine); }
   .btn--primary:hover:not(:disabled) { background: var(--c-ivory); color: var(--c-wine); }
   .btn--outline-dark { border-color: var(--c-brass); color: var(--c-ivory); }
   .btn--outline-dark:hover { background: var(--c-ivory); color: var(--c-wine); }
-  .server-error { background: rgba(242, 166, 166, 0.1); border-left-color: #f2a6a6; color: #f2a6a6; }
+  .server-error { background: rgba(242, 166, 166, 0.1); border-left-color: #ff9a8a; color: #ff9a8a; }
 }

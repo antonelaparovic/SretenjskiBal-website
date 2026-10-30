@@ -49,6 +49,7 @@ describe('ReservationFormComponent', () => {
     await type('[formcontrolname=phone]', '+386 40 123 456');
     await click(ticketRadios()[1]); // Galerija
     await type(count(), '2');
+    await type('.guests input', 'Maja Anić');
     await choose('[formcontrolname=source]', 2); // Društvene mreže
   }
 
@@ -68,8 +69,8 @@ describe('ReservationFormComponent', () => {
     await open();
     expect($('form')).toBeTruthy();
     expect($$('h2.legend').map((h) => h.textContent!.trim())).toEqual(['Vaši podaci', 'Ulaznice', 'Ishrana i napomene', 'Još malo']);
-    expect(el.textContent).not.toContain('Gost 1');
-    expect(el.textContent).toContain('Karte glase na vaše ime.');
+    expect($('.guests')).toBeNull();
+    expect(el.textContent).toContain('Ulaznice glase na Vaše ime.');
     expect(el.textContent).toContain('Sva polja su obavezna, osim onih označenih kao opciona.');
     expect($('a[href="/privacy"]')).toBeTruthy();
   });
@@ -91,7 +92,7 @@ describe('ReservationFormComponent', () => {
     expect($('form')).toBeTruthy();
   });
 
-  it('broj karata: dugmad − / +, bez gornjeg ograničenja u prodaji', async () => {
+  it('broj ulaznica: dugmad − / +, bez gornjeg ograničenja u prodaji', async () => {
     await open();
     expect(count().value).toBe('1');
     const [minus, plus] = $$<HTMLButtonElement>('.stepper__btn');
@@ -105,7 +106,7 @@ describe('ReservationFormComponent', () => {
     expect(errors()).toEqual([]);
   });
 
-  it('dva tipa karata kao kartice sa cenom', async () => {
+  it('dva tipa ulaznica kao kartice sa cenom', async () => {
     await open();
     const cards = $$('.ticket').map((c) => [c.querySelector('.ticket__name')!.textContent!.trim(), c.querySelector('.ticket__price')!.textContent!.replace(/\s+/g, ' ').trim()]);
     expect(cards).toEqual([
@@ -134,11 +135,23 @@ describe('ReservationFormComponent', () => {
       'Unesite ime i prezime.',
       'Unesite ispravnu email adresu.',
       'Unesite broj telefona, npr. +386 40 123 456.',
-      'Izaberite tip karte.',
-      'Unesite broj karata (ceo broj, najmanje 1).',
+      'Izaberite tip ulaznice.',
+      'Unesite broj ulaznica (ceo broj, najmanje 1).',
       'Izaberite jednu od ponuđenih mogućnosti.',
     ]);
     expect($('[formcontrolname=fullName]').getAttribute('aria-invalid')).toBe('true');
+  });
+
+  it('za svaku ulaznicu preko prve traži ime i prezime gosta', async () => {
+    await open();
+    await type(count(), '3');
+    expect($$('.guests input').length).toBe(2);
+    await click('button[type=submit]');
+    expect(errors().filter((e) => e === 'Unesite ime i prezime gosta.').length).toBe(2);
+    await type(count(), '2');
+    expect($$('.guests input').length).toBe(1);
+    await type(count(), '1');
+    expect($('.guests')).toBeNull();
   });
 
   it('neispravna email adresa', async () => {
@@ -176,7 +189,7 @@ describe('ReservationFormComponent', () => {
   it('polje „Drugo" za izvor prijave', async () => {
     await open();
     expect($('[formcontrolname=sourceOther]')).toBeNull();
-    await choose('[formcontrolname=source]', 6);
+    await choose('[formcontrolname=source]', 3);
     expect($('[formcontrolname=sourceOther]')).toBeTruthy();
   });
 
@@ -205,7 +218,7 @@ describe('ReservationFormComponent', () => {
       locale: 'sr',
       website: '',
     });
-    expect(body).not.toHaveProperty('guests');
+    expect(body.guestNames).toEqual(['Maja Anić']);
     expect(body.requestId).toMatch(/^[0-9a-f-]{36}$/);
     expect($<HTMLButtonElement>('button[type=submit]').disabled).toBe(true);
     expect($('button[type=submit]').textContent).toContain('Slanje rezervacije…');
@@ -214,7 +227,7 @@ describe('ReservationFormComponent', () => {
     await render();
     expect($('form')).toBeNull();
     expect($('.number__value').textContent).toBe('27001');
-    expect(el.textContent).toContain('Javićemo vam se u roku od 3 dana sa detaljima za uplatu.');
+    expect(el.textContent).toContain('Javićemo Vam se u roku od 3 dana sa detaljima za uplatu.');
     expect(el.textContent).toContain('Sretenjski bal 27001');
     expect($('.summary').textContent).toContain('Galerija');
     expect($('.summary').textContent).toContain('2');
@@ -258,6 +271,6 @@ describe('ReservationFormComponent', () => {
     http.expectOne('/api/reservations').flush({ code: 'BOOKING_CLOSED' }, { status: 409, statusText: 'Conflict' });
     await render();
     expect(el.textContent).toContain('Rezervacije trenutno nisu dostupne.');
-    expect(el.textContent).toContain('vaša rezervacija nije evidentirana');
+    expect(el.textContent).toContain('Vaša rezervacija nije evidentirana');
   });
 });

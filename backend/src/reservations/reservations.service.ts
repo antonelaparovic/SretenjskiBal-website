@@ -92,6 +92,7 @@ export class ReservationsService {
           ...(dto.invoice.companyCountry === 'SI' ? { vatPayer: dto.invoice.vatPayer === true } : {}),
         }
       : { needed: false };
+    const guestNames = (dto.guestNames ?? []).map((n) => cleanText(n)).filter(Boolean);
     const utm: Record<string, string> = {};
     for (const [key, value] of Object.entries(dto.utm ?? {})) {
       if (typeof value === 'string' && value.trim()) utm[key] = cleanText(value);
@@ -106,7 +107,10 @@ export class ReservationsService {
       diet: cleanText(dto.diet ?? '', { multiline: true }),
       dietConsent: dto.dietConsent === true && cleanText(dto.diet ?? '', { multiline: true }) !== '',
       privacyPolicyVersion: dto.privacyPolicyVersion,
-      note: cleanText(dto.note ?? '', { multiline: true }),
+      note: [
+        guestNames.length ? `Gosti: ${guestNames.join('; ')}` : '',
+        cleanText(dto.note ?? '', { multiline: true }),
+      ].filter(Boolean).join('\n'),
       source: dto.source,
       sourceOther: dto.source === 'DRUGO' ? cleanText(dto.sourceOther ?? '') : '',
       locale: dto.locale,

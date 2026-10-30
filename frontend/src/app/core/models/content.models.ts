@@ -68,7 +68,7 @@ export interface ContactPayload {
   elapsedMs: number;
 }
 
-/** Šifre tipova karata za rezervaciju — iste u backendu i u Google Apps Scriptu. */
+/** Šifre tipova ulaznica za rezervaciju — iste u backendu i u Google Apps Scriptu. */
 export type TicketTypeCode = 'SVECANA' | 'GALERIJA';
 
 export type ReservationSource = 'PREPORUKA' | 'DRUSTVENE_MREZE' | 'RANIJI_DOLAZAK' | 'SAJT' | 'EMAIL' | 'DRUGO';
@@ -80,12 +80,14 @@ export interface BookingStatus {
 export type CompanyCountry = 'SI' | 'EU' | 'OTHER';
 
 export interface ReservationPayload {
+  /** Imena ostalih gostiju (broj ulaznica − 1). */
+  guestNames?: string[];
   /** Isti za ponovljena slanja iste rezervacije — backend tako sprečava duplikat. */
   requestId: string;
   fullName: string;
   email: string;
   phone: string;
-  /** Karte glase na osobu koja rezerviše. Lista da bi se kasnije mogli kombinovati tipovi; za sada jedna stavka. */
+  /** Ulaznice glase na osobu koja rezerviše. Lista da bi se kasnije mogli kombinovati tipovi; za sada jedna stavka. */
   tickets: { ticketType: TicketTypeCode; count: number }[];
   invoice: {
     needed: boolean;

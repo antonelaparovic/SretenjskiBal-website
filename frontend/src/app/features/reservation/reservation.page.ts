@@ -11,10 +11,10 @@ import { ReservationFormComponent } from './reservation-form.component';
       <div class="container">
         <header class="head grid">
           <app-section-heading class="title" [level]="1" headingId="reservation-title">
-            <ng-container i18n>Rezervacija karata.</ng-container>
+            <ng-container i18n>Rezervacija ulaznica.</ng-container>
           </app-section-heading>
           <div class="intro">
-            <p class="lead" i18n>Popunite formu i rezervišite karte za Sretenjski bal. U roku od 3 dana javićemo vam se sa detaljima za uplatu.</p>
+            <p class="lead" i18n>Popunite formu i rezervišite ulaznice za Sretenjski bal. U roku od 3 dana javićemo Vam se sa detaljima za uplatu.</p>
             <p class="note" i18n>13.2.2027 · Maribor</p>
           </div>
         </header>
@@ -63,8 +63,8 @@ import { ReservationFormComponent } from './reservation-form.component';
 export class ReservationPage {
   constructor() {
     inject(SeoService).set({
-      title: $localize`Rezervacija karata | Sretenjski bal`,
-      description: $localize`Rezervišite karte za Sretenjski bal, 13. februara 2027. u Mariboru.`,
+      title: $localize`Rezervacija ulaznica | Sretenjski bal`,
+      description: $localize`Rezervišite ulaznice za Sretenjski bal, 13. februara 2027. u Mariboru.`,
       path: '/rezervacija',
     });
   }

@@ -21,7 +21,7 @@ export const routes: Routes = [
     loadComponent: () => import('./features/ball-tradition/ball-tradition.page').then((m) => m.BallTraditionPage),
   },
   { path: 'program', ...soon($localize`Program`) },
-  // Stari link na karte vodi na formu za rezervaciju.
+  // Stari link na ulaznice vodi na formu za rezervaciju.
   { path: 'karte', redirectTo: 'rezervacija' },
   { path: 'prostor', ...soon($localize`Prostor`) },
   { path: 'partneri', ...soon($localize`Partneri`) },

@@ -105,7 +105,7 @@
     }
 
     &[aria-invalid='true'] {
-      border-bottom-color: #9b1c1c;
+      border-bottom-color: #c8352b;
     }
   }
 
@@ -116,7 +116,8 @@
 
   &__error {
     font-size: var(--fs-small);
-    color: #9b1c1c;
+    font-weight: 500;
+    color: #c8352b;
   }
 }
 

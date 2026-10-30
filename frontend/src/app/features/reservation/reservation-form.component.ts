@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { ORGANIZER, PRIVACY_POLICY_VERSION, TICKETS } from '../../core/content/site-content';
@@ -30,9 +30,6 @@ export const TICKET_TYPE_OPTIONS: { value: TicketTypeCode; label: string }[] = [
 export const SOURCE_OPTIONS: { value: ReservationSource; label: string }[] = [
   { value: 'PREPORUKA', label: $localize`Preporuka prijatelja` },
   { value: 'DRUSTVENE_MREZE', label: $localize`Društvene mreže` },
-  { value: 'RANIJI_DOLAZAK', label: $localize`Raniji dolazak na bal` },
-  { value: 'SAJT', label: $localize`Sajt` },
-  { value: 'EMAIL', label: $localize`E-mail` },
   { value: 'DRUGO', label: $localize`Drugo` },
 ];
 
@@ -111,6 +108,7 @@ export class ReservationFormComponent {
     phone: ['', [Validators.required, Validators.pattern(PHONE)]],
     ticketCount: [1 as number | null, [Validators.required, wholeNumber, Validators.min(1), Validators.max(MAX_TICKETS)]],
     ticketType: ['' as TicketTypeCode | '', Validators.required],
+    guests: this.fb.array<string>([]),
     diet: ['', Validators.maxLength(1000)],
     dietConsent: [false, Validators.requiredTrue],
     note: ['', Validators.maxLength(2000)],
@@ -127,6 +125,10 @@ export class ReservationFormComponent {
     website: [''],
   });
 
+  /** Polja za imena ostalih gostiju: jedno po svakoj ulaznici preko prve (prva je na ime osobe koja rezerviše). */
+  protected get guests(): FormArray<AbstractControl<string>> {
+    return this.form.controls.guests as unknown as FormArray<AbstractControl<string>>;
+  }
   protected readonly dietText = toSignal(this.form.controls.diet.valueChanges, { initialValue: '' });
   protected readonly companyCountry = toSignal(this.form.controls.company.controls.country.valueChanges, { initialValue: 'SI' as CompanyCountry });
   protected taxIdInvalid(): boolean {
@@ -149,6 +151,14 @@ export class ReservationFormComponent {
   constructor() {
     const c = this.form.controls;
     c.company.disable();
+    const syncGuests = () => {
+      const raw = Number(c.ticketCount.value);
+      const want = Number.isInteger(raw) ? Math.min(MAX_TICKETS, Math.max(1, raw)) - 1 : 0;
+      const arr = c.guests;
+      while (arr.length < want) arr.push(this.fb.control('', [Validators.required, personName, Validators.maxLength(120)]));
+      while (arr.length > want) arr.removeAt(arr.length - 1);
+    };
+    c.ticketCount.valueChanges.subscribe(syncGuests);
     // Saglasnost za podatke o zdravlju traži se samo kad je ishrana popunjena.
     c.dietConsent.disable();
     c.diet.valueChanges.subscribe((text) => {
@@ -182,7 +192,7 @@ export class ReservationFormComponent {
     return c.invalid && (c.touched || this.submitted());
   }
 
-  /** Dugmad − / + pored broja karata. */
+  /** Dugmad − / + pored broja ulaznica. */
   protected step(delta: number): void {
     const c = this.form.controls.ticketCount;
     const current = Number.isInteger(c.value) ? (c.value as number) : 1;
@@ -223,7 +233,7 @@ export class ReservationFormComponent {
         const code = (e.error as { code?: string } | null)?.code;
         if (e.status === 409 || code === 'BOOKING_CLOSED') {
           this.booking.set('closed');
-          this.serverError.set($localize`Rezervacije su u međuvremenu zatvorene, pa vaša rezervacija nije evidentirana.`);
+          this.serverError.set($localize`Rezervacije su u međuvremenu zatvorene, pa Vaša rezervacija nije evidentirana.`);
         } else if (e.status === 429) {
           this.serverError.set($localize`Poslali ste više zahteva u kratkom roku. Pokušajte ponovo za nekoliko minuta — uneti podaci su sačuvani u formi.`);
         } else if (e.status === 400) {
@@ -265,6 +275,7 @@ export class ReservationFormComponent {
       dietConsent: v.diet.trim() !== '' && v.dietConsent === true,
       privacyPolicyVersion: PRIVACY_POLICY_VERSION,
       note: v.note.trim(),
+      ...(v.guests.length ? { guestNames: v.guests.map((g) => g.trim()) } : {}),
       source: v.source as ReservationSource,
       sourceOther: v.source === 'DRUGO' ? v.sourceOther.trim() : '',
       locale: this.locale,

@@ -2,7 +2,7 @@
   <div class="row">
     <div class="row__main success" #success tabindex="-1" role="status" aria-labelledby="success-title">
       <p class="label eyebrow" id="success-title" i18n>Rezervacija je evidentirana</p>
-      <p class="quote" i18n>Hvala vam. Vaš zahtev za rezervaciju je primljen i upisan.</p>
+      <p class="quote" i18n>Hvala Vam. Vaš zahtev za rezervaciju je primljen i upisan.</p>
 
       <div class="number">
         <span class="field__label" i18n>Broj rezervacije</span>
@@ -10,11 +10,11 @@
       </div>
 
       <dl class="summary">
-        <div><dt class="field__label" i18n>Tip karte</dt><dd>{{ r.ticketLabel }}</dd></div>
-        <div><dt class="field__label" i18n>Broj karata</dt><dd>{{ r.count }}</dd></div>
+        <div><dt class="field__label" i18n>Tip ulaznice</dt><dd>{{ r.ticketLabel }}</dd></div>
+        <div><dt class="field__label" i18n>Broj ulaznica</dt><dd>{{ r.count }}</dd></div>
       </dl>
 
-      <p class="lead" i18n>Javićemo vam se u roku od 3 dana sa detaljima za uplatu.</p>
+      <p class="lead" i18n>Javićemo Vam se u roku od 3 dana sa detaljima za uplatu.</p>
       <p class="body" i18n>Sačuvajte broj rezervacije i navedite ga prilikom uplate — u svrsi uplate upišite „Sretenjski bal {{ r.number }}“. Iznos i podatke za uplatu dobićete naknadno, e-mailom.</p>
       @if (r.mailTo) {
         <p class="note" i18n>Potvrdu sa ovim podacima poslali smo i na adresu {{ r.mailTo }}.</p>
@@ -41,7 +41,7 @@
         <div class="row__main notice" role="status">
           <p class="quote" i18n>Rezervacije trenutno nisu dostupne.</p>
           @if (serverError()) { <p class="server-error">{{ serverError() }}</p> }
-          <p class="body" i18n>Za pitanja o kartama <a class="inline-link" routerLink="/kontakt">pišite nam</a>.</p>
+          <p class="body" i18n>Za pitanja o ulaznicama <a class="inline-link" routerLink="/kontakt">pišite nam</a>.</p>
         </div>
       </div>
     }
@@ -50,7 +50,7 @@
         <section class="row" aria-labelledby="sec-contact">
           <div class="row__aside">
             <h2 class="label legend" id="sec-contact" i18n>Vaši podaci</h2>
-            <p class="aside-text" i18n>Karte glase na vaše ime. Na ovaj e-mail šaljemo potvrdu i podatke za uplatu.</p>
+            <p class="aside-text" i18n>Ulaznice glase na Vaše ime. Na ovaj e-mail šaljemo potvrdu i podatke za uplatu.</p>
           </div>
           <div class="row__main fields">
             <label class="field">
@@ -83,7 +83,7 @@
           </div>
           <div class="row__main fields">
             <fieldset class="choice" aria-describedby="err-ticketType">
-              <legend class="field__label" i18n>Tip karte</legend>
+              <legend class="field__label" i18n>Tip ulaznice</legend>
               <div class="tickets">
                 @for (t of ticketTypes; track t.value) {
                   <label class="ticket">
@@ -93,19 +93,19 @@
                   </label>
                 }
               </div>
-              @if (invalid(form.controls.ticketType)) { <span class="field__error" id="err-ticketType" i18n>Izaberite tip karte.</span> }
+              @if (invalid(form.controls.ticketType)) { <span class="field__error" id="err-ticketType" i18n>Izaberite tip ulaznice.</span> }
             </fieldset>
 
             <div class="count-row">
               <div class="field">
-                <label class="field__label" for="ticketCount" i18n>Broj karata</label>
+                <label class="field__label" for="ticketCount" i18n>Broj ulaznica</label>
                 <div class="stepper">
-                  <button type="button" class="stepper__btn" (click)="step(-1)" [disabled]="(ticketCount() ?? 1) <= 1" i18n-aria-label aria-label="Jedna karta manje">−</button>
+                  <button type="button" class="stepper__btn" (click)="step(-1)" [disabled]="(ticketCount() ?? 1) <= 1" i18n-aria-label aria-label="Jedna ulaznica manje">−</button>
                   <input id="ticketCount" class="field__control stepper__input" type="number" inputmode="numeric" min="1" [max]="maxTickets" step="1"
                     formControlName="ticketCount" required [attr.aria-invalid]="invalid(form.controls.ticketCount)" aria-describedby="err-ticketCount" />
-                  <button type="button" class="stepper__btn" (click)="step(1)" i18n-aria-label aria-label="Jedna karta više">+</button>
+                  <button type="button" class="stepper__btn" (click)="step(1)" i18n-aria-label aria-label="Jedna ulaznica više">+</button>
                 </div>
-                @if (invalid(form.controls.ticketCount)) { <span class="field__error" id="err-ticketCount" i18n>Unesite broj karata (ceo broj, najmanje 1).</span> }
+                @if (invalid(form.controls.ticketCount)) { <span class="field__error" id="err-ticketCount" i18n>Unesite broj ulaznica (ceo broj, najmanje 1).</span> }
               </div>
 
               @if (estimate(); as e) {
@@ -116,6 +116,23 @@
                 </p>
               }
             </div>
+
+            @if (guests.length) {
+              <fieldset class="choice guests">
+                <legend class="field__label" i18n>Imena gostiju</legend>
+                <p class="field__hint" i18n>Prva ulaznica glasi na ime iz podataka iznad. Upišite ime i prezime za svaku od ostalih ulaznica.</p>
+                <div class="pair">
+                  @for (g of guests.controls; track $index; let i = $index) {
+                    <label class="field">
+                      <span class="field__label"><ng-container i18n>Gost</ng-container> {{ i + 2 }}</span>
+                      <input class="field__control" [formControl]="$any(g)" autocomplete="off" required
+                        [attr.aria-invalid]="invalid(g)" />
+                      @if (invalid(g)) { <span class="field__error" i18n>Unesite ime i prezime gosta.</span> }
+                    </label>
+                  }
+                </div>
+              </fieldset>
+            }
           </div>
         </section>
 
@@ -143,8 +160,7 @@
 
             <label class="field">
               <span class="field__label"><ng-container i18n>Ostale napomene</ng-container> <span class="optional" i18n>(opciono)</span></span>
-              <textarea class="field__control" formControlName="note" rows="3" aria-describedby="hint-note"></textarea>
-              <span class="field__hint" id="hint-note" i18n>Ako kupujete karte za nekog drugog, napišite za koga. Ovde upišite i želje u vezi sa sedenjem.</span>
+              <textarea class="field__control" formControlName="note" rows="3"></textarea>
             </label>
           </div>
         </section>
@@ -155,7 +171,7 @@
           </div>
           <div class="row__main fields">
             <fieldset class="choice">
-              <legend class="field__label" i18n>Da li vam je potrebna faktura na firmu?</legend>
+              <legend class="field__label" i18n>Da li Vam je potrebna faktura na firmu?</legend>
               <div class="options">
                 <label class="checkbox"><input type="radio" formControlName="invoiceNeeded" [value]="false" /><span i18n>Ne</span></label>
                 <label class="checkbox"><input type="radio" formControlName="invoiceNeeded" [value]="true" /><span i18n>Da</span></label>
@@ -238,7 +254,7 @@
         <div class="row row--submit">
           <div class="row__main fields">
             <input class="hp" type="text" formControlName="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
-            <p class="note" i18n>Sva polja su obavezna, osim onih označenih kao opciona. Podatke iz ove forme koristimo za obradu vaše rezervacije i kontakt u vezi sa njom. Podatke obrađuje {{ organizerName }} na osnovu izvršenja rezervacije i čuva ih do 6 meseci nakon bala; možete zatražiti uvid, ispravku ili brisanje. Više u <a routerLink="/privacy" target="_blank" class="inline-link">politici privatnosti</a>.</p>
+            <p class="note" i18n>Sva polja su obavezna, osim onih označenih kao opciona. Podatke iz ove forme koristimo za obradu Vaše rezervacije i kontakt u vezi sa njom. Podatke obrađuje {{ organizerName }} na osnovu izvršenja rezervacije i čuva ih do 6 meseci nakon bala; možete zatražiti uvid, ispravku ili brisanje. Više u <a routerLink="/privacy" target="_blank" class="inline-link">politici privatnosti</a>.</p>
             @if (serverError()) { <p class="server-error" role="alert">{{ serverError() }}</p> }
             <button class="btn btn--primary submit" type="submit" [disabled]="sending()" [attr.aria-busy]="sending()">
               @if (sending()) { <ng-container i18n>Slanje rezervacije…</ng-container> } @else { <ng-container i18n>Pošalji rezervaciju</ng-container> }

@@ -160,6 +160,14 @@ export class CreateReservationDto {
   @MaxLength(2000)
   note?: string;
 
+  /** Imena ostalih gostiju (broj ulaznica − 1); upisuju se na početak napomene. */
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(99)
+  @IsString({ each: true })
+  @Length(2, 120, { each: true })
+  guestNames?: string[];
+
   @IsIn(RESERVATION_SOURCES)
   source!: ReservationSource;
 
