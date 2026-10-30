@@ -32,6 +32,7 @@
 
 // Tamna tema stranice (bordo): ista komponenta forme, samo se tokeni preslikaju na svetle tonove.
 .on-dark {
+  --autofill-bg: #4a1520;
   --c-ink: var(--c-ivory);
   --c-ink-soft: rgba(246, 241, 232, 0.7);
   --c-burgundy: #d3bb82; // mesing za oznake i cene na tamnoj podlozi

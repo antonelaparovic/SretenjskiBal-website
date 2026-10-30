@@ -256,7 +256,7 @@ describe('ReservationFormComponent', () => {
     expect($('form')).toBeNull();
     expect($('.number__value').textContent).toBe('27001');
     expect(el.textContent).toContain('Javićemo Vam se u roku od 3 dana sa detaljima za uplatu.');
-    expect(el.textContent).toContain('Sretenjski bal 27001');
+    expect(el.textContent).not.toContain('svrsi uplate');
     expect($('.summary').textContent).toContain('Galerija');
     expect($('.summary').textContent).toContain('2');
     expect(el.textContent).toContain('ana@primer.si');

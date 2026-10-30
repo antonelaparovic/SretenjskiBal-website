@@ -90,7 +90,7 @@
   &__control {
     width: 100%;
     min-height: 48px;
-    padding: 0.75rem 0;
+    padding: 0.75rem 0.85rem;
     border: 0;
     border-bottom: 1px solid var(--c-ink);
     border-radius: 0;
@@ -106,6 +106,16 @@
 
     &[aria-invalid='true'] {
       border-bottom-color: #c8352b;
+    }
+
+    // Automatsko popunjavanje (browser): boje sajta umesto svetloplave podloge.
+    &:-webkit-autofill,
+    &:-webkit-autofill:hover,
+    &:-webkit-autofill:focus {
+      -webkit-text-fill-color: var(--c-ink);
+      caret-color: var(--c-ink);
+      box-shadow: 0 0 0 1000px var(--autofill-bg, #efe6d6) inset;
+      transition: background-color 9999s ease-out 0s;
     }
   }
 
@@ -163,7 +173,7 @@ select.field__control option {
 
   select.field__control {
     background-image: none;
-    padding-right: 0;
+    padding-right: 0.85rem;
 
     &::picker-icon {
       color: var(--c-burgundy);
