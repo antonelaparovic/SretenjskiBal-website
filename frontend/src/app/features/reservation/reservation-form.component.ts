@@ -103,7 +103,8 @@ export class ReservationFormComponent {
 
   protected readonly organizerName = ORGANIZER.name;
   protected readonly form = this.fb.group({
-    fullName: ['', [Validators.required, personName, Validators.maxLength(120)]],
+    firstName: ['', [Validators.required, personName, Validators.maxLength(60)]],
+    lastName: ['', [Validators.required, personName, Validators.maxLength(60)]],
     email: ['', [Validators.required, Validators.email, Validators.maxLength(254)]],
     phone: ['', [Validators.required, Validators.pattern(PHONE)]],
     ticketCount: [1 as number | null, [Validators.required, wholeNumber, Validators.min(1), Validators.max(MAX_TICKETS)]],
@@ -263,7 +264,7 @@ export class ReservationFormComponent {
     }
     return {
       requestId,
-      fullName: v.fullName.trim(),
+      fullName: `${v.firstName.trim()} ${v.lastName.trim()}`,
       email: v.email.trim(),
       phone: v.phone.trim(),
       tickets: [{ ticketType: v.ticketType as TicketTypeCode, count: v.ticketCount as number }],

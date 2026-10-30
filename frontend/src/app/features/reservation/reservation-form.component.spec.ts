@@ -44,7 +44,8 @@ describe('ReservationFormComponent', () => {
   }
 
   async function fillValid() {
-    await type('[formcontrolname=fullName]', 'Ana Anić');
+    await type('[formcontrolname=firstName]', 'Ana');
+    await type('[formcontrolname=lastName]', 'Anić');
     await type('[formcontrolname=email]', 'ana@primer.si');
     await type('[formcontrolname=phone]', '+386 40 123 456');
     await click(ticketRadios()[1]); // Galerija
@@ -135,14 +136,15 @@ describe('ReservationFormComponent', () => {
     await click('button[type=submit]');
     http.expectNone('/api/reservations');
     expect(errors()).toEqual([
-      'Unesite ime i prezime.',
+      'Unesite ime.',
+      'Unesite prezime.',
       'Unesite ispravnu email adresu.',
       'Unesite broj telefona, npr. +386 40 123 456.',
       'Izaberite tip ulaznice.',
       'Unesite broj ulaznica (ceo broj, najmanje 1).',
       'Izaberite jednu od ponuđenih mogućnosti.',
     ]);
-    expect($('[formcontrolname=fullName]').getAttribute('aria-invalid')).toBe('true');
+    expect($('[formcontrolname=firstName]').getAttribute('aria-invalid')).toBe('true');
   });
 
   it('za svaku ulaznicu preko prve traži ime i prezime gosta', async () => {
@@ -246,7 +248,8 @@ describe('ReservationFormComponent', () => {
     await render();
     expect($('.server-error').textContent).toContain('Rezervacija nije sačuvana');
     expect($('form')).toBeTruthy();
-    expect($('[formcontrolname=fullName]').value).toBe('Ana Anić');
+    expect($('[formcontrolname=firstName]').value).toBe('Ana');
+    expect($('[formcontrolname=lastName]').value).toBe('Anić');
     expect(count().value).toBe('2');
 
     await click('button[type=submit]');

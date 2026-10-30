@@ -53,12 +53,20 @@
             <p class="aside-text" i18n>Ulaznice glase na Vaše ime. Na ovaj e-mail šaljemo potvrdu i podatke za uplatu.</p>
           </div>
           <div class="row__main fields">
-            <label class="field">
-              <span class="field__label" i18n>Ime i prezime</span>
-              <input class="field__control" formControlName="fullName" autocomplete="name" required
-                [attr.aria-invalid]="invalid(form.controls.fullName)" aria-describedby="err-fullName" />
-              @if (invalid(form.controls.fullName)) { <span class="field__error" id="err-fullName" i18n>Unesite ime i prezime.</span> }
-            </label>
+            <div class="pair">
+              <label class="field">
+                <span class="field__label" i18n>Ime</span>
+                <input class="field__control" formControlName="firstName" autocomplete="given-name" required
+                  [attr.aria-invalid]="invalid(form.controls.firstName)" aria-describedby="err-firstName" />
+                @if (invalid(form.controls.firstName)) { <span class="field__error" id="err-firstName" i18n>Unesite ime.</span> }
+              </label>
+              <label class="field">
+                <span class="field__label" i18n>Prezime</span>
+                <input class="field__control" formControlName="lastName" autocomplete="family-name" required
+                  [attr.aria-invalid]="invalid(form.controls.lastName)" aria-describedby="err-lastName" />
+                @if (invalid(form.controls.lastName)) { <span class="field__error" id="err-lastName" i18n>Unesite prezime.</span> }
+              </label>
+            </div>
             <div class="pair">
               <label class="field">
                 <span class="field__label" i18n>Email</span>
