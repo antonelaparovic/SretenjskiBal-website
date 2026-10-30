@@ -23,18 +23,6 @@
   </div>
 } @else {
   @switch (booking()) {
-    @case ('loading') {
-      <div class="row"><p class="row__main note" role="status" i18n>Učitavanje forme za rezervaciju…</p></div>
-    }
-    @case ('error') {
-      <div class="row">
-        <div class="row__main notice" role="alert">
-          <p class="quote" i18n>Rezervacije trenutno nisu dostupne.</p>
-          <p class="body" i18n>Nismo uspeli da proverimo da li su rezervacije otvorene. Pokušajte ponovo za nekoliko minuta.</p>
-          <button type="button" class="btn btn--outline-dark" (click)="loadStatus()" i18n>Pokušaj ponovo</button>
-        </div>
-      </div>
-    }
     @case ('closed') {
       <div class="row">
         <div class="row__main notice" role="status">

@@ -19,7 +19,7 @@ import { FormsApiService, ScriptError } from '../../core/services/forms-api.serv
 import { TurnstileComponent } from '../../shared/components/turnstile/turnstile.component';
 import { formatPrice } from '../../core/util/format';
 
-type Booking = 'loading' | 'open' | 'closed' | 'error';
+type Booking = 'open' | 'closed';
 
 /** Šifre moraju biti iste kao u google-apps-script/Code.gs (TICKET_TYPES); naziv i cena su u site-content.ts (TICKETS). */
 export const TICKET_TYPE_OPTIONS: { value: TicketTypeCode; label: string }[] = [
@@ -85,7 +85,8 @@ export class ReservationFormComponent {
   });
   protected readonly sources = SOURCE_OPTIONS;
   protected readonly maxTickets = MAX_TICKETS;
-  protected readonly booking = signal<Booking>('loading');
+  /** Forma se prikazuje odmah; ako provera pokaže da su rezervacije zatvorene, zamenjuje je obaveštenje. */
+  protected readonly booking = signal<Booking>('open');
   protected readonly sending = signal(false);
   protected readonly submitted = signal(false);
   protected readonly serverError = signal<string | null>(null);
@@ -192,10 +193,10 @@ export class ReservationFormComponent {
   }
 
   protected loadStatus(): void {
-    this.booking.set('loading');
+    // Provera ide u pozadini; ako ne uspe, forma ostaje, a slanje svakako proverava status na serveru.
     this.api.getReservationStatus().subscribe({
       next: (s) => this.booking.set(s.open ? 'open' : 'closed'),
-      error: () => this.booking.set('error'),
+      error: () => undefined,
     });
   }
 

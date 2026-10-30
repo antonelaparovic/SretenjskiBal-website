@@ -106,13 +106,10 @@ describe('ReservationFormComponent', () => {
     expect(el.textContent).toContain('Rezervacije trenutno nisu dostupne.');
   });
 
-  it('kad backend nije dostupan nudi ponovni pokušaj', async () => {
+  it('forma se prikazuje odmah i ostaje i kad provera statusa ne uspe', async () => {
     await render();
+    expect($('form')).toBeTruthy();
     script('status').error(new ProgressEvent('error'));
-    await render();
-    expect($('form')).toBeNull();
-    await click('.notice button');
-    script('status').flush({ ok: true, open: true });
     await render();
     expect($('form')).toBeTruthy();
   });
