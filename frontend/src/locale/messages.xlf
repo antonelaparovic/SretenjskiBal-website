@@ -83,8 +83,8 @@
           <context context-type="linenumber">50</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="1816742285216843360" datatype="html">
-        <source>Nastupi KUD-a iz Maribora, baletska tačka i pevanje, uz slobodan ples.</source>
+      <trans-unit id="5915048717374857714" datatype="html">
+        <source>Nastupi SKD Maribor, operska pevačica i harmonikaš, uz slobodan ples.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
           <context context-type="linenumber">50</context>
@@ -179,46 +179,60 @@
           <context context-type="linenumber">89</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="7881651936407201472" datatype="html">
-        <source>Voditeljka večeri</source>
+      <trans-unit id="7789882067463560772" datatype="html">
+        <source>Voditeljka programa</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
           <context context-type="linenumber">90</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="503086916012932165" datatype="html">
-        <source>Glumac · recitacija</source>
+      <trans-unit id="5615598052097456609" datatype="html">
+        <source>Profesor književnosti i pisac</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
           <context context-type="linenumber">91</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="4081082091303018324" datatype="html">
-        <source>Recitacija</source>
+      <trans-unit id="7875408122500418531" datatype="html">
+        <source>Glumac</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
           <context context-type="linenumber">92</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4743698184641915193" datatype="html">
+        <source>Operska pevačica</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
+          <context context-type="linenumber">93</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="410181542251281132" datatype="html">
+        <source>Violinistkinja</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
+          <context context-type="linenumber">94</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5857212294291058112" datatype="html">
+        <source>Harmonikaš</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
+          <context context-type="linenumber">95</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2869215905616609740" datatype="html">
+        <source>Folklor</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
+          <context context-type="linenumber">96</context>
         </context-group>
       </trans-unit>
       <trans-unit id="6121306988137786378" datatype="html">
         <source>Hor</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
-          <context context-type="linenumber">93</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="8312501018250208021" datatype="html">
-        <source>Baletski duo</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
-          <context context-type="linenumber">94</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="6222874254239669559" datatype="html">
-        <source>KUD · folklor</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
-          <context context-type="linenumber">95</context>
+          <context context-type="linenumber">97</context>
         </context-group>
       </trans-unit>
       <trans-unit id="557727155035277857" datatype="html">

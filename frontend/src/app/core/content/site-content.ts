@@ -47,7 +47,7 @@ export const PROGRAM: ProgramItem[] = [
   { time: '18:00', title: $localize`Ulazak gostiju`, description: $localize`Doček u foajeu Narodnog doma uz muzičku pozadinu. Gosti se u 18:55 pozivaju ka svojim stolovima.` },
   { time: '19:00', title: $localize`Himne i otvaranje`, description: $localize`Himne Srbije i Slovenije, a zatim izlazak voditelja i uvodna reč.` },
   { time: '19:30', title: $localize`Svečana večera`, description: $localize`Večera uz muziku kamernog kvarteta.` },
-  { time: '19:50', until: '21:00', title: $localize`Kulturno-umetnički program`, description: $localize`Nastupi KUD-a iz Maribora, baletska tačka i pevanje, uz slobodan ples.` },
+  { time: '19:50', until: '21:00', title: $localize`Kulturno-umetnički program`, description: $localize`Nastupi SKD Maribor, operska pevačica i harmonikaš, uz slobodan ples.` },
   { time: '21:20', until: '23:00', title: $localize`Koncert grupe Galija`, description: $localize`Glavni muzički program večeri i završetak bala.` },
 ];
 
@@ -87,12 +87,14 @@ export const SPONSORS: Sponsor[] = [];
  */
 export const PERFORMERS: Performer[] = [
   { role: $localize`Glavni muzički gost`, name: 'Galija', featured: true },
-  { role: $localize`Voditeljka večeri`, name: null },
-  { role: $localize`Glumac · recitacija`, name: null },
-  { role: $localize`Recitacija`, name: 'Nenad Gugl' },
+  { role: $localize`Voditeljka programa`, name: 'Aleksandra Balmazović' },
+  { role: $localize`Profesor književnosti i pisac`, name: 'Nenad Gugl' },
+  { role: $localize`Glumac`, name: null },
+  { role: $localize`Operska pevačica`, name: 'Anđela Nedeljković' },
+  { role: $localize`Violinistkinja`, name: 'Sara Mitić i kvartet' },
+  { role: $localize`Harmonikaš`, name: 'Mile' },
+  { role: $localize`Folklor`, name: 'SKD Maribor' },
   { role: $localize`Hor`, name: null },
-  { role: $localize`Baletski duo`, name: null },
-  { role: $localize`KUD · folklor`, name: null },
 ];
 
 /**
