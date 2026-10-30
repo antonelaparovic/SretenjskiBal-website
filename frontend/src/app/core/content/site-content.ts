@@ -44,13 +44,12 @@ export const HERO_IMAGE: { src: string | null; alt: string; credit: string | nul
 /** Okvirna satnica — biće potvrđena. */
 /** Predlog programa — satnica i sadržaj se potvrđuju sa organizatorom. */
 export const PROGRAM: ProgramItem[] = [
-  { time: '18:30', title: $localize`Dolazak gostiju`, description: $localize`Doček u foajeu Narodnog doma, piće dobrodošlice i fotografisanje.` },
-  { time: '19:30', title: $localize`Svečano otvaranje`, description: $localize`Pozdravne reči organizatora i zvanica, otvaranje prvog Sretenjskog bala.` },
-  { time: '20:00', title: $localize`Kulturno-umetnički program`, description: $localize`Nastupi umetnika iz Srbije i Slovenije u Velikoj dvorani.` },
-  { time: '21:00', title: $localize`Prvi ples`, description: $localize`Svečano otvaranje plesnog dela večeri.` },
-  { time: '21:30', title: $localize`Svečana večera`, description: $localize`Večera za gostima sa sedećim mestima; koktel posluženje na galeriji.` },
-  { time: '22:30', title: $localize`Koncert grupe Galija`, description: $localize`Glavni muzički program večeri.` },
-  { time: '00:00', title: $localize`Ponoćno kolo`, description: $localize`Zajedničko kolo i završni deo večeri.` },
+  { time: '18:00', title: $localize`Ulazak gostiju`, description: $localize`Doček u foajeu Narodnog doma uz muzičku pozadinu. Gosti se u 18:55 pozivaju ka svojim stolovima.` },
+  { time: '19:00', title: $localize`Himne i otvaranje`, description: $localize`Himne Srbije i Slovenije, a zatim izlazak voditelja i uvodna reč.` },
+  { time: '19:15', title: $localize`Sretenjska besjeda`, description: $localize`O značaju Sretenja: duhovnom susretu sa Hristom, susretu naroda sa slobodom i opredeljenju za pravdu i zakonitost.` },
+  { time: '19:30', title: $localize`Svečana večera`, description: $localize`Večera uz muziku kamernog kvarteta.` },
+  { time: '19:50', until: '21:00', title: $localize`Kulturno-umetnički program`, description: $localize`Nastupi KUD-a iz Maribora, besjeda, baletska tačka i pevanje, uz slobodan ples.` },
+  { time: '21:20', until: '23:00', title: $localize`Koncert grupe Galija`, description: $localize`Glavni muzički program večeri i završetak bala.` },
 ];
 
 /** priceCents: 0 znači da cena još nije određena (prikazuje se „Cena uskoro"). */
@@ -119,8 +118,10 @@ export const PRIVACY_POLICY_VERSION = '2026-10-28';
  */
 export const ORGANIZER = {
   name: 'Kulturni centar Sretenje',
-  address: '[UPISATI: ulica i broj, poštanski broj, mesto]',
-  registration: '[UPISATI: matična / davčna številka]',
+  /** Naziv u poslovnom registru (bizi.si) — koristi se u pravnim tekstovima. */
+  legalName: 'Kulturno društvo Kulturni center Sretenje',
+  address: 'Zagrebška cesta 20, 2000 Maribor',
+  registration: 'MŠ: 2949903000, DŠ: 41959787',
   privacyEmail: '[UPISATI: e-adresa za pitanja o privatnosti]',
   hosting: '[UPISATI: pružalac hostinga sajta]',
   mailProvider: '[UPISATI: pružalac e-pošte (SMTP)]',

@@ -16,6 +16,8 @@ export interface EventInfo {
 
 export interface ProgramItem {
   time: string;
+  /** Kraj termina (prikazuje se ispod početka). */
+  until?: string;
   title: string;
   description?: string;
 }

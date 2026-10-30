@@ -11,7 +11,7 @@ import { RevealDirective } from '../../directives/reveal.directive';
     <ol class="timeline">
       @for (item of items(); track item.time + item.title; let i = $index) {
         <li class="row" appReveal [appRevealDelay]="i * 60">
-          <time class="time">{{ item.time }}</time>
+          <time class="time">{{ item.time }}@if (item.until) { <span class="until">– {{ item.until }}</span> }</time>
           <span class="dot" aria-hidden="true"></span>
           <div class="text">
             <span class="title">{{ item.title }}</span>
@@ -71,8 +71,12 @@ import { RevealDirective } from '../../directives/reveal.directive';
       border-radius: 1px; /* mali romb umesto kruga */
       transition: background-color var(--dur-base) var(--ease), transform var(--dur-base) var(--ease);
     }
+    @keyframes dot-glow { 0% { box-shadow: 0 0 0 0 var(--tl-dot); } 100% { box-shadow: 0 0 0 12px transparent; } }
+    .row.is-visible .dot { animation: dot-glow 1.4s var(--ease) 0.3s 1 both; }
+    @media (prefers-reduced-motion: reduce) { .row.is-visible .dot { animation: none; } }
     .row:hover .dot { background: var(--tl-dot); transform: translateY(0.1rem) rotate(45deg) scale(1.25); }
     .time { font-family: var(--font-display); font-size: clamp(1.625rem, 2.4vw, 2.125rem); color: var(--tl-time); line-height: 1.1; text-align: right; }
+    .until { display: block; font-size: 0.55em; opacity: 0.75; margin-top: 0.15rem; }
     .text { display: flex; flex-direction: column; gap: 0.25rem; }
     .title { font-family: var(--font-display); font-size: clamp(1.375rem, 2vw, 1.625rem); color: var(--tl-title); line-height: 1.2; }
     .desc { font-size: 0.9375rem; font-weight: 300; color: var(--tl-desc); }

@@ -33,12 +33,9 @@ export const SECTION_NAV: SectionNavItem[] = [
   { label: $localize`Priča o balskoj tradiciji`, path: '/balska-tradicija' },
 ];
 
-export const FOOTER_NAV: NavItem[] = [
-  // { label: $localize`Bal`, path: '/o-balu' },
-  // { label: $localize`Program`, path: '/program' },
-  { label: $localize`Ulaznice`, path: '/rezervacija' },
-  { label: $localize`Kontakt`, path: '/kontakt' },
-];
+/** Sekcije koje se ponavljaju u podnožju (bez ulaznica). */
+export const FOOTER_SECTION_IDS = ['izvodjaci', 'program', 'prostor', 'pravila-oblacenja'];
+
 
 export const LEGAL_NAV: NavItem[] = [
   { label: $localize`Politika privatnosti`, path: '/privacy' },

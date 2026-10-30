@@ -32,7 +32,7 @@ const privacySr: LegalDoc = {
     {
       h: '1. Ko je upravljač podataka',
       p: [
-        `Upravljač vaših ličnih podataka je ${O.name}, ${O.address}, ${O.registration} (u daljem tekstu: organizator). Pitanja o privatnosti: ${O.privacyEmail}.`,
+        `Upravljač vaših ličnih podataka je ${O.legalName}, ${O.address}, ${O.registration} (u daljem tekstu: organizator). Pitanja o privatnosti: ${O.privacyEmail}.`,
         'Ova politika važi za sajt Sretenjskog bala i obrađuje podatke u skladu sa Uredbom (EU) 2016/679 (GDPR) i slovenačkim Zakonom o zaštiti ličnih podataka (ZVOP-2).',
       ],
     },
@@ -106,7 +106,7 @@ const privacySl: LegalDoc = {
     {
       h: '1. Kdo je upravljavec podatkov',
       p: [
-        `Upravljavec vaših osebnih podatkov je ${O.name}, ${O.address}, ${O.registration} (v nadaljevanju: organizator). Vprašanja o zasebnosti: ${O.privacyEmail}.`,
+        `Upravljavec vaših osebnih podatkov je ${O.legalName}, ${O.address}, ${O.registration} (v nadaljevanju: organizator). Vprašanja o zasebnosti: ${O.privacyEmail}.`,
         'Ta politika velja za spletno stran Sretenjskega bala; podatke obdelujemo v skladu z Uredbo (EU) 2016/679 (GDPR) in Zakonom o varstvu osebnih podatkov (ZVOP-2).',
       ],
     },
@@ -178,7 +178,7 @@ const privacyEn: LegalDoc = {
     {
       h: '1. Who is the controller',
       p: [
-        `The controller of your personal data is ${O.name}, ${O.address}, ${O.registration} (the organiser). Privacy enquiries: ${O.privacyEmail}.`,
+        `The controller of your personal data is ${O.legalName}, ${O.address}, ${O.registration} (the organiser). Privacy enquiries: ${O.privacyEmail}.`,
         'This policy applies to the Sretenjski bal website and complies with Regulation (EU) 2016/679 (GDPR) and the Slovenian Personal Data Protection Act (ZVOP-2).',
       ],
     },

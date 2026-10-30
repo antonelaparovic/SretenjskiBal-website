@@ -4,14 +4,17 @@
 // Bez JS-a (SSR, pre hidratacije) sadržaj je vidljiv.
 .js-reveal .reveal {
   opacity: 0;
-  transform: translateY(24px);
+  transform: translateY(26px);
+  filter: blur(3px);
   transition:
-    opacity var(--dur-slow) var(--ease),
-    transform var(--dur-slow) var(--ease);
+    opacity 900ms var(--ease),
+    transform 900ms var(--ease),
+    filter 900ms var(--ease);
 
   &.is-visible {
     opacity: 1;
     transform: none;
+    filter: none;
   }
 }
 
@@ -21,6 +24,53 @@
 
   &.is-visible {
     clip-path: inset(0 0 0 0);
+  }
+}
+
+/* Blagi ulazak stranice pri promeni rute. */
+@keyframes page-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+router-outlet + * {
+  animation: page-in 600ms var(--ease) both;
+}
+
+/* Mesingana crta ispod oznake sekcije raste dok sekcija ulazi u vidno polje (gde browser to podržava). */
+@keyframes rule-grow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+/* Svetao prelaz preko dugmeta na prelazak mišem. */
+.btn {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition:
+    background-color var(--dur-base) var(--ease),
+    color var(--dur-base) var(--ease),
+    border-color var(--dur-base) var(--ease),
+    transform var(--dur-base) var(--ease),
+    box-shadow var(--dur-base) var(--ease);
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(105deg, transparent 35%, rgba(180, 154, 99, 0.35) 50%, transparent 65%);
+    transform: translateX(-120%);
+  }
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px -12px rgba(23, 20, 19, 0.55);
+
+    &::after {
+      transform: translateX(120%);
+      transition: transform 900ms var(--ease);
+    }
   }
 }
 
@@ -45,6 +95,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  router-outlet + * { animation: none; }
+  .btn:hover:not(:disabled) { transform: none; box-shadow: none; }
+  .btn::after { display: none; }
   .js-reveal .reveal,
   .js-reveal .reveal-image {
     opacity: 1;

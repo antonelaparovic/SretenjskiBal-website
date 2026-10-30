@@ -1,26 +1,30 @@
 <footer class="footer">
   <div class="container grid top">
-    <div class="identity">
+    <div class="identity" appReveal>
       <app-emblem [size]="88" label="Sretenjski bal" />
       <p class="name">Sretenjski bal</p>
-      <p class="when" i18n>13.2.2027. · Maribor</p>
+      <p class="when" i18n>13. februar 2027. · Narodni dom, Maribor</p>
       <p class="tagline" i18n>Kultura koja spaja.</p>
     </div>
 
-    <nav class="links" i18n-aria-label aria-label="Linkovi u podnožju">
+    <nav class="links" appReveal [appRevealDelay]="120" i18n-aria-label aria-label="Linkovi u podnožju">
+      <p class="label" i18n>Bal</p>
       <ul>
-        @for (item of nav; track item.path) {
-          <li><a [routerLink]="item.path">{{ item.label }}</a></li>
+        @for (item of sections; track item.id) {
+          <li><a routerLink="/" [fragment]="item.id">{{ item.label }}</a></li>
+        }
+        @if (story) {
+          <li><a [routerLink]="story.path">{{ story.label }}</a></li>
         }
       </ul>
     </nav>
 
-    <div class="org">
+    <div class="org" appReveal [appRevealDelay]="240">
       <p class="label" i18n>Organizator</p>
-      <span class="org-name" i18n>Kulturni centar Sretenje</span>
+      <span class="org-name">{{ org.legalName }}</span>
       <span class="org-addr">{{ org.address }}</span>
-      <span class="org-addr">{{ org.privacyEmail }}</span>
-      <a href="https://www.instagram.com/" target="_blank" rel="noopener">Instagram</a>
+      <span class="org-addr">{{ org.registration }}</span>
+      <a routerLink="/kontakt" class="contact" i18n>Kontakt i pitanja</a>
     </div>
   </div>
 

@@ -21,6 +21,24 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   styles: `
     :host { display: flex; flex-direction: column; gap: 1.5rem; }
     .eyebrow { color: var(--eyebrow-color, var(--c-burgundy)); }
+    .eyebrow::after {
+      content: '';
+      display: block;
+      width: 3rem;
+      height: 1px;
+      margin-top: 0.75rem;
+      background: var(--c-brass);
+      transform-origin: left;
+    }
+    @supports (animation-timeline: view()) {
+      @media (prefers-reduced-motion: no-preference) {
+        .eyebrow::after {
+          animation: rule-grow linear both;
+          animation-timeline: view();
+          animation-range: entry 10% entry 90%;
+        }
+      }
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
