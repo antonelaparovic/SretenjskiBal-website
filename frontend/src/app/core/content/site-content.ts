@@ -44,10 +44,10 @@ export const HERO_IMAGE: { src: string | null; alt: string; credit: string | nul
 /** Okvirna satnica — biće potvrđena. */
 /** Predlog programa — satnica i sadržaj se potvrđuju sa organizatorom. */
 export const PROGRAM: ProgramItem[] = [
-  { time: '18:00', title: $localize`Ulazak gostiju`, description: $localize`Doček u foajeu Narodnog doma uz muzičku pozadinu. Gosti se u 18:55 pozivaju ka svojim stolovima.` },
+  { time: '18:00', title: $localize`Ulazak gostiju` },
   { time: '19:00', title: $localize`Himne i otvaranje`, description: $localize`Himne Srbije i Slovenije, a zatim izlazak voditelja i uvodna reč.` },
-  { time: '19:30', title: $localize`Svečana večera`, description: $localize`Večera uz muziku kamernog kvarteta.` },
-  { time: '19:50', until: '21:00', title: $localize`Kulturno-umetnički program`, description: $localize`Nastupi SKD Maribor, operska pevačica i harmonikaš, uz slobodan ples.` },
+  { time: '19:30', title: $localize`Svečana večera` },
+  { time: '19:50', until: '21:00', title: $localize`Kulturno-umetnički program` },
   { time: '21:20', until: '23:00', title: $localize`Koncert grupe Galija`, description: $localize`Glavni muzički program večeri i završetak bala.` },
 ];
 
@@ -62,7 +62,7 @@ export const TICKETS: TicketType[] = [
       $localize`Kulturno-umetnički program i koncert grupe Galija`,
       $localize`Svečana večera`,
       $localize`Neograničena konzumacija pića`,
-      $localize`Sedeće mesto za stolom u Velikoj dvorani`,
+      $localize`Sedeće mesto za stolom u Dvorani generala Maistra`,
     ],
     priceCents: 14000, ctaUrl: '/rezervacija', soldOut: false },
   { code: 'GALERIJA', name: $localize`Galerija`,
@@ -70,7 +70,7 @@ export const TICKETS: TicketType[] = [
       $localize`Kulturno-umetnički program i koncert grupe Galija`,
       $localize`Koktel posluženje i piće dobrodošlice`,
       $localize`Stajaće mesto na galeriji, sa pogledom na celokupan program`,
-      $localize`Pristup Velikoj dvorani nakon završetka zvaničnog dela programa, od početka nastupa grupe Galija`,
+      $localize`Pristup Dvorani generala Maistra nakon završetka zvaničnog dela programa, od početka nastupa grupe Galija`,
     ],
     priceCents: 7000, ctaUrl: '/rezervacija', soldOut: false },
 ];

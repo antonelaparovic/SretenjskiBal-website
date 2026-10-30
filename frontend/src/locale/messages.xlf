@@ -37,13 +37,6 @@
           <context context-type="linenumber">47</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="2756447660267785273" datatype="html">
-        <source>Doček u foajeu Narodnog doma uz muzičku pozadinu. Gosti se u 18:55 pozivaju ka svojim stolovima.</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
-          <context context-type="linenumber">47</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="2282509009632853037" datatype="html">
         <source>Himne i otvaranje</source>
         <context-group purpose="location">
@@ -69,22 +62,8 @@
           <context context-type="linenumber">63</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="7662079193887372992" datatype="html">
-        <source>Večera uz muziku kamernog kvarteta.</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
-          <context context-type="linenumber">49</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="4921732235370732360" datatype="html">
         <source>Kulturno-umetnički program</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
-          <context context-type="linenumber">50</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="5915048717374857714" datatype="html">
-        <source>Nastupi SKD Maribor, operska pevačica i harmonikaš, uz slobodan ples.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
           <context context-type="linenumber">50</context>
@@ -133,8 +112,8 @@
           <context context-type="linenumber">64</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="6701447921178804789" datatype="html">
-        <source>Sedeće mesto za stolom u Velikoj dvorani</source>
+      <trans-unit id="5293151697902409829" datatype="html">
+        <source>Sedeće mesto za stolom u Dvorani generala Maistra</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
           <context context-type="linenumber">65</context>
@@ -165,8 +144,8 @@
           <context context-type="linenumber">72</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="5051446375004581337" datatype="html">
-        <source>Pristup Velikoj dvorani nakon završetka zvaničnog dela programa, od početka nastupa grupe Galija</source>
+      <trans-unit id="2379814223678097430" datatype="html">
+        <source>Pristup Dvorani generala Maistra nakon završetka zvaničnog dela programa, od početka nastupa grupe Galija</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
           <context context-type="linenumber">73</context>
@@ -1333,8 +1312,8 @@
           <context context-type="linenumber">164,165</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="656670580549379685" datatype="html">
-        <source>Posebna ishrana i alergije</source>
+      <trans-unit id="2389242545760143720" datatype="html">
+        <source>Alergije</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
           <context context-type="linenumber">168</context>
@@ -1355,8 +1334,8 @@
           <context context-type="linenumber">269</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="1559713795448138896" datatype="html">
-        <source>Npr. vegetarijanska, veganska, bez glutena, alergija na orašaste plodove. Ako rezervišete za više osoba, napišite na koga se odnosi napomena.</source>
+      <trans-unit id="8454074135589005251" datatype="html">
+        <source>Ako rezervišete za više osoba, napišite na koga se odnosi napomena.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
           <context context-type="linenumber">170,171</context>
@@ -1563,8 +1542,8 @@
           <context context-type="linenumber">269</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="4052545144840696641" datatype="html">
-        <source>Sva polja su obavezna, osim onih označenih kao opciona. Podatke iz ove forme koristimo za obradu Vaše rezervacije i kontakt u vezi sa njom. Podatke obrađuje <x id="INTERPOLATION" equiv-text="{{ organizerName }}"/> na osnovu izvršenja rezervacije i čuva ih do 6 meseci nakon bala; možete zatražiti uvid, ispravku ili brisanje. Više u <x id="START_LINK" ctype="x-a" equiv-text="&lt;a routerLink=&quot;/privacy&quot; target=&quot;_blank&quot; class=&quot;inline-link&quot;&gt;"/>politici privatnosti<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/>.</source>
+      <trans-unit id="7587772730927350632" datatype="html">
+        <source>Sva polja su obavezna, osim označenih kao opciona. Podatke koristimo isključivo za Vašu rezervaciju i čuvamo ih najduže šest meseci nakon bala, a u svakom trenutku možete zatražiti uvid, ispravku ili brisanje. Više u <x id="START_LINK" ctype="x-a" equiv-text="&lt;a routerLink=&quot;/privacy&quot; target=&quot;_blank&quot; class=&quot;inline-link&quot;&gt;"/>politici privatnosti<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/>.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
           <context context-type="linenumber">279,280</context>
