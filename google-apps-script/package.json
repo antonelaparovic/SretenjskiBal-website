@@ -1,0 +1,13 @@
+{
+  "name": "sretenjski-bal-apps-script",
+  "private": true,
+  "description": "Testovi za Google Apps Script (Code.gs) — izvršava se u Node-u sa lažnim Google servisima.",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "vitest": "^4.1.2"
+  }
+}

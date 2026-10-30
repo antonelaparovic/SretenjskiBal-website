@@ -63,6 +63,8 @@ const privacySr: LegalDoc = {
       p: [
         'Podacima pristupaju samo članovi organizacionog tima. Koristimo sledeće obrađivače, koji podatke obrađuju samo po našem nalogu:',
       ],
+      // TODO (pravnik): dodati Cloudflare Turnstile (zaštita formi od botova, Cloudflare, Inc.) u spisak obrađivača
+      // na sva tri jezika i proveriti tekst stranice Kolačići — sajt sada učitava Turnstile sa challenges.cloudflare.com.
       list: [
         `Hosting sajta: ${O.hosting}`,
         `Slanje e-pošte: ${O.mailProvider}`,

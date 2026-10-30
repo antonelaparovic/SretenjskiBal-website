@@ -11,17 +11,17 @@ import {
 import { DOCUMENT } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
-import { HttpErrorResponse } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { ORGANIZER, PRIVACY_POLICY_VERSION, TICKETS } from '../../core/content/site-content';
 import { currentLocale } from '../../core/i18n/locale';
 import { CompanyCountry, ReservationPayload, ReservationSource, TicketTypeCode } from '../../core/models/content.models';
-import { FormsApiService } from '../../core/services/forms-api.service';
+import { FormsApiService, ScriptError } from '../../core/services/forms-api.service';
+import { TurnstileComponent } from '../../shared/components/turnstile/turnstile.component';
 import { formatPrice } from '../../core/util/format';
 
 type Booking = 'loading' | 'open' | 'closed' | 'error';
 
-/** Šifre moraju biti iste u backend/src/reservations/reservation.dto.ts i google-apps-script/Code.gs. */
+/** Šifre moraju biti iste kao u google-apps-script/Code.gs (TICKET_TYPES); naziv i cena su u site-content.ts (TICKETS). */
 export const TICKET_TYPE_OPTIONS: { value: TicketTypeCode; label: string }[] = [
   { value: 'SVECANA', label: $localize`Svečana` },
   { value: 'GALERIJA', label: $localize`Galerija` },
@@ -73,7 +73,7 @@ function newRequestId(): string {
 
 @Component({
   selector: 'app-reservation-form',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, TurnstileComponent],
   templateUrl: './reservation-form.component.html',
   styleUrl: './reservation-form.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -89,6 +89,9 @@ export class ReservationFormComponent {
   protected readonly sending = signal(false);
   protected readonly submitted = signal(false);
   protected readonly serverError = signal<string | null>(null);
+  /** Token Turnstile provere za sledeće slanje. */
+  protected readonly captcha = signal<string | null>(null);
+  protected readonly captchaFailed = signal(false);
   protected readonly result = signal<{ number: string; ticketLabel: string; count: number; mailTo: string | null } | null>(null);
 
   private readonly api = inject(FormsApiService);
@@ -96,6 +99,7 @@ export class ReservationFormComponent {
   private readonly doc = inject(DOCUMENT);
   private readonly host: ElementRef<HTMLElement> = inject(ElementRef);
   private readonly successEl = viewChild<ElementRef<HTMLElement>>('success');
+  private readonly turnstile = viewChild(TurnstileComponent);
   private readonly locale = currentLocale();
   private renderedAt = Date.now();
   /** Ostaje isti dok rezervacija ne uspe, pa ponovno slanje posle greške ne pravi duplikat. */
@@ -216,12 +220,22 @@ export class ReservationFormComponent {
       this.focusFirstInvalid();
       return;
     }
+    const captcha = this.captcha();
+    if (!captcha) {
+      this.serverError.set(
+        this.captchaFailed()
+          ? $localize`Provera da niste robot nije mogla da se učita. Proverite internet vezu ili isključite blokator reklama za ovaj sajt, pa osvežite stranicu.`
+          : $localize`Još trenutak — proveravamo da niste robot. Pokušajte ponovo za nekoliko sekundi.`,
+      );
+      return;
+    }
     this.requestId ??= newRequestId();
     this.sending.set(true);
     const payload = this.buildPayload(this.requestId);
-    this.api.createReservation(payload).subscribe({
+    this.api.createReservation(payload, captcha).subscribe({
       next: (res) => {
         this.sending.set(false);
+        this.turnstile()?.reset();
         this.requestId = null;
         this.result.set({
           number: res.reservationNumber,
@@ -235,15 +249,18 @@ export class ReservationFormComponent {
           el?.focus({ preventScroll: true });
         });
       },
-      error: (e: HttpErrorResponse) => {
+      error: (e: unknown) => {
         this.sending.set(false);
-        const code = (e.error as { code?: string } | null)?.code;
-        if (e.status === 409 || code === 'BOOKING_CLOSED') {
+        this.turnstile()?.reset(); // token važi za jedno slanje
+        const code = e instanceof ScriptError ? e.code : null;
+        if (code === 'BOOKING_CLOSED') {
           this.booking.set('closed');
           this.serverError.set($localize`Rezervacije su u međuvremenu zatvorene, pa Vaša rezervacija nije evidentirana.`);
-        } else if (e.status === 429) {
-          this.serverError.set($localize`Poslali ste više zahteva u kratkom roku. Pokušajte ponovo za nekoliko minuta — uneti podaci su sačuvani u formi.`);
-        } else if (e.status === 400) {
+        } else if (code === 'BUSY') {
+          this.serverError.set($localize`Trenutno je velika gužva. Pokušajte ponovo za minut — uneti podaci su sačuvani u formi i nećete napraviti duplu rezervaciju.`);
+        } else if (code === 'CAPTCHA_FAILED') {
+          this.serverError.set($localize`Provera da niste robot nije prošla. Pokušajte ponovo za nekoliko sekundi.`);
+        } else if (code === 'INVALID' || code === 'REJECTED') {
           this.serverError.set($localize`Proverite unete podatke i pokušajte ponovo.`);
         } else {
           this.serverError.set(

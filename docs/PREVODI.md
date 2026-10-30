@@ -24,6 +24,6 @@ Delovi unutar vitičastih/oštrih oznaka (`<x id="..." />`) su mesta za linkove 
 
 - Nazivi stranica (`/rezervacija`, `/kontakt`, `/balska-tradicija`) su isti u sva tri jezika; menja se samo prefiks (`/sl/rezervacija`).
 - Prevodi su pisani kao nacrt: pre objave ih treba da pregleda osoba kojoj je slovenački odnosno engleski maternji jezik.
-- `npm run start:dev` (`ng serve`, brzo osvežavanje) prikazuje samo srpski, pa tamo prekidač SL/EN ne vodi nigde. Za proveru sva tri jezika:
-  `npm start` (u folderu `frontend`; gradi sajt i pokreće ga), pa otvoriti `http://localhost:4000/`, `/sl/` i `/en/`.
-- Pregled na Netlify-ju (`npm run build:preview`) takođe gradi sva tri jezika; `_redirects` šalje `/sl/*` i `/en/*` na svoju jezičku verziju.
+- `npm start` (`ng serve`, brzo osvežavanje) prikazuje samo srpski, pa tamo prekidač SL/EN ne vodi nigde. Za proveru sva tri jezika:
+  `npm run start:all` (u folderu `frontend`; gradi sajt i pokreće ga), pa otvoriti `http://localhost:4000/`, `/sl/` i `/en/`.
+- Gotov sajt (`npm run build`) sadrži sva tri jezika u `dist/frontend/browser` (`/`, `/sl/`, `/en/`), pa ga Cloudflare Pages služi bez ikakvih dodatnih podešavanja.

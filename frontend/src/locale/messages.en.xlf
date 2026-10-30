@@ -1759,7 +1759,7 @@
         <target>Sending reservation…</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
-          <context context-type="linenumber">282</context>
+          <context context-type="linenumber">283</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3551861892386130702" datatype="html">
@@ -1767,7 +1767,7 @@
         <target>Send reservation</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
-          <context context-type="linenumber">282</context>
+          <context context-type="linenumber">283</context>
         </context-group>
       </trans-unit>
       <trans-unit id="8864608791497682157" datatype="html">
@@ -1794,20 +1794,56 @@
           <context context-type="linenumber">33</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="591256854503024091" datatype="html">
+        <source>Provera da niste robot nije mogla da se učita. Proverite internet vezu ili isključite blokator reklama za ovaj sajt, pa osvežite stranicu.</source>
+        <target>The robot check could not be loaded. Check your internet connection or turn off your ad blocker for this site, then refresh the page.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.ts</context>
+          <context context-type="linenumber">227</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/components/contact-form/contact-form.component.ts</context>
+          <context context-type="linenumber">73</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5058535692094076074" datatype="html">
+        <source>Još trenutak — proveravamo da niste robot. Pokušajte ponovo za nekoliko sekundi.</source>
+        <target>One moment — we are checking that you are not a robot. Please try again in a few seconds.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.ts</context>
+          <context context-type="linenumber">228</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/components/contact-form/contact-form.component.ts</context>
+          <context context-type="linenumber">74</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="5580782860779350451" datatype="html">
         <source>Rezervacije su u međuvremenu zatvorene, pa Vaša rezervacija nije evidentirana.</source>
         <target>Reservations have closed in the meantime, so your reservation was not recorded.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.ts</context>
-          <context context-type="linenumber">243</context>
+          <context context-type="linenumber">258</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="5229013171657535833" datatype="html">
-        <source>Poslali ste više zahteva u kratkom roku. Pokušajte ponovo za nekoliko minuta — uneti podaci su sačuvani u formi.</source>
-        <target>You sent several requests in a short time. Please try again in a few minutes — your data is still in the form.</target>
+      <trans-unit id="9028299304491900479" datatype="html">
+        <source>Trenutno je velika gužva. Pokušajte ponovo za minut — uneti podaci su sačuvani u formi i nećete napraviti duplu rezervaciju.</source>
+        <target>It is very busy right now. Please try again in a minute — your details are kept in the form and you will not create a duplicate reservation.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.ts</context>
-          <context context-type="linenumber">245</context>
+          <context context-type="linenumber">260</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3951603918850603874" datatype="html">
+        <source>Provera da niste robot nije prošla. Pokušajte ponovo za nekoliko sekundi.</source>
+        <target>The check that you are not a robot did not pass. Please try again in a few seconds.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.ts</context>
+          <context context-type="linenumber">262</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/components/contact-form/contact-form.component.ts</context>
+          <context context-type="linenumber">91</context>
         </context-group>
       </trans-unit>
       <trans-unit id="5607870672279336271" datatype="html">
@@ -1815,11 +1851,11 @@
         <target>Please check the information you entered and try again.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.ts</context>
-          <context context-type="linenumber">247</context>
+          <context context-type="linenumber">264</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/components/contact-form/contact-form.component.ts</context>
-          <context context-type="linenumber">76</context>
+          <context context-type="linenumber">93</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2797355341777507315" datatype="html">
@@ -1827,7 +1863,7 @@
         <target>The reservation was not saved because of a temporary technical problem. Your data is still in the form — please try again in a few moments. Sending again will not create a duplicate reservation.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.ts</context>
-          <context context-type="linenumber">250</context>
+          <context context-type="linenumber">267</context>
         </context-group>
       </trans-unit>
       <trans-unit id="6396929775265325049" datatype="html">
@@ -2035,7 +2071,7 @@
         <target>Sending…</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/components/contact-form/contact-form.component.html</context>
-          <context context-type="linenumber">52</context>
+          <context context-type="linenumber">53</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2137490327560993368" datatype="html">
@@ -2043,7 +2079,7 @@
         <target>Send message</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/components/contact-form/contact-form.component.html</context>
-          <context context-type="linenumber">52</context>
+          <context context-type="linenumber">53</context>
         </context-group>
       </trans-unit>
       <trans-unit id="7128330101378913854" datatype="html">
@@ -2078,12 +2114,12 @@
           <context context-type="linenumber">13</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="1208008593242265905" datatype="html">
-        <source>Poslali ste više poruka u kratkom roku. Pokušajte ponovo za nekoliko minuta.</source>
-        <target>You sent several messages in a short time. Please try again in a few minutes.</target>
+      <trans-unit id="5354789577111419535" datatype="html">
+        <source>Trenutno je velika gužva. Pokušajte ponovo za minut.</source>
+        <target>It is very busy right now. Please try again in a minute.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/components/contact-form/contact-form.component.ts</context>
-          <context context-type="linenumber">74</context>
+          <context context-type="linenumber">89</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4309241319714207671" datatype="html">
@@ -2091,7 +2127,7 @@
         <target>The message could not be sent right now. Please try again or write to us directly by email.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/components/contact-form/contact-form.component.ts</context>
-          <context context-type="linenumber">77</context>
+          <context context-type="linenumber">94</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2573159024509417433" datatype="html">

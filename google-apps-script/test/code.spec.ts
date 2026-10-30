@@ -4,8 +4,6 @@ process.env.TZ = 'Europe/Ljubljana';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { FakeSheet, Formula, GasEnv, loadAppsScript } from './helpers/gas-fakes.js';
 
-const SECRET = 'x'.repeat(64);
-
 function reservation(overrides: Record<string, unknown> = {}) {
   return {
     requestId: crypto.randomUUID(),
@@ -23,6 +21,8 @@ function reservation(overrides: Record<string, unknown> = {}) {
     locale: 'sr',
     pageUrl: '/rezervacija',
     utm: { source: 'facebook', campaign: 'bal2027' },
+    website: '',
+    elapsedMs: 30000,
     ...overrides,
   };
 }
@@ -40,7 +40,19 @@ describe('Apps Script (Code.gs)', () => {
   let COL: Record<string, string>;
 
   const post = (body: object) => JSON.parse((gas.ctx.doPost({ postData: { contents: JSON.stringify(body) } }) as { content: string }).content);
-  const create = (r: object) => post({ secret: SECRET, action: 'create', reservation: r });
+  const create = (r: object, captcha = 'ok-token') => post({ action: 'create', reservation: r, captcha });
+  const contact = (m: object, captcha = 'ok-token') => post({ action: 'contact', contact: m, captcha });
+  const message = (overrides: Record<string, unknown> = {}) => ({
+    firstName: 'Marko',
+    lastName: 'Marković',
+    email: 'Marko@Primer.si',
+    topic: 'PARTNERSTVO',
+    message: 'Zainteresovani smo za partnerstvo na balu.',
+    consent: true,
+    website: '',
+    elapsedMs: 20000,
+    ...overrides,
+  });
   const cell = (row: number, key: string) => res.data[row - 1][H.indexOf(COL[key])];
   const setSetting = (key: string, value: unknown) => {
     const row = settings.data.find((r) => r[0] === key);
@@ -72,24 +84,23 @@ describe('Apps Script (Code.gs)', () => {
     setSetting('BANK', '');
     gas.sheets.set('Rezervacije', res);
     gas.sheets.set('Podešavanja', settings);
-    gas.props.set('API_SECRET', SECRET);
   });
 
   describe('web app', () => {
-    it('odbija pogrešan ili prazan ključ', () => {
-      expect(post({ secret: 'pogresan', action: 'status' })).toEqual({ ok: false, code: 'UNAUTHORIZED' });
-      expect(post({ action: 'status' })).toEqual({ ok: false, code: 'UNAUTHORIZED' });
+    it('nepoznata akcija ili neispravan zahtev', () => {
+      expect(post({ action: 'brisanje' })).toEqual({ ok: false, code: 'BAD_REQUEST' });
+      expect(JSON.parse(gas.ctx.doPost({ postData: { contents: 'nije json' } }).content)).toEqual({ ok: false, code: 'BAD_REQUEST' });
     });
 
-    it('vraća status iz taba Podešavanja', () => {
-      expect(post({ secret: SECRET, action: 'status' })).toEqual({ ok: true, open: true });
+    it('vraća status iz taba Podešavanja (bez ključa — sajt ga čita direktno)', () => {
+      expect(post({ action: 'status' })).toEqual({ ok: true, open: true });
       setSetting('BOOKING_OPEN', false);
-      expect(post({ secret: SECRET, action: 'status' })).toEqual({ ok: true, open: false });
+      expect(post({ action: 'status' })).toEqual({ ok: true, open: false });
     });
 
     it('bez taba Podešavanja rezervacije su zatvorene', () => {
       gas.sheets.delete('Podešavanja');
-      expect(post({ secret: SECRET, action: 'status' }).open).toBe(false);
+      expect(post({ action: 'status' }).open).toBe(false);
       expect(create(reservation())).toEqual({ ok: false, code: 'BOOKING_CLOSED' });
     });
   });
@@ -168,6 +179,16 @@ describe('Apps Script (Code.gs)', () => {
       expect(res.data).toHaveLength(1);
     });
 
+    it('ostali gosti se upisuju na početak napomene, a nepotpun gost se odbija', () => {
+      create(reservation({
+        tickets: [{ ticketType: 'GALERIJA', count: 2 }],
+        guests: [{ firstName: 'Maja', lastName: 'Anić', email: 'MAJA@primer.si', phone: '+386 41 222 333' }],
+      }));
+      expect(cell(2, 'note')).toBe('Gost 2: Maja Anić, maja@primer.si, +386 41 222 333\nSedimo sa porodicom Petrović.');
+      const bad = create(reservation({ guests: [{ firstName: 'Maja', lastName: '', email: 'x', phone: '1' }] }));
+      expect(bad.fields).toEqual(['guests.0']);
+    });
+
     it('unos koji liči na formulu ostaje običan tekst', () => {
       create(reservation({ fullName: '=HYPERLINK("http://zlo.example","klik")', note: '@SUM(A1:A9)', diet: '-2+3', dietConsent: true }));
       const row = res.data[1];
@@ -189,7 +210,7 @@ describe('Apps Script (Code.gs)', () => {
       create(reservation()); // 2 × Svečana
       create(reservation({ tickets: [{ ticketType: 'GALERIJA', count: 3 }] }));
       expect([cell(2, 'amount'), cell(3, 'amount')]).toEqual([280, 210]);
-      expect(gas.outbox.find((m) => m.subject.endsWith('27001') && m.to === 'fbozic7@gmail.com')!.body).toContain('Iznos (po cenama iz podešavanja): 280,00 EUR');
+      expect(gas.outbox.find((m) => m.subject.endsWith('27001') && m.to === 'info@kcsretenje.si')!.body).toContain('Iznos (po cenama iz podešavanja): 280,00 EUR');
       setSetting('PRICE_GALERIJA', 95);
       create(reservation({ tickets: [{ ticketType: 'GALERIJA', count: 1 }] }));
       expect(cell(4, 'amount')).toBe(95);
@@ -212,7 +233,7 @@ describe('Apps Script (Code.gs)', () => {
     it('ishrana: posebna kolona, istaknuta u mejlu organizatoru i potvrđena gostu', () => {
       create(reservation({ diet: 'Jedna osoba bez glutena, jedna vegetarijanska.', dietConsent: true }));
       expect(cell(2, 'diet')).toBe('Jedna osoba bez glutena, jedna vegetarijanska.');
-      const admin = gas.outbox.find((m) => m.to === 'fbozic7@gmail.com')!;
+      const admin = gas.outbox.find((m) => m.to === 'info@kcsretenje.si')!;
       expect(admin.subject).toBe('Nova rezervacija za Sretenjski bal — 27001 · posebna ishrana');
       expect(admin.body).toContain('ISHRANA I ALERGIJE: Jedna osoba bez glutena, jedna vegetarijanska.');
       expect(gas.outbox.find((m) => m.to === 'ana@primer.si')!.body).toContain('Ishrana i alergije: Jedna osoba bez glutena');
@@ -228,7 +249,7 @@ describe('Apps Script (Code.gs)', () => {
 
     it('šalje obaveštenje organizatoru sa svim podacima i linkom ka tabeli', () => {
       create(reservation());
-      const admin = gas.outbox.find((m) => m.to === 'fbozic7@gmail.com')!;
+      const admin = gas.outbox.find((m) => m.to === 'info@kcsretenje.si')!;
       expect(admin.subject).toBe('Nova rezervacija za Sretenjski bal — 27001');
       expect(admin.replyTo).toBe('ana@primer.si');
       for (const s of ['27001', 'Ana Anić', 'ana@primer.si', '+386 40 123 456', 'Svečana', 'ISHRANA I ALERGIJE: —', 'Faktura na firmu: NE', 'Sedimo sa porodicom Petrović.', 'Preporuka prijatelja', 'Jezik forme: sr', 'https://docs.google.com/spreadsheets/d/test#gid=123']) {
@@ -244,16 +265,42 @@ describe('Apps Script (Code.gs)', () => {
       expect(sr.subject).toBe('Sretenjski bal — rezervacija 27001 je evidentirana');
       expect(sr.body).toContain('Javićemo vam se u roku od 3 dana sa detaljima za uplatu.');
       expect(sr.body).toContain('Sretenjski bal 27001');
-      expect(sr.replyTo).toBe('fbozic7@gmail.com');
+      expect(sr.replyTo).toBe('info@kcsretenje.si');
       expect(gas.outbox.find((m) => m.to === 'sl@primer.si')!.body).toContain('V 3 dneh vam bomo poslali podatke za plačilo.');
       const en = gas.outbox.find((m) => m.to === 'en@primer.si')!;
       expect(en.body).toContain('We will contact you within 3 days with the payment details.');
       expect(en.body).toContain('Ticket type: Gallery');
     });
 
+    it('mejlovi idu sa info@ kad je alias podešen u Gmailu, inače sa glavne adrese naloga', () => {
+      create(reservation());
+      expect(gas.outbox.every((m) => m.from === undefined && m.name === 'Sretenjski bal')).toBe(true);
+      gas.outbox.length = 0;
+      gas.aliases = ['Info@kcsretenje.si'];
+      gas.get('senderAliasesCache_ = null'); // aliasi se čitaju jednom po izvršavanju skripte
+      create(reservation());
+      expect(gas.outbox.map((m) => m.from)).toEqual(['info@kcsretenje.si', 'info@kcsretenje.si']);
+      expect(gas.outbox[0].replyTo).toBe('ana@primer.si'); // organizatoru: odgovor ide gostu
+      expect(gas.outbox[1].replyTo).toBe('info@kcsretenje.si'); // gostu: odgovor ide organizaciji
+    });
+
+    it('obaveštenje poslato u sopstveno sanduče (info@ → info@) premešta se u Inbox kao nepročitano', () => {
+      gas.aliases = ['info@kcsretenje.si'];
+      gas.get('senderAliasesCache_ = null');
+      create(reservation()); // ADMIN_EMAIL = info@kcsretenje.si
+      expect(gas.inboxMoves).toEqual([
+        ['moveToInbox', 'in:sent subject:"Nova rezervacija za Sretenjski bal — 27001" newer_than:1d'],
+        ['markUnread', 'in:sent subject:"Nova rezervacija za Sretenjski bal — 27001" newer_than:1d'],
+      ]);
+      gas.inboxMoves.length = 0;
+      setSetting('ADMIN_EMAIL', 'karte@primer.si'); // tuđe sanduče: ništa se ne premešta
+      create(reservation({ email: 'drugi@primer.si' }));
+      expect(gas.inboxMoves).toEqual([]);
+    });
+
     it('HTML mejla ne izvršava unos korisnika', () => {
       create(reservation({ note: '<script>alert(1)</script> & "x"' }));
-      const admin = gas.outbox.find((m) => m.to === 'fbozic7@gmail.com')!;
+      const admin = gas.outbox.find((m) => m.to === 'info@kcsretenje.si')!;
       expect(admin.htmlBody).not.toContain('<script>');
     });
 
@@ -268,12 +315,108 @@ describe('Apps Script (Code.gs)', () => {
     it('potvrda gostu može da se isključi', () => {
       setSetting('GUEST_EMAILS', false);
       expect(create(reservation())).toMatchObject({ adminMailSent: true, guestMailSent: false });
-      expect(gas.outbox.map((m) => m.to)).toEqual(['fbozic7@gmail.com']);
+      expect(gas.outbox.map((m) => m.to)).toEqual(['info@kcsretenje.si']);
     });
 
     it('jasna greška kad tab Rezervacije nije podešen', () => {
       gas.sheets.delete('Rezervacije');
       expect(create(reservation())).toEqual({ ok: false, code: 'SERVER_ERROR' });
+    });
+  });
+
+  describe('zaštita (skripta je javna)', () => {
+    it('bez ispravne Turnstile provere nema upisa', () => {
+      expect(create(reservation(), '')).toEqual({ ok: false, code: 'CAPTCHA_FAILED' });
+      expect(create(reservation(), 'lazni-token')).toEqual({ ok: false, code: 'CAPTCHA_FAILED' });
+      expect(res.data).toHaveLength(1);
+      expect(gas.outbox).toHaveLength(0);
+    });
+
+    it('koristi TURNSTILE_SECRET iz Svojstava skripte, a dok ga nema Cloudflareov probni ključ', () => {
+      create(reservation());
+      expect(gas.captchaCalls.at(-1)).toEqual(['ok-token', '1x0000000000000000000000000000000AA']);
+      gas.props.set('TURNSTILE_SECRET', 'pravi-kljuc');
+      create(reservation());
+      expect(gas.captchaCalls.at(-1)).toEqual(['ok-token', 'pravi-kljuc']);
+    });
+
+    it('botovi: skriveno polje ili prebrzo slanje', () => {
+      expect(create(reservation({ website: 'http://spam' }))).toEqual({ ok: false, code: 'REJECTED' });
+      expect(create(reservation({ elapsedMs: 900 }))).toEqual({ ok: false, code: 'REJECTED' });
+      expect(gas.captchaCalls).toHaveLength(0);
+      expect(res.data).toHaveLength(1);
+    });
+
+    it('najviše 20 slanja u minuti za ceo sajt', () => {
+      const results = Array.from({ length: 22 }, () => create(reservation()));
+      expect(results.filter((r) => r.ok)).toHaveLength(20);
+      expect(results.at(-1)).toEqual({ ok: false, code: 'BUSY' });
+    });
+
+    it('faktura: podaci firme i poreski broj po državi (Slovenija, EU, izvan EU)', () => {
+      const firm = (inv: object) => reservation({ invoice: { needed: true, companyName: 'Firma d.o.o.', companyAddress: 'Glavni trg 1, Maribor', ...inv } });
+      expect(create(firm({ companyCountry: 'SI', taxId: 'SI12345678', vatPayer: true }))).toMatchObject({ ok: true });
+      expect(cell(2, 'company')).toContain('Davčna številka / ID za DDV: SI12345678');
+      expect(cell(2, 'company')).toContain('Obveznik DDV: DA');
+      expect(create(firm({ companyCountry: 'SI', taxId: '1234', vatPayer: false })).fields).toEqual(['invoice.taxId']);
+      expect(create(firm({ companyCountry: 'SI', taxId: '12345678' })).fields).toEqual(['invoice.vatPayer']);
+      expect(create(firm({ companyCountry: 'EU', taxId: 'HR12345678901' }))).toMatchObject({ ok: true });
+      expect(create(firm({ companyCountry: 'EU', taxId: 'SI12345678' })).fields).toEqual(['invoice.taxId']);
+      expect(create(firm({ companyCountry: 'OTHER', taxId: 'EIN 12-3456789' }))).toMatchObject({ ok: true });
+      expect(create(firm({ companyCountry: 'XX', taxId: '123' })).fields).toContain('invoice.companyCountry');
+    });
+
+    it('ishrana bez izričite saglasnosti i bez verzije politike privatnosti se ne prima', () => {
+      expect(create(reservation({ diet: 'Bez glutena', dietConsent: false })).fields).toEqual(['dietConsent']);
+      expect(create(reservation({ privacyPolicyVersion: '' })).fields).toEqual(['privacyPolicyVersion']);
+      expect(create(reservation({ diet: 'Bez glutena', dietConsent: true }))).toMatchObject({ ok: true });
+      expect(cell(2, 'consent')).toContain('ishrana: izričita saglasnost data');
+    });
+
+    it('stroga provera podataka', () => {
+      expect(create(reservation({ phone: '+386' })).fields).toContain('phone');
+      expect(create(reservation({ phone: 'zovi me' })).fields).toContain('phone');
+      expect(create(reservation({ note: 'x'.repeat(2001) })).fields).toContain('note');
+      expect(create(reservation({ diet: 'x'.repeat(1001) })).fields).toContain('diet');
+      expect(create(reservation({ diet: 5 })).fields).toContain('diet');
+      expect(create(reservation({ utm: ['a'] })).fields).toContain('utm');
+      expect(create(reservation({ requestId: 'x' })).fields).toContain('requestId');
+      expect(gas.captchaCalls).toHaveLength(0); // neispravni podaci ne troše proveru
+    });
+  });
+
+  describe('kontakt forma', () => {
+    it('upisuje poruku u tab Poruke i šalje je organizatoru; odgovor ide pošiljaocu', () => {
+      expect(contact(message())).toEqual({ ok: true });
+      const rows = gas.sheets.get('Poruke')!.data;
+      expect(rows[0]).toEqual(gas.get('MESSAGE_HEADERS'));
+      expect(rows[1].slice(1)).toEqual(['Marko', 'Marković', 'marko@primer.si', 'Partnerstvo i sponzorstvo', 'Zainteresovani smo za partnerstvo na balu.', 'DA']);
+      const mail = gas.outbox[0];
+      expect(mail.to).toBe('info@kcsretenje.si');
+      expect(mail.replyTo).toBe('marko@primer.si');
+      expect(mail.subject).toBe('Sajt · Partnerstvo i sponzorstvo · Marko Marković');
+    });
+
+    it('ako mejl ne prođe, poruka ostaje u tabeli i slanje je uspešno', () => {
+      gas.failMail = () => true;
+      expect(contact(message())).toEqual({ ok: true });
+      expect(gas.sheets.get('Poruke')!.data[1].at(-1)).toBe('NE');
+    });
+
+    it('provera podataka, saglasnosti, botova i Turnstilea', () => {
+      expect(contact(message({ message: 'kratko' })).fields).toEqual(['message']);
+      expect(contact(message({ consent: false })).fields).toEqual(['consent']);
+      expect(contact(message({ topic: 'NESTO' })).fields).toEqual(['topic']);
+      expect(contact(message({ email: 'nije-mejl' })).fields).toEqual(['email']);
+      expect(contact(message({ website: 'x' }))).toEqual({ ok: false, code: 'REJECTED' });
+      expect(contact(message(), 'lazni')).toEqual({ ok: false, code: 'CAPTCHA_FAILED' });
+      expect(gas.outbox).toHaveLength(0);
+      expect(gas.sheets.has('Poruke')).toBe(false);
+    });
+
+    it('formule iz poruke ostaju običan tekst', () => {
+      contact(message({ firstName: '=IMPORTXML("x")', message: '=HYPERLINK("http://zlo")  i još teksta' }));
+      expect(gas.sheets.get('Poruke')!.data[1].some((c) => c instanceof Formula)).toBe(false);
     });
   });
 
@@ -288,7 +431,22 @@ describe('Apps Script (Code.gs)', () => {
       expect(keys).toEqual(expect.arrayContaining(['BOOKING_OPEN', 'PRICE_GALERIJA', 'IBAN']));
       expect(keys).not.toContain('MAX_TICKETS');
       expect(gas.sheets.get('Statistika')!.data.length).toBeGreaterThan(10);
-      expect(gas.props.get('API_SECRET')).toHaveLength(64);
+      expect(gas.props.has('API_SECRET')).toBe(false);
+      expect(gas.sheets.get('Poruke')!.data[0]).toEqual(gas.get('MESSAGE_HEADERS'));
+      expect(gas.props.get('SPREADSHEET_ID')).toBe('test-spreadsheet-id');
+    });
+
+    it('vraća polja za štikliranje u Podešavanjima i zadržava vrednost', () => {
+      setSetting('BOOKING_OPEN', 'TRUE'); // kvačica izgubljena, u ćeliji ostao tekst
+      setSetting('GUEST_EMAILS', '');
+      gas.ctx.setup();
+      const value = (key: string) => settings.data.find((r) => r[0] === key)![1];
+      expect(value('BOOKING_OPEN')).toBe(true);
+      expect(value('GUEST_EMAILS')).toBe(true); // prazno → podrazumevano
+      expect(post({ action: 'status' })).toEqual({ ok: true, open: true });
+      setSetting('BOOKING_OPEN', 'ne');
+      gas.ctx.setup();
+      expect(value('BOOKING_OPEN')).toBe(false);
     });
 
     it('postojeća tabela: kolone se preuređuju zajedno sa podacima, ništa se ne gubi', () => {
@@ -432,7 +590,7 @@ describe('Apps Script (Code.gs)', () => {
         'Sretenjski bal — podsetnik za uplatu, rezervacija 27010',
       ]);
       expect(reminders[0].body).toContain('samo odgovorite na ovaj mejl');
-      expect(gas.outbox.some((m) => m.to === 'fbozic7@gmail.com' && m.subject.includes('provera rokova'))).toBe(true);
+      expect(gas.outbox.some((m) => m.to === 'info@kcsretenje.si' && m.subject.includes('provera rokova'))).toBe(true);
     });
 
     it('isti podsetnik se ne šalje dvaput', () => {
