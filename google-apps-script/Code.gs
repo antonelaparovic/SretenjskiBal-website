@@ -903,7 +903,6 @@ const MAIL = {
       outro: function () {
         return [
           'Javićemo Vam se u roku od 3 dana sa detaljima za uplatu.',
-          'Ukoliko imate pitanja ili želite nešto da izmenite, slobodno odgovorite na ovaj mejl.',
         ];
       },
     },
@@ -946,7 +945,6 @@ const MAIL = {
       outro: function () {
         return [
           'V 3 dneh Vam bomo poslali podatke za plačilo.',
-          'Če imate vprašanja ali želite kaj spremeniti, preprosto odgovorite na to sporočilo.',
         ];
       },
     },
@@ -989,7 +987,6 @@ const MAIL = {
       outro: function () {
         return [
           'We will contact you within 3 days with the payment details.',
-          'If you have any questions or would like to change something, simply reply to this email.',
         ];
       },
     },
