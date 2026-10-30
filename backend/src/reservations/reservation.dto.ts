@@ -102,6 +102,14 @@ export class UtmDto {
   @IsOptional() @IsString() @MaxLength(100) content?: string;
 }
 
+export class GuestDto {
+  @Transform(trim) @IsString() @Length(1, 60) firstName!: string;
+  @Transform(trim) @IsString() @Length(1, 60) lastName!: string;
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim().toLowerCase() : value))
+  @IsEmail() @MaxLength(254) email!: string;
+  @Transform(trim) @IsString() @Matches(/^(?=(?:\D*\d){6})[+0-9 ()/.-]{6,30}$/) phone!: string;
+}
+
 export class CreateReservationDto {
   /** Pravi ga browser jednom po rezervaciji; isti ID pri ponovnom slanju sprečava duplikat. */
   @IsUUID()
@@ -160,13 +168,13 @@ export class CreateReservationDto {
   @MaxLength(2000)
   note?: string;
 
-  /** Imena ostalih gostiju (broj ulaznica − 1); upisuju se na početak napomene. */
+  /** Ostali gosti (broj ulaznica − 1); upisuju se na početak napomene. */
   @IsOptional()
   @IsArray()
   @ArrayMaxSize(99)
-  @IsString({ each: true })
-  @Length(2, 120, { each: true })
-  guestNames?: string[];
+  @ValidateNested({ each: true })
+  @Type(() => GuestDto)
+  guests?: GuestDto[];
 
   @IsIn(RESERVATION_SOURCES)
   source!: ReservationSource;

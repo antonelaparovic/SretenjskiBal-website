@@ -80,8 +80,8 @@ export interface BookingStatus {
 export type CompanyCountry = 'SI' | 'EU' | 'OTHER';
 
 export interface ReservationPayload {
-  /** Imena ostalih gostiju (broj ulaznica − 1). */
-  guestNames?: string[];
+  /** Ostali gosti (broj ulaznica − 1). */
+  guests?: { firstName: string; lastName: string; email: string; phone: string }[];
   /** Isti za ponovljena slanja iste rezervacije — backend tako sprečava duplikat. */
   requestId: string;
   fullName: string;

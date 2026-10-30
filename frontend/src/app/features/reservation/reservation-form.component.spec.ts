@@ -49,7 +49,10 @@ describe('ReservationFormComponent', () => {
     await type('[formcontrolname=phone]', '+386 40 123 456');
     await click(ticketRadios()[1]); // Galerija
     await type(count(), '2');
-    await type('.guests input', 'Maja Anić');
+    await type('.guest [formcontrolname=firstName]', 'Maja');
+    await type('.guest [formcontrolname=lastName]', 'Anić');
+    await type('.guest [formcontrolname=email]', 'maja@primer.si');
+    await type('.guest [formcontrolname=phone]', '+386 41 222 333');
     await choose('[formcontrolname=source]', 2); // Društvene mreže
   }
 
@@ -145,11 +148,11 @@ describe('ReservationFormComponent', () => {
   it('za svaku ulaznicu preko prve traži ime i prezime gosta', async () => {
     await open();
     await type(count(), '3');
-    expect($$('.guests input').length).toBe(2);
+    expect($$('.guest').length).toBe(2);
     await click('button[type=submit]');
-    expect(errors().filter((e) => e === 'Unesite ime i prezime gosta.').length).toBe(2);
+    expect(errors().filter((e) => e === 'Unesite ime gosta.').length).toBe(2);
     await type(count(), '2');
-    expect($$('.guests input').length).toBe(1);
+    expect($$('.guest').length).toBe(1);
     await type(count(), '1');
     expect($('.guests')).toBeNull();
   });
@@ -218,7 +221,7 @@ describe('ReservationFormComponent', () => {
       locale: 'sr',
       website: '',
     });
-    expect(body.guestNames).toEqual(['Maja Anić']);
+    expect(body.guests).toEqual([{ firstName: 'Maja', lastName: 'Anić', email: 'maja@primer.si', phone: '+386 41 222 333' }]);
     expect(body.requestId).toMatch(/^[0-9a-f-]{36}$/);
     expect($<HTMLButtonElement>('button[type=submit]').disabled).toBe(true);
     expect($('button[type=submit]').textContent).toContain('Slanje rezervacije…');

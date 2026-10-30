@@ -92,7 +92,9 @@ export class ReservationsService {
           ...(dto.invoice.companyCountry === 'SI' ? { vatPayer: dto.invoice.vatPayer === true } : {}),
         }
       : { needed: false };
-    const guestNames = (dto.guestNames ?? []).map((n) => cleanText(n)).filter(Boolean);
+    const guestLines = (dto.guests ?? []).map(
+      (g, i) => `Gost ${i + 2}: ${cleanText(g.firstName)} ${cleanText(g.lastName)}, ${g.email}, ${cleanText(g.phone)}`,
+    );
     const utm: Record<string, string> = {};
     for (const [key, value] of Object.entries(dto.utm ?? {})) {
       if (typeof value === 'string' && value.trim()) utm[key] = cleanText(value);
@@ -108,7 +110,7 @@ export class ReservationsService {
       dietConsent: dto.dietConsent === true && cleanText(dto.diet ?? '', { multiline: true }) !== '',
       privacyPolicyVersion: dto.privacyPolicyVersion,
       note: [
-        guestNames.length ? `Gosti: ${guestNames.join('; ')}` : '',
+        ...guestLines,
         cleanText(dto.note ?? '', { multiline: true }),
       ].filter(Boolean).join('\n'),
       source: dto.source,

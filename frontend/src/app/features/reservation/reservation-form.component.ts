@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { AbstractControl, FormArray, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { ORGANIZER, PRIVACY_POLICY_VERSION, TICKETS } from '../../core/content/site-content';
@@ -108,7 +108,7 @@ export class ReservationFormComponent {
     phone: ['', [Validators.required, Validators.pattern(PHONE)]],
     ticketCount: [1 as number | null, [Validators.required, wholeNumber, Validators.min(1), Validators.max(MAX_TICKETS)]],
     ticketType: ['' as TicketTypeCode | '', Validators.required],
-    guests: this.fb.array<string>([]),
+    guests: this.fb.array<ReturnType<ReservationFormComponent['newGuest']>>([]),
     diet: ['', Validators.maxLength(1000)],
     dietConsent: [false, Validators.requiredTrue],
     note: ['', Validators.maxLength(2000)],
@@ -125,10 +125,16 @@ export class ReservationFormComponent {
     website: [''],
   });
 
-  /** Polja za imena ostalih gostiju: jedno po svakoj ulaznici preko prve (prva je na ime osobe koja rezerviše). */
-  protected get guests(): FormArray<AbstractControl<string>> {
-    return this.form.controls.guests as unknown as FormArray<AbstractControl<string>>;
+  /** Podaci jednog gosta preko prvog (prvi gost je osoba koja rezerviše). */
+  protected newGuest() {
+    return this.fb.group({
+      firstName: ['', [Validators.required, personName, Validators.maxLength(60)]],
+      lastName: ['', [Validators.required, personName, Validators.maxLength(60)]],
+      email: ['', [Validators.required, Validators.email, Validators.maxLength(254)]],
+      phone: ['', [Validators.required, Validators.pattern(PHONE)]],
+    });
   }
+  protected get guests() { return this.form.controls.guests; }
   protected readonly dietText = toSignal(this.form.controls.diet.valueChanges, { initialValue: '' });
   protected readonly companyCountry = toSignal(this.form.controls.company.controls.country.valueChanges, { initialValue: 'SI' as CompanyCountry });
   protected taxIdInvalid(): boolean {
@@ -155,7 +161,7 @@ export class ReservationFormComponent {
       const raw = Number(c.ticketCount.value);
       const want = Number.isInteger(raw) ? Math.min(MAX_TICKETS, Math.max(1, raw)) - 1 : 0;
       const arr = c.guests;
-      while (arr.length < want) arr.push(this.fb.control('', [Validators.required, personName, Validators.maxLength(120)]));
+      while (arr.length < want) arr.push(this.newGuest());
       while (arr.length > want) arr.removeAt(arr.length - 1);
     };
     c.ticketCount.valueChanges.subscribe(syncGuests);
@@ -275,7 +281,7 @@ export class ReservationFormComponent {
       dietConsent: v.diet.trim() !== '' && v.dietConsent === true,
       privacyPolicyVersion: PRIVACY_POLICY_VERSION,
       note: v.note.trim(),
-      ...(v.guests.length ? { guestNames: v.guests.map((g) => g.trim()) } : {}),
+      ...(v.guests.length ? { guests: v.guests.map((g) => ({ firstName: g.firstName.trim(), lastName: g.lastName.trim(), email: g.email.trim(), phone: g.phone.trim() })) } : {}),
       source: v.source as ReservationSource,
       sourceOther: v.source === 'DRUGO' ? v.sourceOther.trim() : '',
       locale: this.locale,

@@ -79,7 +79,6 @@
         <section class="row" aria-labelledby="sec-tickets">
           <div class="row__aside">
             <h2 class="label legend" id="sec-tickets" i18n>Ulaznice</h2>
-            <p class="aside-text" i18n>Cene su po osobi. Tačan iznos potvrđujemo u mejlu sa instrukcijama za uplatu.</p>
           </div>
           <div class="row__main fields">
             <fieldset class="choice" aria-describedby="err-ticketType">
@@ -110,7 +109,6 @@
 
               @if (estimate(); as e) {
                 <p class="estimate" aria-live="polite">
-                  <span class="field__label" i18n>Okvirni iznos</span>
                   <span class="estimate__value">{{ e.total }}</span>
                   <span class="field__hint">{{ e.count }} × {{ e.unit }}</span>
                 </p>
@@ -119,18 +117,35 @@
 
             @if (guests.length) {
               <fieldset class="choice guests">
-                <legend class="field__label" i18n>Imena gostiju</legend>
-                <p class="field__hint" i18n>Prva ulaznica glasi na ime iz podataka iznad. Upišite ime i prezime za svaku od ostalih ulaznica.</p>
-                <div class="pair">
-                  @for (g of guests.controls; track $index; let i = $index) {
-                    <label class="field">
-                      <span class="field__label"><ng-container i18n>Gost</ng-container> {{ i + 2 }}</span>
-                      <input class="field__control" [formControl]="$any(g)" autocomplete="off" required
-                        [attr.aria-invalid]="invalid(g)" />
-                      @if (invalid(g)) { <span class="field__error" i18n>Unesite ime i prezime gosta.</span> }
-                    </label>
-                  }
-                </div>
+                <legend class="field__label" i18n>Podaci o gostima</legend>
+                <p class="field__hint" i18n>Prva ulaznica glasi na osobu iz podataka iznad. Za svaku od ostalih ulaznica upišite podatke gosta.</p>
+                @for (g of guests.controls; track $index; let i = $index) {
+                  <div class="guest" [formGroup]="g">
+                    <p class="guest__title"><ng-container i18n>Gost</ng-container> {{ i + 2 }}</p>
+                    <div class="pair">
+                      <label class="field">
+                        <span class="field__label" i18n>Ime</span>
+                        <input class="field__control" formControlName="firstName" autocomplete="off" required [attr.aria-invalid]="invalid(g.controls.firstName)" />
+                        @if (invalid(g.controls.firstName)) { <span class="field__error" i18n>Unesite ime gosta.</span> }
+                      </label>
+                      <label class="field">
+                        <span class="field__label" i18n>Prezime</span>
+                        <input class="field__control" formControlName="lastName" autocomplete="off" required [attr.aria-invalid]="invalid(g.controls.lastName)" />
+                        @if (invalid(g.controls.lastName)) { <span class="field__error" i18n>Unesite prezime gosta.</span> }
+                      </label>
+                      <label class="field">
+                        <span class="field__label" i18n>Email</span>
+                        <input class="field__control" type="email" formControlName="email" autocomplete="off" placeholder="ime@email.com" required [attr.aria-invalid]="invalid(g.controls.email)" />
+                        @if (invalid(g.controls.email)) { <span class="field__error" i18n>Unesite ispravnu email adresu gosta.</span> }
+                      </label>
+                      <label class="field">
+                        <span class="field__label" i18n>Kontakt telefon</span>
+                        <input class="field__control" type="tel" formControlName="phone" autocomplete="off" placeholder="+386 …" required [attr.aria-invalid]="invalid(g.controls.phone)" />
+                        @if (invalid(g.controls.phone)) { <span class="field__error" i18n>Unesite broj telefona gosta.</span> }
+                      </label>
+                    </div>
+                  </div>
+                }
               </fieldset>
             }
           </div>
@@ -139,13 +154,12 @@
         <section class="row" aria-labelledby="sec-diet">
           <div class="row__aside">
             <h2 class="label legend" id="sec-diet" i18n>Ishrana i napomene</h2>
-            <p class="aside-text" i18n>Kuhinji je važno da unapred zna za posebne potrebe u ishrani.</p>
           </div>
           <div class="row__main fields">
             <label class="field diet">
               <span class="field__label"><ng-container i18n>Posebna ishrana i alergije</ng-container> <span class="optional" i18n>(opciono)</span></span>
               <textarea class="field__control" formControlName="diet" rows="2" aria-describedby="hint-diet"></textarea>
-              <span class="field__hint" id="hint-diet" i18n>Npr. vegetarijanska, veganska, bez glutena, bez laktoze, alergija na orašaste plodove. Ako rezervišete za više osoba, napišite i za koga.</span>
+              <span class="field__hint" id="hint-diet" i18n>Npr. vegetarijanska, veganska, bez glutena, alergija na orašaste plodove. Ako rezervišete za više osoba, napišite na koga se odnosi napomena.</span>
             </label>
 
             @if (dietText().trim()) {

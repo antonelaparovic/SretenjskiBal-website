@@ -42,6 +42,35 @@
   .field__error { color: #ff9a8a; }
   .field__control[aria-invalid='true'] { border-bottom-color: #ff9a8a; }
   select.field__control option { background: var(--c-wine); color: var(--c-ivory); }
+  select.field__control { color: var(--c-ivory); }
+  select.field__control option { background: #2a0b11; color: var(--c-ivory); }
+  select.field__control option:disabled { color: rgba(246, 241, 232, 0.5); }
+  @supports (appearance: base-select) {
+    select.field__control::picker(select) {
+      margin-top: 0.35rem;
+      padding: 0.4rem 0;
+      border: 1px solid var(--c-rule-brass);
+      background: #2a0b11;
+      box-shadow: 0 24px 50px -20px rgba(0, 0, 0, 0.8);
+    }
+    select.field__control option {
+      padding: 0.8rem 1.1rem;
+      color: var(--c-ivory);
+      font-weight: 400;
+      background: transparent;
+    }
+    select.field__control option:disabled { display: none; }
+    select.field__control option:hover,
+    select.field__control option:focus-visible {
+      background: rgba(180, 154, 99, 0.16);
+      color: #fff;
+    }
+    select.field__control option:checked {
+      color: var(--c-brass);
+      font-weight: 500;
+    }
+    select.field__control option::checkmark { display: none; }
+  }
   .btn--primary { background: var(--c-brass); color: var(--c-wine); }
   .btn--primary:hover:not(:disabled) { background: var(--c-ivory); color: var(--c-wine); }
   .btn--outline-dark { border-color: var(--c-brass); color: var(--c-ivory); }
