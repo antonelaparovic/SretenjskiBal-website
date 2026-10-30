@@ -55,6 +55,7 @@
   font-size: 0.6875rem;
 }
 
+.org-title,
 .org-addr {
   font-size: 0.875rem;
   color: rgba(246, 241, 232, 0.62);
@@ -80,8 +81,7 @@
 }
 
 .links a,
-.org a,
-.org-name {
+.org a {
   font-size: 0.875rem;
   color: var(--c-on-dark-soft);
   transition: color var(--dur-base) var(--ease);
@@ -118,5 +118,25 @@
   .links,
   .org {
     grid-column: 1 / -1;
+  }
+}
+
+.org-title {
+  color: var(--c-ivory);
+  font-size: 0.9375rem;
+}
+
+.org .social {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  align-self: flex-start;
+
+  svg {
+    transition: transform var(--dur-base) var(--ease);
+  }
+
+  &:hover svg {
+    transform: scale(1.12) rotate(-4deg);
   }
 }

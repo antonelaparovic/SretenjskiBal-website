@@ -9,7 +9,6 @@ type Status = 'idle' | 'sending' | 'sent' | 'error';
 export const CONTACT_TOPICS: { value: ContactTopic; label: string }[] = [
   { value: 'OPSTE', label: $localize`Opšti upit` },
   { value: 'PARTNERSTVO', label: $localize`Partnerstvo i sponzorstvo` },
-  { value: 'KARTE', label: $localize`Rezervacije` },
   { value: 'MEDIJI', label: $localize`Mediji` },
   { value: 'SARADNJA', label: $localize`Saradnja i nastup` },
 ];

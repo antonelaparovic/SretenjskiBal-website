@@ -21,11 +21,14 @@
 
     <div class="org" appReveal [appRevealDelay]="240">
       <p class="label" i18n>Organizator</p>
-      <span class="org-name">{{ org.legalName }}</span>
+      <span class="org-title">{{ org.legalName }}</span>
       <span class="org-addr">{{ org.address }}</span>
       <span class="org-addr">{{ org.registration }}</span>
       <a routerLink="/kontakt" class="contact" i18n>Kontakt i pitanja</a>
-      <a href="https://www.instagram.com/sretenjskibal.slo/" target="_blank" rel="noopener" class="social">Instagram · &#64;sretenjskibal.slo</a>
+      <a href="https://www.instagram.com/sretenjskibal.slo/" target="_blank" rel="noopener" class="social" aria-label="Instagram @sretenjskibal.slo">
+        <svg viewBox="0 0 24 24" aria-hidden="true" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.4" cy="6.6" r="1" fill="currentColor" stroke="none"/></svg>
+        <span>&#64;sretenjskibal.slo</span>
+      </a>
     </div>
   </div>
 

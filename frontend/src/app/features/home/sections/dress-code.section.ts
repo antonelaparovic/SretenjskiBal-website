@@ -72,15 +72,16 @@ interface Guide {
     .col__title { display: flex; align-items: center; gap: 1rem; padding-bottom: 1.5rem; margin-bottom: 2rem; border-bottom: 1px solid var(--c-rule-brass); font-family: var(--font-display); font-weight: 500; font-size: clamp(1.9rem, 3.2vw, 2.6rem); line-height: 1; letter-spacing: 0.04em; text-transform: uppercase; }
     .col__body { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: clamp(1.25rem, 3vw, 2.5rem); align-items: end; }
     .figure { height: clamp(18rem, 32vw, 27rem); width: auto; align-self: end; opacity: 0.62; }
-    .sub { color: var(--c-ink-soft); margin-bottom: 0.4rem; }
-    .sub--no { margin: 2.25rem 0 0; padding: 0.7rem 1rem; font-weight: 600; color: var(--c-ivory); background: var(--c-burgundy); }
-    .no { border: 1px solid var(--c-burgundy); border-top: 0; padding: 0 1rem; background: rgba(90, 23, 35, 0.05); }
-    .list li { display: flex; align-items: center; gap: 0.9rem; padding: 0.9rem 0; border-bottom: 1px solid var(--c-rule-dark); font-size: 1.0625rem; }
-    .mark { width: 1.15rem; height: 1.15rem; flex: none; }
-    .yes .mark { color: var(--c-ink-soft); }
+    .sub { display: flex; align-items: center; gap: 1rem; color: var(--c-ink-soft); margin-bottom: 0.35rem; }
+    .sub::after { content: ''; flex: 1; height: 1px; background: var(--c-rule-brass); }
+    .sub--no { margin: 2.5rem 0 0.35rem; color: var(--c-burgundy); font-weight: 600; }
+    .sub--no::after { background: linear-gradient(90deg, var(--c-burgundy), transparent); opacity: 0.55; }
+    .list li { display: flex; align-items: center; gap: 0.9rem; padding: 0.85rem 0; border-bottom: 1px solid var(--c-rule-dark); font-size: 1.0625rem; }
+    .list li:last-child { border-bottom: 0; }
+    .mark { width: 1.05rem; height: 1.05rem; flex: none; }
+    .yes .mark { color: var(--c-brass); }
     .no .mark { color: var(--c-burgundy); }
-    .no li { color: var(--c-ink); }
-    .no li:last-child { border-bottom: 0; }
+    .no li { color: var(--c-ink-soft); }
 
     @media (max-width: 767.98px) { .cols { grid-template-columns: 1fr; } }
     @media (max-width: 479.98px) { .col__body { gap: 1rem; } .figure { height: 14rem; } }

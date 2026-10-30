@@ -555,7 +555,7 @@
         <target>For ladies</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">93</context>
+          <context context-type="linenumber">94</context>
         </context-group>
       </trans-unit>
       <trans-unit id="7069415753275284497" datatype="html">
@@ -563,7 +563,7 @@
         <target>Floor-length evening or ball gown</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">95</context>
+          <context context-type="linenumber">96</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4252174064641854347" datatype="html">
@@ -571,11 +571,11 @@
         <target>Elegant formal footwear</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">95</context>
+          <context context-type="linenumber">96</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">110</context>
+          <context context-type="linenumber">111</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3394526962284498362" datatype="html">
@@ -583,7 +583,7 @@
         <target>Short and cocktail dresses</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">97</context>
+          <context context-type="linenumber">98</context>
         </context-group>
       </trans-unit>
       <trans-unit id="6418659042162778991" datatype="html">
@@ -591,24 +591,12 @@
         <target>Short skirts and daywear</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">98</context>
+          <context context-type="linenumber">99</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2926847237179042245" datatype="html">
         <source>Patike i neformalna obuća</source>
         <target>Sneakers and casual footwear</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">99</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">115</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="702065592462377042" datatype="html">
-        <source>Narodne nošnje</source>
-        <target>Folk costumes</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
           <context context-type="linenumber">100</context>
@@ -618,12 +606,24 @@
           <context context-type="linenumber">116</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="702065592462377042" datatype="html">
+        <source>Narodne nošnje</source>
+        <target>Folk costumes</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
+          <context context-type="linenumber">101</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
+          <context context-type="linenumber">117</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="156529230216849476" datatype="html">
         <source>Za gospodu</source>
         <target>For gentlemen</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">104</context>
+          <context context-type="linenumber">105</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4677238505483944009" datatype="html">
@@ -631,7 +631,7 @@
         <target>Black tailcoat or tuxedo</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">107</context>
+          <context context-type="linenumber">108</context>
         </context-group>
       </trans-unit>
       <trans-unit id="839543756183919459" datatype="html">
@@ -639,7 +639,7 @@
         <target>Elegant black or dark suit</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">108</context>
+          <context context-type="linenumber">109</context>
         </context-group>
       </trans-unit>
       <trans-unit id="8126036992628766140" datatype="html">
@@ -647,7 +647,7 @@
         <target>White shirt and bow tie</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">109</context>
+          <context context-type="linenumber">110</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1842354851750025934" datatype="html">
@@ -655,7 +655,7 @@
         <target>Ties instead of a bow tie</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">113</context>
+          <context context-type="linenumber">114</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1748523902439951457" datatype="html">
@@ -663,7 +663,7 @@
         <target>Sportswear and casual clothing</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">114</context>
+          <context context-type="linenumber">115</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2610572581333992138" datatype="html">
@@ -1259,8 +1259,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="8811902995044151017" datatype="html">
-        <source>Za pitanja o kartama <x id="START_LINK" ctype="x-a" equiv-text="&lt;a class=&quot;inline-link&quot; routerLink=&quot;/kontakt&quot; [queryParams]=&quot;{ tema: &apos;KARTE&apos; }&quot;&gt;"/>pišite nam<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/>.</source>
-        <target>For questions about tickets, <x id="START_LINK" ctype="x-a" equiv-text="&lt;a class=&quot;inline-link&quot; routerLink=&quot;/kontakt&quot; [queryParams]=&quot;{ tema: &apos;KARTE&apos; }&quot;&gt;"/>write to us<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/>.</target>
+        <source>Za pitanja o kartama <x id="START_LINK" ctype="x-a" equiv-text="&lt;a class=&quot;inline-link&quot; routerLink=&quot;/kontakt&quot;&gt;"/>pišite nam<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/>.</source>
+        <target>For questions about tickets, <x id="START_LINK" ctype="x-a" equiv-text="&lt;a class=&quot;inline-link&quot; routerLink=&quot;/kontakt&quot;&gt;"/>write to us<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/>.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
           <context context-type="linenumber">44,45</context>
@@ -1767,7 +1767,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/components/contact-form/contact-form.component.ts</context>
-          <context context-type="linenumber">77</context>
+          <context context-type="linenumber">76</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2797355341777507315" datatype="html">
@@ -1859,7 +1859,7 @@
         <target>© <x id="INTERPOLATION" equiv-text="{{ year }}"/> Sretenje Cultural Centre</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/layout/footer/footer.component.html</context>
-          <context context-type="linenumber">33,35</context>
+          <context context-type="linenumber">36,38</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4516372548704749282" datatype="html">
@@ -2046,20 +2046,12 @@
           <context context-type="linenumber">11</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="4554689334557829946" datatype="html">
-        <source>Rezervacije</source>
-        <target>Reservations</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/components/contact-form/contact-form.component.ts</context>
-          <context context-type="linenumber">12</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="6353418349096575841" datatype="html">
         <source>Mediji</source>
         <target>Media</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/components/contact-form/contact-form.component.ts</context>
-          <context context-type="linenumber">13</context>
+          <context context-type="linenumber">12</context>
         </context-group>
       </trans-unit>
       <trans-unit id="7928637202092451803" datatype="html">
@@ -2067,7 +2059,7 @@
         <target>Collaboration and performance</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/components/contact-form/contact-form.component.ts</context>
-          <context context-type="linenumber">14</context>
+          <context context-type="linenumber">13</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1208008593242265905" datatype="html">
@@ -2075,7 +2067,7 @@
         <target>You sent several messages in a short time. Please try again in a few minutes.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/components/contact-form/contact-form.component.ts</context>
-          <context context-type="linenumber">75</context>
+          <context context-type="linenumber">74</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4309241319714207671" datatype="html">
@@ -2083,7 +2075,7 @@
         <target>The message could not be sent right now. Please try again or write to us directly by email.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/components/contact-form/contact-form.component.ts</context>
-          <context context-type="linenumber">78</context>
+          <context context-type="linenumber">77</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2573159024509417433" datatype="html">

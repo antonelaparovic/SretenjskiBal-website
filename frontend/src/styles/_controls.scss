@@ -148,6 +148,64 @@ select.field__control {
   cursor: pointer;
 }
 
+// Padajuća lista u paleti sajta (pergament); stariji browseri koriste samo boje stavki.
+select.field__control option {
+  background: var(--c-parchment);
+  color: var(--c-ink);
+}
+
+@supports (appearance: base-select) {
+  select.field__control,
+  select.field__control::picker(select) {
+    appearance: base-select;
+  }
+
+  select.field__control {
+    background-image: none;
+    padding-right: 0;
+
+    &::picker-icon {
+      color: var(--c-burgundy);
+      transition: rotate var(--dur-base) var(--ease);
+    }
+
+    &:open::picker-icon {
+      rotate: 180deg;
+    }
+
+    &::picker(select) {
+      margin-top: 0.25rem;
+      padding: 0.35rem 0;
+      border: 1px solid var(--c-rule-brass);
+      background: var(--c-parchment);
+      box-shadow: 0 18px 40px -20px rgba(23, 20, 19, 0.45);
+    }
+
+    option {
+      padding: 0.7rem 1rem;
+      font-size: 0.9375rem;
+      color: var(--c-ink);
+      transition: background-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+
+      &::checkmark {
+        content: '';
+        display: none;
+      }
+
+      &:hover,
+      &:focus-visible {
+        background: rgba(90, 23, 35, 0.08);
+        color: var(--c-burgundy);
+      }
+
+      &:checked {
+        color: var(--c-burgundy);
+        font-weight: 600;
+      }
+    }
+  }
+}
+
 // Skriveno polje protiv botova.
 .hp {
   position: absolute;
