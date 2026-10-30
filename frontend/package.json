@@ -8,7 +8,8 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:frontend": "node dist/frontend/server/server.mjs",
-    "build:preview": "ng build --configuration production,preview"
+    "build:preview": "ng build --configuration production,preview",
+    "start:i18n": "ng build && node dist/frontend/server/server.mjs"
   },
   "private": true,
   "packageManager": "npm@10.9.7",

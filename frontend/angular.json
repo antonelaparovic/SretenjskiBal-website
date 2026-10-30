@@ -100,7 +100,7 @@
                   "input": "netlify-preview"
                 }
               ],
-              "localize": false
+              "localize": true
             }
           },
           "defaultConfiguration": "production"
