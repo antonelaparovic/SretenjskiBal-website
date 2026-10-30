@@ -26,7 +26,6 @@ export const routes: Routes = [
   { path: 'prostor', ...soon($localize`Prostor`) },
   { path: 'partneri', ...soon($localize`Partneri`) },
   { path: 'privacy', loadComponent: () => import('./features/legal/legal.page').then((m) => m.LegalPage), data: { kind: 'privacy' } },
-  { path: 'cookies', loadComponent: () => import('./features/legal/legal.page').then((m) => m.LegalPage), data: { kind: 'cookies' } },
   // Uslovi korišćenja: sakriveno dok ne budu napisani.
   // { path: 'uslovi', ...soon($localize`Uslovi korišćenja`) },
 

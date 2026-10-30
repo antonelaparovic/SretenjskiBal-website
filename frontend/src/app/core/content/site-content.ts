@@ -46,9 +46,8 @@ export const HERO_IMAGE: { src: string | null; alt: string; credit: string | nul
 export const PROGRAM: ProgramItem[] = [
   { time: '18:00', title: $localize`Ulazak gostiju`, description: $localize`Doček u foajeu Narodnog doma uz muzičku pozadinu. Gosti se u 18:55 pozivaju ka svojim stolovima.` },
   { time: '19:00', title: $localize`Himne i otvaranje`, description: $localize`Himne Srbije i Slovenije, a zatim izlazak voditelja i uvodna reč.` },
-  { time: '19:15', title: $localize`Sretenjska besjeda`, description: $localize`O značaju Sretenja: duhovnom susretu sa Hristom, susretu naroda sa slobodom i opredeljenju za pravdu i zakonitost.` },
   { time: '19:30', title: $localize`Svečana večera`, description: $localize`Večera uz muziku kamernog kvarteta.` },
-  { time: '19:50', until: '21:00', title: $localize`Kulturno-umetnički program`, description: $localize`Nastupi KUD-a iz Maribora, besjeda, baletska tačka i pevanje, uz slobodan ples.` },
+  { time: '19:50', until: '21:00', title: $localize`Kulturno-umetnički program`, description: $localize`Nastupi KUD-a iz Maribora, baletska tačka i pevanje, uz slobodan ples.` },
   { time: '21:20', until: '23:00', title: $localize`Koncert grupe Galija`, description: $localize`Glavni muzički program večeri i završetak bala.` },
 ];
 

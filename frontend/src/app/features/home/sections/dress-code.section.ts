@@ -17,7 +17,7 @@ interface Guide {
         <div class="head" appReveal>
           <div class="head__title">
             <p class="label eyebrow" i18n>Kodeks oblačenja · Dress code</p>
-            <h2 id="dress-title" class="display title" i18n>Formal / Black Tie</h2>
+            <h2 id="dress-title" class="display title" i18n>Kodeks oblačenja</h2>
           </div>
           <p class="lead" i18n>Svečani karakter bala podrazumeva i odgovarajući kodeks oblačenja.</p>
         </div>

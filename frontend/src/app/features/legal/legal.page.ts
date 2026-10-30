@@ -79,8 +79,8 @@ import { SeoService } from '../../core/services/seo.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LegalPage {
-  /** Iz route data: 'privacy' | 'cookies'. */
-  readonly kind = input<'privacy' | 'cookies'>('privacy');
+  /** Iz route data: 'privacy'. */
+  readonly kind = input<'privacy'>('privacy');
   protected readonly langs: Locale[] = ['sr', 'sl', 'en'];
   protected readonly label = LEGAL_LANG_LABEL;
   protected readonly lang = signal<Locale>(currentLocale());

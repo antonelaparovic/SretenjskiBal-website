@@ -86,7 +86,7 @@ const privacySr: LegalDoc = {
     },
     {
       h: '7. Kolačići i praćenje',
-      p: ['Sajt ne koristi kolačiće za praćenje ni analitiku. Detalje vidite na stranici Kolačići.'],
+      p: ['Sajt ne postavlja kolačiće niti upisuje podatke u lokalnu memoriju pregledača (localStorage), a ne koristimo ni analitiku, oglase, društvene dodatke ili spoljne servise koji prate posetioce. Fontovi se učitavaju sa našeg servera. Zato nema banera za saglasnost; ako u budućnosti uvedemo analitiku, tražićemo vašu saglasnost pre toga.'],
     },
     {
       h: '8. Fotografisanje na balu',
@@ -158,7 +158,7 @@ const privacySl: LegalDoc = {
     },
     {
       h: '7. Piškotki in sledenje',
-      p: ['Spletna stran ne uporablja piškotkov za sledenje ali analitiko. Podrobnosti so na strani Piškotki.'],
+      p: ['Spletna stran ne nastavlja piškotkov in ne zapisuje podatkov v lokalni pomnilnik brskalnika (localStorage); ne uporabljamo niti analitike, oglasov, družbenih vtičnikov ali zunanjih storitev, ki bi sledile obiskovalcem. Pisave se nalagajo z našega strežnika. Zato ni pasice za privolitev; če bomo v prihodnje uvedli analitiko, bomo pred tem zahtevali vašo privolitev.'],
     },
     {
       h: '8. Fotografiranje na plesu',
@@ -230,7 +230,7 @@ const privacyEn: LegalDoc = {
     },
     {
       h: '7. Cookies and tracking',
-      p: ['The site does not use tracking or analytics cookies. See the Cookies page for details.'],
+      p: ['The site does not set cookies or write data to your browser’s local storage (localStorage), and we use no analytics, advertising, social plug-ins or third-party services that track visitors. Fonts are served from our own server. That is why there is no consent banner; if we later introduce analytics, we will ask for your consent first.'],
     },
     {
       h: '8. Photography at the ball',
@@ -243,75 +243,8 @@ const privacyEn: LegalDoc = {
   ],
 };
 
-const cookiesSr: LegalDoc = {
-  title: 'Kolačići',
-  updated: `Verzija ${PRIVACY_POLICY_VERSION}`,
-  sections: [
-    {
-      h: 'Šta koristimo',
-      p: [
-        'Ovaj sajt ne postavlja kolačiće niti upisuje podatke u lokalnu memoriju vašeg pregledača (localStorage). Ne koristimo analitiku, oglase, društvene dodatke ni spoljne servise koji bi pratili posetioce. Fontovi se učitavaju sa našeg servera.',
-        'Zato ne prikazujemo baner za saglasnost: saglasnost je potrebna samo za kolačiće koji nisu strogo neophodni (čl. 225 ZEKom-2).',
-      ],
-    },
-    {
-      h: 'Ako se to promeni',
-      p: ['Ako u budućnosti uvedemo analitiku ili slične alate, tražićemo vašu saglasnost pre nego što se postave i ažuriraćemo ovu stranicu.'],
-    },
-    {
-      h: 'Pitanja',
-      p: [`Pišite nam na ${O.privacyEmail}. Više o obradi podataka — u Politici privatnosti.`],
-    },
-  ],
-};
-
-const cookiesSl: LegalDoc = {
-  title: 'Piškotki',
-  updated: `Različica ${PRIVACY_POLICY_VERSION}`,
-  sections: [
-    {
-      h: 'Kaj uporabljamo',
-      p: [
-        'Ta spletna stran ne nastavlja piškotkov in ne zapisuje podatkov v lokalni pomnilnik brskalnika (localStorage). Ne uporabljamo analitike, oglasov, družbenih vtičnikov ali zunanjih storitev, ki bi sledile obiskovalcem. Pisave se nalagajo z našega strežnika.',
-        'Zato ne prikazujemo pasice za privolitev: ta je potrebna le za piškotke, ki niso nujno potrebni (225. člen ZEKom-2).',
-      ],
-    },
-    {
-      h: 'Če se to spremeni',
-      p: ['Če bomo v prihodnje uvedli analitiko ali podobna orodja, bomo pred namestitvijo zahtevali vašo privolitev in posodobili to stran.'],
-    },
-    {
-      h: 'Vprašanja',
-      p: [`Pišite nam na ${O.privacyEmail}. Več o obdelavi podatkov — v Politiki zasebnosti.`],
-    },
-  ],
-};
-
-const cookiesEn: LegalDoc = {
-  title: 'Cookies',
-  updated: `Version ${PRIVACY_POLICY_VERSION}`,
-  sections: [
-    {
-      h: 'What we use',
-      p: [
-        'This site does not set cookies or write data to your browser’s local storage. We use no analytics, advertising, social plug-ins or third-party services that track visitors. Fonts are served from our own server.',
-        'That is why there is no consent banner: consent is only required for cookies that are not strictly necessary (Art. 225 ZEKom-2).',
-      ],
-    },
-    {
-      h: 'If this changes',
-      p: ['If we later introduce analytics or similar tools, we will ask for your consent before they load and update this page.'],
-    },
-    {
-      h: 'Questions',
-      p: [`Write to ${O.privacyEmail}. More on data processing — see the Privacy Policy.`],
-    },
-  ],
-};
-
-export const LEGAL: Record<'privacy' | 'cookies', Record<Locale, LegalDoc>> = {
+export const LEGAL: Record<'privacy', Record<Locale, LegalDoc>> = {
   privacy: { sr: privacySr, sl: privacySl, en: privacyEn },
-  cookies: { sr: cookiesSr, sl: cookiesSl, en: cookiesEn },
 };
 
 export const LEGAL_LANG_LABEL: Record<Locale, string> = { sr: 'Srpski', sl: 'Slovenščina', en: 'English' };

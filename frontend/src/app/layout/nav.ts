@@ -27,7 +27,7 @@ export const SECTION_NAV: SectionNavItem[] = [
   { label: $localize`Umetnički program`, id: 'izvodjaci' },
   { label: $localize`Narodni dom, Maribor`, id: 'prostor' },
   { label: $localize`Program večeri`, id: 'program' },
-  { label: $localize`Formal / Black Tie`, id: 'pravila-oblacenja' },
+  { label: $localize`Kodeks oblačenja`, id: 'pravila-oblacenja' },
   { label: $localize`Ulaznice`, id: 'karte' },
   { label: $localize`Kulturni centar Sretenje`, id: 'organizator' },
   { label: $localize`Priča o balskoj tradiciji`, path: '/balska-tradicija' },
@@ -39,6 +39,5 @@ export const FOOTER_SECTION_IDS = ['izvodjaci', 'program', 'prostor', 'pravila-o
 
 export const LEGAL_NAV: NavItem[] = [
   { label: $localize`Politika privatnosti`, path: '/privacy' },
-  { label: $localize`Kolačići`, path: '/cookies' },
   // { label: $localize`Uslovi korišćenja`, path: '/uslovi' }, // sakriveno dok ne budu napisani
 ];

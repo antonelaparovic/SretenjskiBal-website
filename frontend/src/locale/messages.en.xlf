@@ -66,32 +66,16 @@
           <context context-type="linenumber">48</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="1688727816897900242" datatype="html">
-        <source>Sretenjska besjeda</source>
-        <target>Sretenje address</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
-          <context context-type="linenumber">49</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="6513099753652633454" datatype="html">
-        <source>O značaju Sretenja: duhovnom susretu sa Hristom, susretu naroda sa slobodom i opredeljenju za pravdu i zakonitost.</source>
-        <target>On the meaning of Sretenje: the spiritual meeting with Christ, the nation's meeting with freedom, and the commitment to justice and the rule of law.</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
-          <context context-type="linenumber">49</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="5869630376464937696" datatype="html">
         <source>Svečana večera</source>
         <target>Gala dinner</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
-          <context context-type="linenumber">50</context>
+          <context context-type="linenumber">49</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
-          <context context-type="linenumber">64</context>
+          <context context-type="linenumber">63</context>
         </context-group>
       </trans-unit>
       <trans-unit id="7662079193887372992" datatype="html">
@@ -99,7 +83,7 @@
         <target>Dinner accompanied by a chamber quartet.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
-          <context context-type="linenumber">50</context>
+          <context context-type="linenumber">49</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4921732235370732360" datatype="html">
@@ -107,15 +91,15 @@
         <target>Cultural and artistic programme</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
-          <context context-type="linenumber">51</context>
+          <context context-type="linenumber">50</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="3512534067241218113" datatype="html">
-        <source>Nastupi KUD-a iz Maribora, besjeda, baletska tačka i pevanje, uz slobodan ples.</source>
-        <target>Performances by the Maribor KUD, an address, a ballet number and singing, with open dancing.</target>
+      <trans-unit id="1816742285216843360" datatype="html">
+        <source>Nastupi KUD-a iz Maribora, baletska tačka i pevanje, uz slobodan ples.</source>
+        <target>Performances by the Maribor KUD, a ballet number and singing, with open dancing.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
-          <context context-type="linenumber">51</context>
+          <context context-type="linenumber">50</context>
         </context-group>
       </trans-unit>
       <trans-unit id="5468966185035914804" datatype="html">
@@ -123,7 +107,7 @@
         <target>Concert by Galija</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
-          <context context-type="linenumber">52</context>
+          <context context-type="linenumber">51</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3746723390294083496" datatype="html">
@@ -131,7 +115,7 @@
         <target>The main musical programme of the evening and the close of the ball.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
-          <context context-type="linenumber">52</context>
+          <context context-type="linenumber">51</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3611130896558542601" datatype="html">
@@ -139,7 +123,7 @@
         <target>Gala</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
-          <context context-type="linenumber">61</context>
+          <context context-type="linenumber">60</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.ts</context>
@@ -151,11 +135,11 @@
         <target>Cultural and artistic programme and a concert by Galija</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
-          <context context-type="linenumber">63</context>
+          <context context-type="linenumber">62</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
-          <context context-type="linenumber">71</context>
+          <context context-type="linenumber">70</context>
         </context-group>
       </trans-unit>
       <trans-unit id="6953458869953896212" datatype="html">
@@ -163,7 +147,7 @@
         <target>Unlimited drinks</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
-          <context context-type="linenumber">65</context>
+          <context context-type="linenumber">64</context>
         </context-group>
       </trans-unit>
       <trans-unit id="6701447921178804789" datatype="html">
@@ -171,7 +155,7 @@
         <target>A seat at a table in the Great Hall</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
-          <context context-type="linenumber">66</context>
+          <context context-type="linenumber">65</context>
         </context-group>
       </trans-unit>
       <trans-unit id="108535653952525208" datatype="html">
@@ -179,7 +163,7 @@
         <target>Gallery</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
-          <context context-type="linenumber">69</context>
+          <context context-type="linenumber">68</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.ts</context>
@@ -191,7 +175,7 @@
         <target>Cocktail reception and welcome drink</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
-          <context context-type="linenumber">72</context>
+          <context context-type="linenumber">71</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2020240931477200533" datatype="html">
@@ -199,7 +183,7 @@
         <target>Standing place on the gallery with a view of the entire programme</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
-          <context context-type="linenumber">73</context>
+          <context context-type="linenumber">72</context>
         </context-group>
       </trans-unit>
       <trans-unit id="5051446375004581337" datatype="html">
@@ -207,7 +191,7 @@
         <target>Access to the Great Hall after the official part of the programme ends, from the start of Galija's performance</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
-          <context context-type="linenumber">74</context>
+          <context context-type="linenumber">73</context>
         </context-group>
       </trans-unit>
       <trans-unit id="5047928571088548330" datatype="html">
@@ -215,7 +199,7 @@
         <target>Main musical guest</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
-          <context context-type="linenumber">90</context>
+          <context context-type="linenumber">89</context>
         </context-group>
       </trans-unit>
       <trans-unit id="7881651936407201472" datatype="html">
@@ -223,7 +207,7 @@
         <target>Host of the evening</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
-          <context context-type="linenumber">91</context>
+          <context context-type="linenumber">90</context>
         </context-group>
       </trans-unit>
       <trans-unit id="503086916012932165" datatype="html">
@@ -231,7 +215,7 @@
         <target>Actor · recitation</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
-          <context context-type="linenumber">92</context>
+          <context context-type="linenumber">91</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4081082091303018324" datatype="html">
@@ -239,7 +223,7 @@
         <target>Recitation</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
-          <context context-type="linenumber">93</context>
+          <context context-type="linenumber">92</context>
         </context-group>
       </trans-unit>
       <trans-unit id="6121306988137786378" datatype="html">
@@ -247,7 +231,7 @@
         <target>Choir</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
-          <context context-type="linenumber">94</context>
+          <context context-type="linenumber">93</context>
         </context-group>
       </trans-unit>
       <trans-unit id="8312501018250208021" datatype="html">
@@ -255,7 +239,7 @@
         <target>Ballet duo</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
-          <context context-type="linenumber">95</context>
+          <context context-type="linenumber">94</context>
         </context-group>
       </trans-unit>
       <trans-unit id="6222874254239669559" datatype="html">
@@ -263,7 +247,7 @@
         <target>KUD · folk dance</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
-          <context context-type="linenumber">96</context>
+          <context context-type="linenumber">95</context>
         </context-group>
       </trans-unit>
       <trans-unit id="557727155035277857" datatype="html">
@@ -530,9 +514,9 @@
           <context context-type="linenumber">19,20</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="3471498579683581155" datatype="html">
-        <source>Formal / Black Tie</source>
-        <target>Formal / Black Tie</target>
+      <trans-unit id="2360457824572470031" datatype="html">
+        <source>Kodeks oblačenja</source>
+        <target>Dress code</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
           <context context-type="linenumber">20,21</context>
@@ -1875,7 +1859,7 @@
         <target>© <x id="INTERPOLATION" equiv-text="{{ year }}"/> Sretenje Cultural Centre</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/layout/footer/footer.component.html</context>
-          <context context-type="linenumber">32,34</context>
+          <context context-type="linenumber">33,35</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4516372548704749282" datatype="html">
@@ -1932,14 +1916,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/layout/nav.ts</context>
           <context context-type="linenumber">41</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="2260207181410085117" datatype="html">
-        <source>Kolačići</source>
-        <target>Cookies</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/layout/nav.ts</context>
-          <context context-type="linenumber">42</context>
         </context-group>
       </trans-unit>
       <trans-unit id="5127310159517988780" datatype="html">
