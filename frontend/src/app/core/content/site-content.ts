@@ -84,13 +84,18 @@ export const TICKETS: TicketType[] = [
 export const SPONSORS: Sponsor[] = [];
 
 /**
- * Izvođači — prikazuju se na početnoj kao karusel, redom kako su ovde upisani (prvi = glavni izvođač).
- * Portret staviti u frontend/public/images/izvodjaci/ i upisati putanju u photo.
- * Dok je lista prazna, sekcija prikazuje „Imena izvođača objavljujemo uskoro."
- * Primer:
- *   { name: 'Ime Prezime', role: 'sopran', photo: '/images/izvodjaci/ime-prezime.jpg' },
+ * Izvođači — prvi sa featured: true je glavni gost (krupno), ostali idu u mrežu ispod, redom kako su upisani.
+ * name: null znači da ime još nije objavljeno (prikazuje se „Uskoro"); kad ime bude poznato, upisati ga ovde.
  */
-export const PERFORMERS: Performer[] = [];
+export const PERFORMERS: Performer[] = [
+  { role: $localize`Glavni muzički gost`, name: 'Galija', featured: true },
+  { role: $localize`Voditeljka večeri`, name: null },
+  { role: $localize`Glumac · recitacija`, name: null },
+  { role: $localize`Recitacija`, name: 'Nenad Gugl' },
+  { role: $localize`Hor`, name: null },
+  { role: $localize`Baletski duo`, name: null },
+  { role: $localize`KUD · folklor`, name: null },
+];
 
 /**
  * Fotografija Narodnog doma za stranicu Balska tradicija (fasada ili stepenište, bez ljudi, meko predvečerje).

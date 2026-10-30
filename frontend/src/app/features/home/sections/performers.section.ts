@@ -1,20 +1,11 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  ElementRef,
-  afterNextRender,
-  inject,
-  signal,
-  viewChild,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { PERFORMERS } from '../../../core/content/site-content';
 import { SectionHeadingComponent } from '../../../shared/components/section-heading/section-heading.component';
 import { RevealDirective } from '../../../shared/directives/reveal.directive';
 
 /**
- * Izvođači kao karusel: portreti u luku (motiv iz znaka), prevlačenje prstom
- * na telefonu, strelice na računaru. Dok nema imena, prikazuje prazne lukove i najavu.
+ * Izvođači: glavni gost krupno, ostali u mreži kategorija (voditeljka, recitacije, hor, balet, KUD…).
+ * Radi i dok imena nisu poznata — tada kartica prikazuje samo kategoriju i „Uskoro".
  */
 @Component({
   selector: 'app-performers-section',
@@ -23,153 +14,81 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
     <section id="izvodjaci" class="section bg-ivory performers" aria-labelledby="performers-title">
       <div class="container">
         <div class="head" appReveal>
-          <app-section-heading headingId="performers-title" i18n-eyebrow eyebrow="Muzika večeri">
+          <app-section-heading headingId="performers-title" i18n-eyebrow eyebrow="Nastupaju">
             <ng-container i18n>Izvođači</ng-container>
           </app-section-heading>
-
-          @if (performers.length > 1) {
-            <div class="controls">
-              <button class="arrow" type="button" (click)="step(-1)" [disabled]="atStart()" i18n-aria-label aria-label="Prethodni izvođač">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
-              </button>
-              <button class="arrow" type="button" (click)="step(1)" [disabled]="atEnd()" i18n-aria-label aria-label="Sledeći izvođač">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
-              </button>
-            </div>
-          }
         </div>
 
-        @if (performers.length) {
-          <ul #track class="track" appReveal [appRevealDelay]="120" (scroll)="sync()">
-            @for (p of performers; track p.name) {
-              <li class="card">
-                <div class="portrait">
-                  @if (p.photo) {
-                    <img [src]="p.photo" [alt]="p.name" loading="lazy" decoding="async" />
-                  }
-                </div>
-                <h3 class="name">{{ p.name }}</h3>
-                <p class="label role">{{ p.role }}</p>
-              </li>
-            }
-          </ul>
-        } @else {
-          <ul class="track track--soon" appReveal [appRevealDelay]="120" aria-hidden="true">
-            @for (i of soon; track i) {
-              <li class="card"><div class="portrait"></div></li>
-            }
-          </ul>
-          <p class="lead soon-note" appReveal i18n>Imena izvođača objavljujemo uskoro.</p>
+        @if (featured; as f) {
+          <div class="feature" appReveal [appRevealDelay]="80">
+            <p class="label">{{ f.role }}</p>
+            <p class="feature__name">{{ f.name }}</p>
+          </div>
         }
+
+        <ul class="grid-list">
+          @for (p of others; track p.role + p.name; let i = $index) {
+            <li class="item" appReveal [appRevealDelay]="i * 70">
+              <span class="item__no" aria-hidden="true">{{ i + 2 < 10 ? '0' + (i + 2) : i + 2 }}</span>
+              <div class="item__text">
+                <p class="label item__role">{{ p.role }}</p>
+                @if (p.name) {
+                  <p class="item__name">{{ p.name }}</p>
+                } @else {
+                  <p class="item__name item__name--soon" i18n>Uskoro</p>
+                }
+              </div>
+            </li>
+          }
+        </ul>
       </div>
     </section>
   `,
   styles: `
-    .performers { overflow: hidden; }
-    .head {
+    .head { margin-bottom: clamp(2rem, 4vw, 3.5rem); }
+    .feature {
       display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      gap: 2rem;
-      margin-bottom: clamp(2.5rem, 5vw, 4rem);
+      flex-direction: column;
+      gap: 0.75rem;
+      padding: clamp(2rem, 4vw, 3rem) 0;
+      border-top: 1px solid var(--c-rule-dark);
+      border-bottom: 1px solid var(--c-rule-dark);
     }
-    .controls { display: flex; align-items: center; gap: 0.75rem; }
-    .arrow {
-      display: grid;
-      place-items: center;
-      width: 52px;
-      height: 52px;
-      border: 1px solid var(--c-wine);
-      background: transparent;
-      color: var(--c-wine);
-      cursor: pointer;
-      transition: background-color var(--dur-base) var(--ease), color var(--dur-base) var(--ease), opacity var(--dur-base) var(--ease);
-    }
-    .arrow svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.25; }
-    .arrow:hover:not(:disabled) { background: var(--c-wine); color: var(--c-ivory); }
-    .arrow:disabled { opacity: 0.3; cursor: default; }
-
-    .track {
-      --card-w: clamp(240px, 24vw, 300px);
-      display: grid;
-      grid-auto-flow: column;
-      grid-auto-columns: var(--card-w);
-      gap: clamp(1.25rem, 2.5vw, 2.5rem);
+    .feature .label { color: var(--c-burgundy); }
+    .feature__name {
       margin: 0;
-      padding: 0 0 0.5rem;
-      list-style: none;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      scroll-behavior: smooth;
-      overscroll-behavior-x: contain;
-      scrollbar-width: none;
-      /* Karusel izlazi do desne ivice ekrana, poravnat levo sa sadržajem. */
-      margin-right: calc(-1 * var(--gutter));
-      padding-right: var(--gutter);
-    }
-    .track::-webkit-scrollbar { display: none; }
-    .card { scroll-snap-align: start; }
-
-    .portrait {
-      position: relative;
-      aspect-ratio: 3 / 4;
-      overflow: hidden;
-      border-radius: 999px 999px 0 0;
-      background: var(--c-placeholder-warm);
-    }
-    .portrait img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-    .name {
-      margin: 1.5rem 0 0.5rem;
       font-family: var(--font-display);
-      font-weight: 400;
-      font-size: 1.75rem;
-      line-height: 1.15;
+      font-weight: 300;
+      font-size: clamp(3.25rem, 9vw, 7.5rem);
+      line-height: 0.95;
+      letter-spacing: 0.01em;
     }
-    .role { margin: 0; color: var(--c-burgundy); }
-
-    .track--soon { overflow: hidden; scroll-snap-type: none; }
-    .track--soon .portrait { background: transparent; border: 1px solid var(--c-rule-dark); }
-    .soon-note { margin-top: 2.5rem; color: var(--c-ink-soft); }
-
-    @media (prefers-reduced-motion: reduce) { .track { scroll-behavior: auto; } }
-    @media (max-width: 767.98px) {
-      .track { --card-w: 72vw; }
-      .controls .arrow { display: none; }
+    .grid-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: clamp(2rem, 6vw, 6rem);
+      margin: 0;
+      padding: 0;
+      list-style: none;
     }
+    .item {
+      display: grid;
+      grid-template-columns: 2.75rem minmax(0, 1fr);
+      align-items: baseline;
+      gap: 1rem;
+      padding: 1.5rem 0;
+      border-bottom: 1px solid var(--c-rule-dark);
+    }
+    .item__no { font-family: var(--font-display); font-size: 1.125rem; color: var(--c-brass); }
+    .item__text { display: flex; flex-direction: column; gap: 0.4rem; }
+    .item__role { margin: 0; color: var(--c-burgundy); }
+    .item__name { margin: 0; font-family: var(--font-display); font-size: clamp(1.625rem, 2.6vw, 2.125rem); line-height: 1.15; }
+    .item__name--soon { font-style: italic; color: var(--c-ink-soft); }
+    @media (max-width: 767.98px) { .grid-list { grid-template-columns: 1fr; } }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PerformersSectionComponent {
-  protected readonly performers = PERFORMERS;
-  protected readonly soon = [1, 2, 3, 4, 5];
-  protected readonly atStart = signal(true);
-  protected readonly atEnd = signal(false);
-  private readonly track = viewChild<ElementRef<HTMLUListElement>>('track');
-
-  constructor() {
-    const destroyRef = inject(DestroyRef);
-    afterNextRender(() => {
-      this.sync();
-      const onResize = () => this.sync();
-      window.addEventListener('resize', onResize, { passive: true });
-      destroyRef.onDestroy(() => window.removeEventListener('resize', onResize));
-    });
-  }
-
-  /** Pomera karusel za jednu karticu levo (-1) ili desno (1). */
-  protected step(dir: 1 | -1): void {
-    const el = this.track()?.nativeElement;
-    const card = el?.querySelector<HTMLElement>('.card');
-    if (!el || !card) return;
-    const gap = parseFloat(getComputedStyle(el).columnGap) || 0;
-    el.scrollBy({ left: dir * (card.offsetWidth + gap) });
-  }
-
-  protected sync(): void {
-    const el = this.track()?.nativeElement;
-    if (!el) return;
-    const max = el.scrollWidth - el.clientWidth;
-    this.atStart.set(el.scrollLeft <= 2);
-    this.atEnd.set(el.scrollLeft >= max - 2);
-  }
+  protected readonly featured = PERFORMERS.find((p) => p.featured) ?? null;
+  protected readonly others = PERFORMERS.filter((p) => !p.featured);
 }

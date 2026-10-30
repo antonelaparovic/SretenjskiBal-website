@@ -41,10 +41,13 @@ export interface Sponsor {
 }
 
 export interface Performer {
-  name: string;
-  /** Kratko: instrument, glas ili ansambl, npr. „sopran", „gudački kvartet". */
+  /** Kategorija nastupa, npr. „Hor", „Baletski duo", „Recitacija". */
   role: string;
-  /** Portret, npr. '/images/izvodjaci/ime-prezime.jpg' (uspravna fotografija, najmanje 800 px širine). */
+  /** Ime izvođača; null dok nije objavljeno (prikazuje se „Uskoro"). */
+  name: string | null;
+  /** Glavni gost večeri — prikazuje se krupno iznad ostalih. */
+  featured?: boolean;
+  /** Portret, npr. '/images/izvodjaci/ime-prezime.jpg' (neobavezno). */
   photo?: string;
 }
 

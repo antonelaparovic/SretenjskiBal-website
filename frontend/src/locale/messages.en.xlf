@@ -226,6 +226,62 @@
           <context context-type="linenumber">75</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="5047928571088548330" datatype="html">
+        <source>Glavni muzički gost</source>
+        <target>Main musical guest</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
+          <context context-type="linenumber">91</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7881651936407201472" datatype="html">
+        <source>Voditeljka večeri</source>
+        <target>Host of the evening</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
+          <context context-type="linenumber">92</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="503086916012932165" datatype="html">
+        <source>Glumac · recitacija</source>
+        <target>Actor · recitation</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
+          <context context-type="linenumber">93</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4081082091303018324" datatype="html">
+        <source>Recitacija</source>
+        <target>Recitation</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
+          <context context-type="linenumber">94</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6121306988137786378" datatype="html">
+        <source>Hor</source>
+        <target>Choir</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
+          <context context-type="linenumber">95</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8312501018250208021" datatype="html">
+        <source>Baletski duo</source>
+        <target>Ballet duo</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
+          <context context-type="linenumber">96</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6222874254239669559" datatype="html">
+        <source>KUD · folklor</source>
+        <target>KUD · folk dance</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/content/site-content.ts</context>
+          <context context-type="linenumber">97</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="557727155035277857" datatype="html">
         <source>Balska tradicija</source>
         <target>Ball tradition</target>
@@ -535,7 +591,7 @@
         <target>For ladies</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">91</context>
+          <context context-type="linenumber">93</context>
         </context-group>
       </trans-unit>
       <trans-unit id="7069415753275284497" datatype="html">
@@ -543,7 +599,7 @@
         <target>Floor-length evening or ball gown</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">93</context>
+          <context context-type="linenumber">95</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4252174064641854347" datatype="html">
@@ -551,11 +607,11 @@
         <target>Elegant formal footwear</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">93</context>
+          <context context-type="linenumber">95</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">108</context>
+          <context context-type="linenumber">110</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3394526962284498362" datatype="html">
@@ -563,7 +619,7 @@
         <target>Short and cocktail dresses</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">95</context>
+          <context context-type="linenumber">97</context>
         </context-group>
       </trans-unit>
       <trans-unit id="6418659042162778991" datatype="html">
@@ -571,7 +627,7 @@
         <target>Short skirts and daywear</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">96</context>
+          <context context-type="linenumber">98</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2926847237179042245" datatype="html">
@@ -579,11 +635,11 @@
         <target>Sneakers and casual footwear</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">97</context>
+          <context context-type="linenumber">99</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">113</context>
+          <context context-type="linenumber">115</context>
         </context-group>
       </trans-unit>
       <trans-unit id="702065592462377042" datatype="html">
@@ -591,11 +647,11 @@
         <target>Folk costumes</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">98</context>
+          <context context-type="linenumber">100</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">114</context>
+          <context context-type="linenumber">116</context>
         </context-group>
       </trans-unit>
       <trans-unit id="156529230216849476" datatype="html">
@@ -603,7 +659,7 @@
         <target>For gentlemen</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">102</context>
+          <context context-type="linenumber">104</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4677238505483944009" datatype="html">
@@ -611,7 +667,7 @@
         <target>Black tailcoat or tuxedo</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">105</context>
+          <context context-type="linenumber">107</context>
         </context-group>
       </trans-unit>
       <trans-unit id="839543756183919459" datatype="html">
@@ -619,7 +675,7 @@
         <target>Elegant black or dark suit</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">106</context>
+          <context context-type="linenumber">108</context>
         </context-group>
       </trans-unit>
       <trans-unit id="8126036992628766140" datatype="html">
@@ -627,7 +683,7 @@
         <target>White shirt and bow tie</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">107</context>
+          <context context-type="linenumber">109</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1842354851750025934" datatype="html">
@@ -635,7 +691,7 @@
         <target>Ties instead of a bow tie</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">111</context>
+          <context context-type="linenumber">113</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1748523902439951457" datatype="html">
@@ -643,7 +699,7 @@
         <target>Sportswear and casual clothing</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">112</context>
+          <context context-type="linenumber">114</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2610572581333992138" datatype="html">
@@ -758,12 +814,12 @@
           <context context-type="linenumber">36,37</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="8356872076706794331" datatype="html">
-        <source>Muzika večeri</source>
-        <target>Music of the evening</target>
+      <trans-unit id="4691484211809929848" datatype="html">
+        <source>Nastupaju</source>
+        <target>On stage</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/performers.section.ts</context>
-          <context context-type="linenumber">26,27</context>
+          <context context-type="linenumber">17,18</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1485772001493371088" datatype="html">
@@ -771,35 +827,19 @@
         <target>Performers</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/performers.section.ts</context>
-          <context context-type="linenumber">27</context>
+          <context context-type="linenumber">18</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/layout/nav.ts</context>
           <context context-type="linenumber">27</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="7430332357056817082" datatype="html">
-        <source>Prethodni izvođač</source>
-        <target>Previous performer</target>
+      <trans-unit id="1494371750344720325" datatype="html">
+        <source>Uskoro</source>
+        <target>Soon</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/performers.section.ts</context>
-          <context context-type="linenumber">32,33</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="313594671133839929" datatype="html">
-        <source>Sledeći izvođač</source>
-        <target>Next performer</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/home/sections/performers.section.ts</context>
-          <context context-type="linenumber">35,36</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="4396654337997554664" datatype="html">
-        <source>Imena izvođača objavljujemo uskoro.</source>
-        <target>Performers will be announced soon.</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/home/sections/performers.section.ts</context>
-          <context context-type="linenumber">62,63</context>
+          <context context-type="linenumber">38,39</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2852142514729307429" datatype="html">
