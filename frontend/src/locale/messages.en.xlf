@@ -435,7 +435,7 @@
         <target>Contact</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/contact/contact.page.ts</context>
-          <context context-type="linenumber">13,14</context>
+          <context context-type="linenumber">14,15</context>
         </context-group>
       </trans-unit>
       <trans-unit id="624503260347772493" datatype="html">
@@ -443,15 +443,15 @@
         <target>Write to us.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/contact/contact.page.ts</context>
-          <context context-type="linenumber">14</context>
+          <context context-type="linenumber">15</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="4323939677479540400" datatype="html">
-        <source>Za partnerstva, medije, nastupe ili pitanja o balu. Odgovaramo u najkraćem roku.</source>
-        <target>For partnerships, media, performances or questions about the ball. We reply as soon as possible.</target>
+      <trans-unit id="2773667999780511200" datatype="html">
+        <source>Zanima vas partnerstvo, medijsko izveštavanje ili nastup na balu, ili jednostavno imate pitanje o večeri? Pišite nam, rado ćemo vam odgovoriti u najkraćem roku.</source>
+        <target>Interested in a partnership, media coverage or performing at the ball, or simply have a question about the evening? Write to us and we will gladly reply as soon as we can.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/contact/contact.page.ts</context>
-          <context context-type="linenumber">16,17</context>
+          <context context-type="linenumber">17,18</context>
         </context-group>
       </trans-unit>
       <trans-unit id="581882906330308925" datatype="html">
@@ -459,7 +459,7 @@
         <target>Contact | Sretenjski bal</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/contact/contact.page.ts</context>
-          <context context-type="linenumber">37</context>
+          <context context-type="linenumber">42</context>
         </context-group>
       </trans-unit>
       <trans-unit id="6064511537905018635" datatype="html">
@@ -467,7 +467,7 @@
         <target>Write to the organiser of Sretenjski bal — partnerships, media, performances and general enquiries.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/contact/contact.page.ts</context>
-          <context context-type="linenumber">38</context>
+          <context context-type="linenumber">43</context>
         </context-group>
       </trans-unit>
       <trans-unit id="429229828439857806" datatype="html">
@@ -1811,7 +1811,7 @@
         <target>Ticket reservation | Sretenjski bal</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation.page.ts</context>
-          <context context-type="linenumber">37</context>
+          <context context-type="linenumber">66</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2321209631130591402" datatype="html">
@@ -1819,7 +1819,7 @@
         <target>Reserve tickets for Sretenjski bal, 13 February 2027 in Maribor.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation.page.ts</context>
-          <context context-type="linenumber">38</context>
+          <context context-type="linenumber">67</context>
         </context-group>
       </trans-unit>
       <trans-unit id="6260682911141366554" datatype="html">

@@ -121,7 +121,9 @@ export const ORGANIZER = {
   legalName: 'Kulturni centar Sretenje',
   address: 'Zagrebška cesta 20, 2000 Maribor',
   registration: 'MŠ: 2949903000, DŠ: 41959787',
-  privacyEmail: '[UPISATI: e-adresa za pitanja o privatnosti]',
+  /** Pitanja, kontakt forma i privatnost. */
+  email: 'info@kcsretenje.si',
+  privacyEmail: 'info@kcsretenje.si',
   hosting: '[UPISATI: pružalac hostinga sajta]',
   mailProvider: '[UPISATI: pružalac e-pošte (SMTP)]',
 } as const;

@@ -29,3 +29,22 @@
   margin: 0;
   background: var(--c-brass);
 }
+
+// Tamna tema stranice (bordo): ista komponenta forme, samo se tokeni preslikaju na svetle tonove.
+.on-dark {
+  --c-ink: var(--c-ivory);
+  --c-ink-soft: rgba(246, 241, 232, 0.7);
+  --c-burgundy: #d3bb82; // mesing za oznake i cene na tamnoj podlozi
+  --c-rule-dark: rgba(180, 154, 99, 0.32);
+  color: var(--c-ivory);
+
+  .field__control::placeholder { color: rgba(246, 241, 232, 0.4); }
+  .field__error { color: #f2a6a6; }
+  .field__control[aria-invalid='true'] { border-bottom-color: #f2a6a6; }
+  select.field__control option { background: var(--c-wine); color: var(--c-ivory); }
+  .btn--primary { background: var(--c-brass); color: var(--c-wine); }
+  .btn--primary:hover:not(:disabled) { background: var(--c-ivory); color: var(--c-wine); }
+  .btn--outline-dark { border-color: var(--c-brass); color: var(--c-ivory); }
+  .btn--outline-dark:hover { background: var(--c-ivory); color: var(--c-wine); }
+  .server-error { background: rgba(242, 166, 166, 0.1); border-left-color: #f2a6a6; color: #f2a6a6; }
+}

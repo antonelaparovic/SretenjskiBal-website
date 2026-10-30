@@ -7,7 +7,7 @@ import { ReservationFormComponent } from './reservation-form.component';
   selector: 'app-reservation-page',
   imports: [ReservationFormComponent, SectionHeadingComponent],
   template: `
-    <section class="page section bg-parchment paper" aria-labelledby="reservation-title">
+    <section class="page section on-dark" aria-labelledby="reservation-title">
       <div class="container">
         <header class="head grid">
           <app-section-heading class="title" [level]="1" headingId="reservation-title">
@@ -23,8 +23,37 @@ import { ReservationFormComponent } from './reservation-form.component';
     </section>
   `,
   styles: `
-    .page { padding-top: calc(var(--header-h) + var(--section-y)); }
-    .head { align-items: end; padding-bottom: 3rem; border-bottom: 1px solid var(--c-brass); }
+    .page {
+      position: relative;
+      overflow: hidden;
+      padding-top: calc(var(--header-h) + var(--section-y));
+      background:
+        radial-gradient(55% 40% at 88% 0%, rgba(180, 154, 99, 0.18), transparent 70%),
+        radial-gradient(45% 35% at 0% 100%, rgba(180, 154, 99, 0.1), transparent 70%),
+        linear-gradient(180deg, #401018 0%, #5a1723 45%, #401018 100%);
+    }
+    .head { align-items: end; padding-bottom: 3rem; border-bottom: 1px solid var(--c-rule-brass); }
+    .head::after {
+      content: '';
+      grid-column: 1 / -1;
+      justify-self: center;
+      width: 9px;
+      height: 9px;
+      margin-bottom: -3.35rem;
+      border: 1px solid var(--c-brass);
+      background: #401018;
+      transform: rotate(45deg);
+    }
+    app-reservation-form {
+      display: block;
+      margin-top: clamp(2.5rem, 5vw, 4rem);
+      padding: 0 clamp(1.25rem, 4vw, 3.5rem);
+      border: 1px solid var(--c-rule-brass);
+      background: rgba(30, 10, 14, 0.38);
+      box-shadow: 0 40px 80px -50px rgba(0, 0, 0, 0.7);
+    }
+    .lead { color: var(--c-on-dark-soft); }
+    .note { color: var(--c-brass); }
     .title { grid-column: 1 / span 5; }
     .intro { grid-column: 6 / span 7; display: flex; flex-direction: column; gap: 1rem; }
     @media (max-width: 1023.98px) { .title, .intro { grid-column: 1 / -1; } .intro { margin-top: 1.5rem; } }

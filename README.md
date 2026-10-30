@@ -87,7 +87,7 @@ SMTP_HOST=...        # npr. smtp.gmail.com ili SMTP sa hostinga
 SMTP_PORT=587
 SMTP_USER=...        # nalog sa kog se šalje
 SMTP_PASS=...        # za Gmail: "App password", ne obična lozinka
-MAIL_TO=...          # gde stižu poruke sa sajta
+MAIL_TO=info@kcsretenje.si   # gde stižu poruke sa sajta
 CORS_ORIGINS=https://sretenjskibal.si
 ```
 

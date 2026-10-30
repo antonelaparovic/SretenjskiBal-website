@@ -62,7 +62,7 @@
             <div class="pair">
               <label class="field">
                 <span class="field__label" i18n>Email</span>
-                <input class="field__control" type="email" formControlName="email" autocomplete="email" placeholder="ime@primer.si" required
+                <input class="field__control" type="email" formControlName="email" autocomplete="email" placeholder="ime@email.com" required
                   [attr.aria-invalid]="invalid(form.controls.email)" aria-describedby="err-email" />
                 @if (invalid(form.controls.email)) { <span class="field__error" id="err-email" i18n>Unesite ispravnu email adresu.</span> }
               </label>
