@@ -237,7 +237,7 @@
 // Na širokom ekranu jezik i dugme „Ulaznice" već stoje u zaglavlju — u otvorenom meniju se ne ponavljaju.
 @media (min-width: 1240px) {
   .overlay__cta,
-  .overlay__foot app-language-switcher {
+  .overlay__foot {
     display: none;
   }
 }

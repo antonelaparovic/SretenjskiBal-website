@@ -273,10 +273,6 @@
           <context context-type="sourcefile">src/app/features/home/sections/why-ball.section.ts</context>
           <context context-type="linenumber">11,12</context>
         </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/layout/nav.ts</context>
-          <context context-type="linenumber">26</context>
-        </context-group>
       </trans-unit>
       <trans-unit id="2739310322579056426" datatype="html">
         <source>Reč postoji od 12. veka, od latinskog <x id="START_EMPHASISED_TEXT" ctype="x-em" equiv-text="&lt;em&gt;"/>ballare<x id="CLOSE_EMPHASISED_TEXT" ctype="x-em" equiv-text="&lt;/em&gt;"/> — igrati.</source>
@@ -523,15 +519,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/layout/nav.ts</context>
-          <context context-type="linenumber">30</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="2413802340288003106" datatype="html">
-        <source>Svečani karakter bala podrazumeva i odgovarajući kodeks oblačenja.</source>
-        <target>Slavnostni značaj bala zahteva ustrezen oblačilni kodeks.</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">22,23</context>
+          <context context-type="linenumber">28</context>
         </context-group>
       </trans-unit>
       <trans-unit id="9003126474496442426" datatype="html">
@@ -539,7 +527,7 @@
         <target>Zaželeno</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">34,35</context>
+          <context context-type="linenumber">33,34</context>
         </context-group>
       </trans-unit>
       <trans-unit id="8595816786923578268" datatype="html">
@@ -547,7 +535,7 @@
         <target>Ni dovoljeno</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">45,46</context>
+          <context context-type="linenumber">43,44</context>
         </context-group>
       </trans-unit>
       <trans-unit id="7341744521157313752" datatype="html">
@@ -555,7 +543,7 @@
         <target>Za dame</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">85</context>
+          <context context-type="linenumber">89</context>
         </context-group>
       </trans-unit>
       <trans-unit id="7069415753275284497" datatype="html">
@@ -563,7 +551,7 @@
         <target>Dolga večerna ali plesna obleka do tal</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">87</context>
+          <context context-type="linenumber">91</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4252174064641854347" datatype="html">
@@ -571,11 +559,11 @@
         <target>Elegantna slavnostna obutev</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">87</context>
+          <context context-type="linenumber">91</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">102</context>
+          <context context-type="linenumber">106</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3394526962284498362" datatype="html">
@@ -583,7 +571,7 @@
         <target>Kratke in koktajl obleke</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">89</context>
+          <context context-type="linenumber">93</context>
         </context-group>
       </trans-unit>
       <trans-unit id="6418659042162778991" datatype="html">
@@ -591,7 +579,7 @@
         <target>Kratka krila in dnevna oblačila</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">90</context>
+          <context context-type="linenumber">94</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2926847237179042245" datatype="html">
@@ -599,11 +587,11 @@
         <target>Superge in neformalna obutev</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">91</context>
+          <context context-type="linenumber">95</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">107</context>
+          <context context-type="linenumber">111</context>
         </context-group>
       </trans-unit>
       <trans-unit id="702065592462377042" datatype="html">
@@ -611,11 +599,11 @@
         <target>Narodne noše</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">92</context>
+          <context context-type="linenumber">96</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">108</context>
+          <context context-type="linenumber">112</context>
         </context-group>
       </trans-unit>
       <trans-unit id="156529230216849476" datatype="html">
@@ -623,7 +611,7 @@
         <target>Za gospode</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">96</context>
+          <context context-type="linenumber">100</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4677238505483944009" datatype="html">
@@ -631,7 +619,7 @@
         <target>Črn frak ali smoking</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">99</context>
+          <context context-type="linenumber">103</context>
         </context-group>
       </trans-unit>
       <trans-unit id="839543756183919459" datatype="html">
@@ -639,7 +627,7 @@
         <target>Elegantna črna ali temna obleka</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">100</context>
+          <context context-type="linenumber">104</context>
         </context-group>
       </trans-unit>
       <trans-unit id="8126036992628766140" datatype="html">
@@ -647,7 +635,7 @@
         <target>Bela srajca in metuljček</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">101</context>
+          <context context-type="linenumber">105</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1842354851750025934" datatype="html">
@@ -655,7 +643,7 @@
         <target>Kravate namesto metuljčka</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">105</context>
+          <context context-type="linenumber">109</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1748523902439951457" datatype="html">
@@ -663,7 +651,7 @@
         <target>Športna in neformalna oblačila</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">106</context>
+          <context context-type="linenumber">110</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2610572581333992138" datatype="html">
@@ -795,7 +783,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/layout/nav.ts</context>
-          <context context-type="linenumber">27</context>
+          <context context-type="linenumber">25</context>
         </context-group>
       </trans-unit>
       <trans-unit id="7430332357056817082" datatype="html">
@@ -847,7 +835,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/layout/nav.ts</context>
-          <context context-type="linenumber">29</context>
+          <context context-type="linenumber">27</context>
         </context-group>
       </trans-unit>
       <trans-unit id="7230178832698181296" datatype="html">
@@ -876,10 +864,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/layout/header/header.component.html</context>
           <context context-type="linenumber">48,49</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/layout/nav.ts</context>
-          <context context-type="linenumber">31</context>
         </context-group>
       </trans-unit>
       <trans-unit id="7123959304072009646" datatype="html">
@@ -915,7 +899,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/layout/nav.ts</context>
-          <context context-type="linenumber">28</context>
+          <context context-type="linenumber">26</context>
         </context-group>
       </trans-unit>
       <trans-unit id="786747804964028831" datatype="html">
@@ -999,7 +983,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/layout/nav.ts</context>
-          <context context-type="linenumber">33</context>
+          <context context-type="linenumber">42</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2676014079781017565" datatype="html">
@@ -1008,10 +992,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/why-sretenje.section.ts</context>
           <context context-type="linenumber">18</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/layout/nav.ts</context>
-          <context context-type="linenumber">25</context>
         </context-group>
       </trans-unit>
       <trans-unit id="8966362255930984325" datatype="html">
@@ -1825,10 +1805,6 @@
           <context context-type="sourcefile">src/app/features/reservation/reservation.page.ts</context>
           <context context-type="linenumber">18,19</context>
         </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/layout/header/header.component.html</context>
-          <context context-type="linenumber">52,53</context>
-        </context-group>
       </trans-unit>
       <trans-unit id="907216750887213589" datatype="html">
         <source>Rezervacija karata | Sretenjski bal</source>
@@ -1931,7 +1907,7 @@
         <target>Kulturni center Sretenje</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/layout/nav.ts</context>
-          <context context-type="linenumber">32</context>
+          <context context-type="linenumber">29</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3413577107313974380" datatype="html">
@@ -1939,7 +1915,7 @@
         <target>Politika zasebnosti</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/layout/nav.ts</context>
-          <context context-type="linenumber">41</context>
+          <context context-type="linenumber">37</context>
         </context-group>
       </trans-unit>
       <trans-unit id="5127310159517988780" datatype="html">

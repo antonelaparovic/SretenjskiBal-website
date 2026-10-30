@@ -22,15 +22,11 @@ export interface SectionNavItem {
 
 /** Nazivi su isti kao naslovi sekcija na početnoj. */
 export const SECTION_NAV: SectionNavItem[] = [
-  { label: $localize`Zašto Sretenje?`, id: 'sretenje' },
-  { label: $localize`Bal nikada nije bio samo ples.`, id: 'bal' },
   { label: $localize`Umetnički program`, id: 'izvodjaci' },
   { label: $localize`Narodni dom, Maribor`, id: 'prostor' },
   { label: $localize`Program večeri`, id: 'program' },
   { label: $localize`Kodeks oblačenja`, id: 'pravila-oblacenja' },
-  { label: $localize`Ulaznice`, id: 'karte' },
   { label: $localize`Kulturni centar Sretenje`, id: 'organizator' },
-  { label: $localize`Priča o balskoj tradiciji`, path: '/balska-tradicija' },
 ];
 
 /** Sekcije koje se ponavljaju u podnožju (bez ulaznica). */
@@ -41,3 +37,6 @@ export const LEGAL_NAV: NavItem[] = [
   { label: $localize`Politika privatnosti`, path: '/privacy' },
   // { label: $localize`Uslovi korišćenja`, path: '/uslovi' }, // sakriveno dok ne budu napisani
 ];
+
+/** Priča o balskoj tradiciji: nije u meniju, ali je link u podnožju. */
+export const FOOTER_STORY: SectionNavItem = { label: $localize`Priča o balskoj tradiciji`, path: '/balska-tradicija' };
