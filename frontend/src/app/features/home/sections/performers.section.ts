@@ -15,7 +15,7 @@ import { RevealDirective } from '../../../shared/directives/reveal.directive';
       <div class="container">
         <div class="head" appReveal>
           <app-section-heading headingId="performers-title" i18n-eyebrow eyebrow="Nastupaju">
-            <ng-container i18n>Izvođači</ng-container>
+            <ng-container i18n>Umetnički program</ng-container>
           </app-section-heading>
         </div>
 

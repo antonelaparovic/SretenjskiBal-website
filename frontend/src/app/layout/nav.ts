@@ -24,7 +24,7 @@ export interface SectionNavItem {
 export const SECTION_NAV: SectionNavItem[] = [
   { label: $localize`Zašto Sretenje?`, id: 'sretenje' },
   { label: $localize`Bal nikada nije bio samo ples.`, id: 'bal' },
-  { label: $localize`Izvođači`, id: 'izvodjaci' },
+  { label: $localize`Umetnički program`, id: 'izvodjaci' },
   { label: $localize`Narodni dom, Maribor`, id: 'prostor' },
   { label: $localize`Program večeri`, id: 'program' },
   { label: $localize`Formal / Black Tie`, id: 'pravila-oblacenja' },
