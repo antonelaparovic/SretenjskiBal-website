@@ -76,7 +76,8 @@
                   "maximumError": "16kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "localize": true
             },
             "development": {
               "optimization": false,
@@ -98,7 +99,8 @@
                   "glob": "_redirects",
                   "input": "netlify-preview"
                 }
-              ]
+              ],
+              "localize": false
             }
           },
           "defaultConfiguration": "production"
@@ -126,6 +128,16 @@
         "sourceLocale": {
           "code": "sr-Latn",
           "subPath": ""
+        },
+        "locales": {
+          "sl": {
+            "translation": "src/locale/messages.sl.xlf",
+            "subPath": "sl"
+          },
+          "en": {
+            "translation": "src/locale/messages.en.xlf",
+            "subPath": "en"
+          }
         }
       }
     }

@@ -44,13 +44,13 @@ export const HERO_IMAGE: { src: string | null; alt: string; credit: string | nul
 /** Okvirna satnica — biće potvrđena. */
 /** Predlog programa — satnica i sadržaj se potvrđuju sa organizatorom. */
 export const PROGRAM: ProgramItem[] = [
-  { time: '18:30', title: 'Dolazak gostiju', description: 'Doček u foajeu Narodnog doma, piće dobrodošlice i fotografisanje.' },
-  { time: '19:30', title: 'Svečano otvaranje', description: 'Pozdravne reči organizatora i zvanica, otvaranje prvog Sretenjskog bala.' },
-  { time: '20:00', title: 'Kulturno-umetnički program', description: 'Nastupi umetnika iz Srbije i Slovenije u Velikoj dvorani.' },
-  { time: '21:00', title: 'Prvi ples', description: 'Svečano otvaranje plesnog dela večeri.' },
-  { time: '21:30', title: 'Svečana večera', description: 'Večera za gostima sa sedećim mestima; koktel posluženje na galeriji.' },
-  { time: '22:30', title: 'Koncert grupe Galija', description: 'Glavni muzički program večeri.' },
-  { time: '00:00', title: 'Ponoćno kolo', description: 'Zajedničko kolo i završni deo večeri.' },
+  { time: '18:30', title: $localize`Dolazak gostiju`, description: $localize`Doček u foajeu Narodnog doma, piće dobrodošlice i fotografisanje.` },
+  { time: '19:30', title: $localize`Svečano otvaranje`, description: $localize`Pozdravne reči organizatora i zvanica, otvaranje prvog Sretenjskog bala.` },
+  { time: '20:00', title: $localize`Kulturno-umetnički program`, description: $localize`Nastupi umetnika iz Srbije i Slovenije u Velikoj dvorani.` },
+  { time: '21:00', title: $localize`Prvi ples`, description: $localize`Svečano otvaranje plesnog dela večeri.` },
+  { time: '21:30', title: $localize`Svečana večera`, description: $localize`Večera za gostima sa sedećim mestima; koktel posluženje na galeriji.` },
+  { time: '22:30', title: $localize`Koncert grupe Galija`, description: $localize`Glavni muzički program večeri.` },
+  { time: '00:00', title: $localize`Ponoćno kolo`, description: $localize`Zajedničko kolo i završni deo večeri.` },
 ];
 
 /** priceCents: 0 znači da cena još nije određena (prikazuje se „Cena uskoro"). */
@@ -59,20 +59,20 @@ export const PROGRAM: ProgramItem[] = [
  * Kad se cena menja, promeniti je i u Google tabeli (tab Podešavanja, PRICE_…).
  */
 export const TICKETS: TicketType[] = [
-  { code: 'SVECANA', name: 'Svečana',
+  { code: 'SVECANA', name: $localize`Svečana`,
     includes: [
-      'Kulturno-umetnički program i koncert grupe Galija',
-      'Svečana večera',
-      'Neograničena konzumacija pića',
-      'Sedeće mesto za stolom u Velikoj dvorani',
+      $localize`Kulturno-umetnički program i koncert grupe Galija`,
+      $localize`Svečana večera`,
+      $localize`Neograničena konzumacija pića`,
+      $localize`Sedeće mesto za stolom u Velikoj dvorani`,
     ],
     priceCents: 14000, ctaUrl: '/rezervacija', soldOut: false },
-  { code: 'GALERIJA', name: 'Galerija',
+  { code: 'GALERIJA', name: $localize`Galerija`,
     includes: [
-      'Kulturno-umetnički program i koncert grupe Galija',
-      'Koktel posluženje i piće dobrodošlice',
-      'Stajaće mesto na galeriji, sa pogledom na celokupan program',
-      'Pristup Velikoj dvorani nakon završetka zvaničnog dela programa, od početka nastupa grupe Galija',
+      $localize`Kulturno-umetnički program i koncert grupe Galija`,
+      $localize`Koktel posluženje i piće dobrodošlice`,
+      $localize`Stajaće mesto na galeriji, sa pogledom na celokupan program`,
+      $localize`Pristup Velikoj dvorani nakon završetka zvaničnog dela programa, od početka nastupa grupe Galija`,
     ],
     priceCents: 7000, ctaUrl: '/rezervacija', soldOut: false },
 ];

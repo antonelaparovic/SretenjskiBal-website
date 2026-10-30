@@ -12,13 +12,14 @@ export interface LocaleOption {
 }
 
 /**
- * Jezici sajta. Kad se doda slovenački: prevod u src/locale/messages.sl.xlf,
- * locale u angular.json (i18n.locales) i ovde available: true.
+ * Jezici sajta. Prevodi su u src/locale/messages.sl.xlf i messages.en.xlf; svaka jezička verzija je
+ * zasebna gradnja (angular.json → i18n), objavljena na svojoj putanji. Izvorni jezik je srpski (koren sajta).
+ * Posle izmene teksta: `npx ng extract-i18n --format xlf --output-path src/locale`, pa dopuniti prevode (docs/PREVODI.md).
  */
 export const LOCALES: LocaleOption[] = [
   { code: 'sr', label: 'SR', path: '/', available: true },
-  { code: 'sl', label: 'SL', path: '/sl/', available: false },
-  { code: 'en', label: 'EN', path: '/en/', available: false },
+  { code: 'sl', label: 'SL', path: '/sl/', available: true },
+  { code: 'en', label: 'EN', path: '/en/', available: true },
 ];
 
 export function currentLocale(): Locale {
@@ -26,4 +27,10 @@ export function currentLocale(): Locale {
   if (id.startsWith('sl')) return 'sl';
   if (id.startsWith('en')) return 'en';
   return 'sr';
+}
+
+/** Prefiks putanje za jezik: '' za srpski (koren), '/sl' ili '/en'. */
+export function localePrefix(locale: Locale): string {
+  const o = LOCALES.find((l) => l.code === locale);
+  return o ? o.path.replace(/\/$/, '') : '';
 }

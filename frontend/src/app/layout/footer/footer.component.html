@@ -3,7 +3,7 @@
     <div class="identity">
       <app-emblem [size]="88" label="Sretenjski bal" />
       <p class="name">Sretenjski bal</p>
-      <p class="when">13.2.2027. · Maribor</p>
+      <p class="when" i18n>13.2.2027. · Maribor</p>
       <p class="tagline" i18n>Kultura koja spaja.</p>
     </div>
 
@@ -17,7 +17,7 @@
 
     <div class="org">
       <p class="label" i18n>Organizator</p>
-      <span class="org-name">{{ org.name }}</span>
+      <span class="org-name" i18n>Kulturni centar Sretenje</span>
       <span class="org-addr">{{ org.address }}</span>
       <span class="org-addr">{{ org.privacyEmail }}</span>
       <a href="https://www.instagram.com/" target="_blank" rel="noopener">Instagram</a>
@@ -25,7 +25,7 @@
   </div>
 
   <div class="container bottom">
-    <span>© {{ year }} Kulturni centar Sretenje</span>
+    <span i18n>© {{ year }} Kulturni centar Sretenje</span>
     <ul>
       @for (item of legal; track item.path) {
         <li><a [routerLink]="item.path">{{ item.label }}</a></li>
