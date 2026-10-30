@@ -34,7 +34,7 @@ import { ReservationFormComponent } from './reservation-form.component';
 export class ReservationPage {
   constructor() {
     inject(SeoService).set({
-      title: $localize`Rezervacija karata | Sretenjski bal 2027`,
+      title: $localize`Rezervacija karata | Sretenjski bal`,
       description: $localize`Rezervišite karte za Sretenjski bal, 13. februara 2027. u Mariboru.`,
       path: '/rezervacija',
     });

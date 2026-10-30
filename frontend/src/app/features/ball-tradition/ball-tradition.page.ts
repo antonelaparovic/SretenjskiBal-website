@@ -140,7 +140,7 @@ export class BallTraditionPage {
 
   constructor() {
     inject(SeoService).set({
-      title: `${$localize`Balska tradicija`} | Sretenjski bal 2027`,
+      title: `${$localize`Balska tradicija`} | Sretenjski bal`,
       description: $localize`Bal nikada nije bio samo ples: od latinskog ballare, preko prvog bala u Kragujevcu i slovenačkih čitalnica, do Narodnog doma u Mariboru.`,
       path: '/balska-tradicija',
     });

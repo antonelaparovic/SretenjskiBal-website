@@ -34,7 +34,7 @@ export class ContactPage {
 
   constructor() {
     inject(SeoService).set({
-      title: $localize`Kontakt | Sretenjski bal 2027`,
+      title: $localize`Kontakt | Sretenjski bal`,
       description: $localize`Pišite organizatoru Sretenjskog bala — partnerstva, mediji, nastupi i opšta pitanja.`,
       path: '/kontakt',
     });

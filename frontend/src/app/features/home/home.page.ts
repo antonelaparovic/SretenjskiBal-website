@@ -58,7 +58,7 @@ export class HomePage {
     const seo = inject(SeoService);
     const e = EVENT;
     seo.set({
-      title: $localize`Sretenjski bal 2027 | Maribor`,
+      title: $localize`Sretenjski bal`,
       description: $localize`Sretenjski bal, 13. februara 2027. u Mariboru. Kulturno-muzičko veče i početak jedne nove tradicije. Kultura koja spaja.`,
       path: '/',
     });

@@ -36,7 +36,7 @@ export class ComingSoonPage {
     const seo = inject(SeoService);
     queueMicrotask(() =>
       seo.set({
-        title: `${this.heading()} | Sretenjski bal 2027`,
+        title: `${this.heading()} | Sretenjski bal`,
         description: $localize`Sretenjski bal, 13. februara 2027. u Mariboru.`,
         path: router.url.split(/[?#]/)[0],
       }),

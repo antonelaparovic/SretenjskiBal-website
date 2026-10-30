@@ -91,7 +91,7 @@ export class LegalPage {
     const seo = inject(SeoService);
     queueMicrotask(() =>
       seo.set({
-        title: `${this.doc().title} | Sretenjski bal 2027`,
+        title: `${this.doc().title} | Sretenjski bal`,
         description: $localize`Sretenjski bal, 13. februara 2027. u Mariboru.`,
         path: router.url.split(/[?#]/)[0],
       }),

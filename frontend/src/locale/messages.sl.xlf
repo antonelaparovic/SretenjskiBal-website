@@ -438,9 +438,9 @@
           <context context-type="linenumber">16,17</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="2841706206384515819" datatype="html">
-        <source>Kontakt | Sretenjski bal 2027</source>
-        <target>Kontakt | Sretenjski bal 2027</target>
+      <trans-unit id="581882906330308925" datatype="html">
+        <source>Kontakt | Sretenjski bal</source>
+        <target>Kontakt | Sretenjski bal</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/contact/contact.page.ts</context>
           <context context-type="linenumber">37</context>
@@ -454,9 +454,9 @@
           <context context-type="linenumber">38</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="443951784429626664" datatype="html">
-        <source>Sretenjski bal 2027 | Maribor</source>
-        <target>Sretenjski bal 2027 | Maribor</target>
+      <trans-unit id="429229828439857806" datatype="html">
+        <source>Sretenjski bal</source>
+        <target>Sretenjski bal</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/home.page.ts</context>
           <context context-type="linenumber">61</context>
@@ -553,6 +553,10 @@
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
           <context context-type="linenumber">93</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
+          <context context-type="linenumber">108</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="3394526962284498362" datatype="html">
         <source>Kratke i koktel haljine</source>
@@ -576,6 +580,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
           <context context-type="linenumber">97</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
+          <context context-type="linenumber">113</context>
         </context-group>
       </trans-unit>
       <trans-unit id="702065592462377042" datatype="html">
@@ -622,14 +630,6 @@
           <context context-type="linenumber">107</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="3111484405512225055" datatype="html">
-        <source>Elegantne svečane cipele</source>
-        <target>Elegantni slavnostni čevlji</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">108</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="1842354851750025934" datatype="html">
         <source>Kravate umesto leptir mašne</source>
         <target>Kravate namesto metuljčka</target>
@@ -644,14 +644,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
           <context context-type="linenumber">112</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="2162773195125603008" datatype="html">
-        <source>Patike</source>
-        <target>Superge</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/home/sections/dress-code.section.ts</context>
-          <context context-type="linenumber">113</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2610572581333992138" datatype="html">
@@ -1814,9 +1806,9 @@
           <context context-type="linenumber">52,53</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="3474605661696857798" datatype="html">
-        <source>Rezervacija karata | Sretenjski bal 2027</source>
-        <target>Rezervacija vstopnic | Sretenjski bal 2027</target>
+      <trans-unit id="907216750887213589" datatype="html">
+        <source>Rezervacija karata | Sretenjski bal</source>
+        <target>Rezervacija vstopnic | Sretenjski bal</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation.page.ts</context>
           <context context-type="linenumber">37</context>
