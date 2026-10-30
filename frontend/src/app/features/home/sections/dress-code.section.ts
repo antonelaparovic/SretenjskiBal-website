@@ -41,15 +41,10 @@ interface Guide {
                 }
               </ul>
 
-              <p class="label sub sub--no" i18n>Nije dozvoljeno</p>
-              <ul class="list no">
-                @for (t of g.forbidden; track t) {
-                  <li>
-                    <svg class="mark" viewBox="0 0 20 20" aria-hidden="true"><path d="M4.5 4.5l11 11M15.5 4.5l-11 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-                    <span>{{ t }}</span>
-                  </li>
-                }
-              </ul>
+              <p class="no-note">
+                <span class="label no-note__label" i18n>Nije dozvoljeno</span>
+                {{ g.forbidden.join(' · ') }}
+              </p>
               </div>
               <img class="figure" [src]="g.image" alt="" width="388" height="900" loading="lazy" decoding="async" />
               </div>
@@ -69,19 +64,16 @@ interface Guide {
 
     .cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(2.5rem, 7vw, 6rem); margin-top: clamp(3rem, 6vw, 5rem); }
     .col { display: flex; flex-direction: column; }
-    .col__title { display: flex; align-items: center; gap: 1rem; padding-bottom: 1.5rem; margin-bottom: 2rem; border-bottom: 1px solid var(--c-rule-brass); font-family: var(--font-display); font-weight: 500; font-size: clamp(1.9rem, 3.2vw, 2.6rem); line-height: 1; letter-spacing: 0.04em; text-transform: uppercase; }
+    .col__title { padding-bottom: 1.75rem; font-family: var(--font-display); font-weight: 500; font-size: clamp(1.9rem, 3.2vw, 2.6rem); line-height: 1; letter-spacing: 0.04em; text-transform: uppercase; }
     .col__body { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: clamp(1.25rem, 3vw, 2.5rem); align-items: end; }
     .figure { height: clamp(18rem, 32vw, 27rem); width: auto; align-self: end; opacity: 0.62; }
-    .sub { display: flex; align-items: center; gap: 1rem; color: var(--c-ink-soft); margin-bottom: 0.35rem; }
-    .sub::after { content: ''; flex: 1; height: 1px; background: var(--c-rule-brass); }
-    .sub--no { margin: 2.5rem 0 0.35rem; color: var(--c-burgundy); font-weight: 600; }
-    .sub--no::after { background: linear-gradient(90deg, var(--c-burgundy), transparent); opacity: 0.55; }
-    .list li { display: flex; align-items: center; gap: 0.9rem; padding: 0.85rem 0; border-bottom: 1px solid var(--c-rule-dark); font-size: 1.0625rem; }
-    .list li:last-child { border-bottom: 0; }
-    .mark { width: 1.05rem; height: 1.05rem; flex: none; }
-    .yes .mark { color: var(--c-brass); }
-    .no .mark { color: var(--c-burgundy); }
-    .no li { color: var(--c-ink-soft); }
+    .col__lists { align-self: center; }
+    .sub { color: var(--c-burgundy); margin-bottom: 1.25rem; }
+    .list { display: flex; flex-direction: column; gap: 1.1rem; }
+    .list li { display: flex; align-items: baseline; gap: 0.9rem; font-family: var(--font-display); font-size: clamp(1.35rem, 2vw, 1.65rem); line-height: 1.25; color: var(--c-ink); }
+    .mark { width: 1.1rem; height: 1.1rem; flex: none; color: var(--c-brass); transform: translateY(0.12em); }
+    .no-note { margin: 2.5rem 0 0; font-size: 0.875rem; line-height: 1.7; color: var(--c-ink-soft); opacity: 0.85; }
+    .no-note__label { display: block; margin-bottom: 0.35rem; font-size: 0.6875rem; color: var(--c-ink-soft); }
 
     @media (max-width: 767.98px) { .cols { grid-template-columns: 1fr; } }
     @media (max-width: 479.98px) { .col__body { gap: 1rem; } .figure { height: 14rem; } }

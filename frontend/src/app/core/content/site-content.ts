@@ -117,8 +117,8 @@ export const PRIVACY_POLICY_VERSION = '2026-10-28';
  */
 export const ORGANIZER = {
   name: 'Kulturni centar Sretenje',
-  /** Naziv u poslovnom registru (bizi.si) — koristi se u pravnim tekstovima. */
-  legalName: 'Kulturno društvo Kulturni center Sretenje',
+  /** Naziv u pravnim tekstovima i footeru (u registru: Kulturno društvo Kulturni center Sretenje). */
+  legalName: 'Kulturni centar Sretenje',
   address: 'Zagrebška cesta 20, 2000 Maribor',
   registration: 'MŠ: 2949903000, DŠ: 41959787',
   privacyEmail: '[UPISATI: e-adresa za pitanja o privatnosti]',
