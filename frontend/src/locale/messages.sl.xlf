@@ -1463,7 +1463,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
-          <context context-type="linenumber">256</context>
+          <context context-type="linenumber">254</context>
         </context-group>
       </trans-unit>
       <trans-unit id="8454074135589005251" datatype="html">
@@ -1498,20 +1498,12 @@
           <context context-type="linenumber">171</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="2853561901271127752" datatype="html">
-        <source>Još malo</source>
-        <target>Še malo</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
-          <context context-type="linenumber">179,180</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="7541761642134403400" datatype="html">
         <source>Da li Vam je potrebna faktura na firmu?</source>
         <target>Ali potrebujete račun na podjetje?</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
-          <context context-type="linenumber">183,184</context>
+          <context context-type="linenumber">181,182</context>
         </context-group>
       </trans-unit>
       <trans-unit id="278437647854252271" datatype="html">
@@ -1519,11 +1511,11 @@
         <target>Ne</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
-          <context context-type="linenumber">185</context>
+          <context context-type="linenumber">183</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
-          <context context-type="linenumber">233</context>
+          <context context-type="linenumber">231</context>
         </context-group>
       </trans-unit>
       <trans-unit id="6143849677525158412" datatype="html">
@@ -1531,11 +1523,11 @@
         <target>Da</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
-          <context context-type="linenumber">186</context>
+          <context context-type="linenumber">184</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
-          <context context-type="linenumber">232</context>
+          <context context-type="linenumber">230</context>
         </context-group>
       </trans-unit>
       <trans-unit id="7577760098968634757" datatype="html">
@@ -1543,7 +1535,7 @@
         <target>Naziv podjetja</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
-          <context context-type="linenumber">193,194</context>
+          <context context-type="linenumber">191,192</context>
         </context-group>
       </trans-unit>
       <trans-unit id="7913400225632113504" datatype="html">
@@ -1551,7 +1543,7 @@
         <target>Vnesite naziv podjetja.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
-          <context context-type="linenumber">196,197</context>
+          <context context-type="linenumber">194,195</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1225776581694443962" datatype="html">
@@ -1559,7 +1551,7 @@
         <target>Država sedeža podjetja</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
-          <context context-type="linenumber">199,200</context>
+          <context context-type="linenumber">197,198</context>
         </context-group>
       </trans-unit>
       <trans-unit id="139532704682040891" datatype="html">
@@ -1567,7 +1559,7 @@
         <target>Slovenija</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
-          <context context-type="linenumber">201,202</context>
+          <context context-type="linenumber">199,200</context>
         </context-group>
       </trans-unit>
       <trans-unit id="8820025993079898544" datatype="html">
@@ -1575,7 +1567,7 @@
         <target>Druga država članica EU</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
-          <context context-type="linenumber">202,203</context>
+          <context context-type="linenumber">200,201</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2891863278905938018" datatype="html">
@@ -1583,7 +1575,7 @@
         <target>Država zunaj EU</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
-          <context context-type="linenumber">203,204</context>
+          <context context-type="linenumber">201,202</context>
         </context-group>
       </trans-unit>
       <trans-unit id="6932383841571082997" datatype="html">
@@ -1591,7 +1583,7 @@
         <target>Sedež podjetja (ulica, poštna številka, kraj)</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
-          <context context-type="linenumber">207,208</context>
+          <context context-type="linenumber">205,206</context>
         </context-group>
       </trans-unit>
       <trans-unit id="902385744557777860" datatype="html">
@@ -1599,7 +1591,7 @@
         <target>Vnesite naslov podjetja.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
-          <context context-type="linenumber">210,211</context>
+          <context context-type="linenumber">208,209</context>
         </context-group>
       </trans-unit>
       <trans-unit id="8092422716460176156" datatype="html">
@@ -1607,7 +1599,7 @@
         <target>Davčna številka (ID za DDV)</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
-          <context context-type="linenumber">214,215</context>
+          <context context-type="linenumber">212,213</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1047844748527411095" datatype="html">
@@ -1615,7 +1607,7 @@
         <target>ID za DDV (z oznako države, npr. HR12345678901)</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
-          <context context-type="linenumber">215,216</context>
+          <context context-type="linenumber">213,214</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4403236270698078313" datatype="html">
@@ -1623,7 +1615,7 @@
         <target>Davčna identifikacijska številka</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
-          <context context-type="linenumber">216,217</context>
+          <context context-type="linenumber">214,215</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3526983644619322633" datatype="html">
@@ -1631,7 +1623,7 @@
         <target>Vnesite davčno identifikacijsko številko.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
-          <context context-type="linenumber">220,221</context>
+          <context context-type="linenumber">218,219</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2966750337475200447" datatype="html">
@@ -1639,7 +1631,7 @@
         <target>Slovenska davčna številka ima 8 števk (npr. 12345678 ali SI12345678).</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
-          <context context-type="linenumber">223</context>
+          <context context-type="linenumber">221</context>
         </context-group>
       </trans-unit>
       <trans-unit id="118711035573546857" datatype="html">
@@ -1647,7 +1639,7 @@
         <target>ID za DDV se začne z oznako države, npr. HR12345678901 ali ATU12345678.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
-          <context context-type="linenumber">224</context>
+          <context context-type="linenumber">222</context>
         </context-group>
       </trans-unit>
       <trans-unit id="897183097505672490" datatype="html">
@@ -1655,7 +1647,7 @@
         <target>Ali je podjetje davčni zavezanec (zavezanec za DDV)?</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
-          <context context-type="linenumber">230,231</context>
+          <context context-type="linenumber">228,229</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1997448713727423076" datatype="html">
@@ -1663,11 +1655,11 @@
         <target>Izberite eno od ponujenih možnosti.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
-          <context context-type="linenumber">235,236</context>
+          <context context-type="linenumber">233,234</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
-          <context context-type="linenumber">251,252</context>
+          <context context-type="linenumber">249,250</context>
         </context-group>
       </trans-unit>
       <trans-unit id="8081542920600864331" datatype="html">
@@ -1675,7 +1667,7 @@
         <target>Za podjetja iz EU z veljavnim ID za DDV se račun izda brez slovenskega DDV (obratno obračunavanje); ID preverimo v sistemu VIES.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
-          <context context-type="linenumber">239,240</context>
+          <context context-type="linenumber">237,238</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3146827773544375678" datatype="html">
@@ -1683,7 +1675,7 @@
         <target>Kako ste izvedeli za Sretenjski bal?</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
-          <context context-type="linenumber">245,246</context>
+          <context context-type="linenumber">243,244</context>
         </context-group>
       </trans-unit>
       <trans-unit id="142131213832145335" datatype="html">
@@ -1691,7 +1683,7 @@
         <target>Izberite …</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
-          <context context-type="linenumber">248,249</context>
+          <context context-type="linenumber">246,247</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3916801985078183896" datatype="html">
@@ -1699,7 +1691,7 @@
         <target>Povejte nam več</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
-          <context context-type="linenumber">256</context>
+          <context context-type="linenumber">254</context>
         </context-group>
       </trans-unit>
       <trans-unit id="7587772730927350632" datatype="html">
@@ -1707,7 +1699,7 @@
         <target>Vsa polja so obvezna, razen označenih kot neobvezna. Podatke uporabljamo izključno za Vašo rezervacijo in jih hranimo največ šest mesecev po plesu; kadar koli lahko zahtevate vpogled, popravek ali izbris. Več v <x id="START_LINK" ctype="x-a" equiv-text="&lt;a routerLink=&quot;/privacy&quot; target=&quot;_blank&quot; class=&quot;inline-link&quot;&gt;"/>politiki zasebnosti<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/>.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
-          <context context-type="linenumber">266,267</context>
+          <context context-type="linenumber">264,265</context>
         </context-group>
       </trans-unit>
       <trans-unit id="8467900396278814444" datatype="html">
@@ -1715,7 +1707,7 @@
         <target>Pošiljanje rezervacije …</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
-          <context context-type="linenumber">270</context>
+          <context context-type="linenumber">268</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3551861892386130702" datatype="html">
@@ -1723,7 +1715,7 @@
         <target>Pošlji rezervacijo</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
-          <context context-type="linenumber">270</context>
+          <context context-type="linenumber">268</context>
         </context-group>
       </trans-unit>
       <trans-unit id="8864608791497682157" datatype="html">
