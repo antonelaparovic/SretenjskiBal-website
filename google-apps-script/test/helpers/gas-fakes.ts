@@ -100,6 +100,7 @@ export interface SentMail {
   subject: string;
   body: string;
   htmlBody?: string;
+  inlineImages?: Record<string, unknown>;
   replyTo?: string;
   name?: string;
   /** Postavljeno kad je mejl poslat preko Gmail aliasa (GmailApp). */
@@ -202,7 +203,12 @@ export function loadAppsScript(): GasEnv {
       MimeType: { JSON: 'JSON' },
       createTextOutput: (content: string) => ({ content, setMimeType() { return this; } }),
     },
-    Utilities: { formatDate, getUuid: () => crypto.randomUUID() },
+    Utilities: {
+      formatDate,
+      getUuid: () => crypto.randomUUID(),
+      base64Decode: (s: string) => [...Buffer.from(s, 'base64')],
+      newBlob: (bytes: number[], type: string, name: string) => ({ bytes, type, name }),
+    },
     UrlFetchApp: {
       fetch: (_url: string, opts: { payload: { secret: string; response: string } }) => {
         env.captchaCalls.push([opts.payload.response, opts.payload.secret]);

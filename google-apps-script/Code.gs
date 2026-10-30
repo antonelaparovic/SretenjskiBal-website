@@ -893,109 +893,109 @@ function sendPaymentConfirmationFor_(number) {
 
 const MAIL = {
   sr: {
-    greeting: function (n) { return 'Dobar dan, ' + n + ','; },
-    signoff: ['Srdačan pozdrav,', 'Sretenjski bal'],
-    labels: { number: 'Broj rezervacije', ticketType: 'Tip karte', ticketCount: 'Broj karata', diet: 'Ishrana i alergije', amount: 'Iznos za uplatu', deadline: 'Rok za uplatu', payee: 'Primalac', iban: 'IBAN', bic: 'BIC/SWIFT', bank: 'Banka', purpose: 'Svrha uplate' },
+    greeting: function (n) { return 'Poštovani/a ' + n + ','; },
+    signoff: ['Srdačan pozdrav,', 'Organizacioni tim Sretenjskog bala'],
+    labels: { number: 'Broj rezervacije', ticketType: 'Tip ulaznice', ticketCount: 'Broj ulaznica', diet: 'Alergije', amount: 'Iznos za uplatu', deadline: 'Rok za uplatu', payee: 'Primalac', iban: 'IBAN', bic: 'BIC/SWIFT', bank: 'Banka', purpose: 'Svrha uplate' },
     received: {
-      subject: function (n) { return 'Sretenjski bal — rezervacija ' + n + ' je evidentirana'; },
-      intro: ['Hvala vam na rezervaciji za Sretenjski bal. Vaš zahtev je evidentiran pod brojem rezervacije navedenim ispod.'],
-      outro: function (n) {
+      subject: function (n) { return 'Ulaznice za prvi Sretenjski bal — rezervacija ' + n; },
+      title: 'Ulaznice za prvi Sretenjski bal',
+      intro: ['Zahvaljujemo Vam na rezervaciji ulaznica za prvi Sretenjski bal. Vaša rezervacija je evidentirana pod brojem:'],
+      outro: function () {
         return [
-          'Javićemo vam se u roku od 3 dana sa detaljima za uplatu.',
-          'Sačuvajte broj rezervacije i navedite ga prilikom uplate, u svrsi uplate: „Sretenjski bal ' + n + '".',
-          'Ako imate pitanja ili želite nešto da izmenite, samo odgovorite na ovaj mejl.',
+          'Javićemo Vam se u roku od 3 dana sa detaljima za uplatu.',
+          'Ukoliko imate pitanja ili želite nešto da izmenite, slobodno odgovorite na ovaj mejl.',
         ];
       },
     },
     instructions: {
       subject: function (n) { return 'Sretenjski bal — instrukcije za uplatu, rezervacija ' + n; },
-      intro: ['pregledali smo vašu rezervaciju. U nastavku su iznos i podaci za uplatu.'],
+      intro: ['Pregledali smo Vašu rezervaciju. U nastavku su iznos i podaci za uplatu.'],
       outro: function (n, x) {
         return [
-          'Molimo vas da uplatu izvršite najkasnije do ' + x.deadline + ' i da u svrsi uplate obavezno navedete „Sretenjski bal ' + n + '", kako bismo uplatu povezali sa vašom rezervacijom.',
-          'Kada uplatu evidentiramo na izvodu, poslaćemo vam potvrdu.',
+          'Molimo Vas da uplatu izvršite najkasnije do ' + x.deadline + ' i da u svrsi uplate obavezno navedete „Sretenjski bal ' + n + '", kako bismo uplatu povezali sa Vašom rezervacijom.',
+          'Kada uplatu evidentiramo na izvodu, poslaćemo Vam potvrdu.',
           'Ako imate pitanja, samo odgovorite na ovaj mejl.',
         ];
       },
     },
     reminder: {
       subject: function (n) { return 'Sretenjski bal — podsetnik za uplatu, rezervacija ' + n; },
-      intro: ['ljubazno vas podsećamo da uplatu za vašu rezervaciju još nismo evidentirali, a rok za uplatu je istekao.'],
+      intro: ['Ljubazno Vas podsećamo da uplatu za Vašu rezervaciju još nismo evidentirali, a rok za uplatu je istekao.'],
       outro: function (n, x) {
         return [
           'Ako uplata ne bude evidentirana do ' + x.expiresOn + ', rezervacija ističe i mesta se oslobađaju.',
-          'Ako ste uplatu već izvršili, a ona još nije vidljiva na našem izvodu, samo odgovorite na ovaj mejl — proverićemo i javiti vam se.',
+          'Ako ste uplatu već izvršili, a ona još nije vidljiva na našem izvodu, samo odgovorite na ovaj mejl — proverićemo i javiti Vam se.',
           'U svrsi uplate navedite „Sretenjski bal ' + n + '".',
         ];
       },
     },
     paid: {
       subject: function (n) { return 'Sretenjski bal — uplata za rezervaciju ' + n + ' je evidentirana'; },
-      intro: ['potvrđujemo da je uplata za vašu rezervaciju evidentirana. Hvala vam!'],
-      outro: function () { return ['Radujemo se vašem dolasku na Sretenjski bal.', 'Ako imate pitanja, samo odgovorite na ovaj mejl.']; },
+      intro: ['Potvrđujemo da je uplata za Vašu rezervaciju evidentirana. Hvala Vam!'],
+      outro: function () { return ['Radujemo se Vašem dolasku na Sretenjski bal.', 'Ako imate pitanja, samo odgovorite na ovaj mejl.']; },
     },
   },
   sl: {
-    greeting: function (n) { return 'Pozdravljeni, ' + n + ','; },
-    signoff: ['Lep pozdrav,', 'Sretenjski bal'],
-    labels: { number: 'Številka rezervacije', ticketType: 'Vrsta vstopnice', ticketCount: 'Število vstopnic', diet: 'Prehrana in alergije', amount: 'Znesek za plačilo', deadline: 'Rok plačila', payee: 'Prejemnik', iban: 'IBAN', bic: 'BIC/SWIFT', bank: 'Banka', purpose: 'Namen plačila' },
+    greeting: function (n) { return 'Spoštovani/-a ' + n + ','; },
+    signoff: ['Lep pozdrav,', 'Organizacijska ekipa Sretenjskega bala'],
+    labels: { number: 'Številka rezervacije', ticketType: 'Vrsta vstopnice', ticketCount: 'Število vstopnic', diet: 'Alergije', amount: 'Znesek za plačilo', deadline: 'Rok plačila', payee: 'Prejemnik', iban: 'IBAN', bic: 'BIC/SWIFT', bank: 'Banka', purpose: 'Namen plačila' },
     received: {
-      subject: function (n) { return 'Sretenjski bal — rezervacija ' + n + ' je evidentirana'; },
-      intro: ['hvala za rezervacijo za Sretenjski bal. Vaša zahteva je evidentirana pod spodnjo številko rezervacije.'],
-      outro: function (n) {
+      subject: function (n) { return 'Vstopnice za prvi Sretenjski bal — rezervacija ' + n; },
+      title: 'Vstopnice za prvi Sretenjski bal',
+      intro: ['Zahvaljujemo se Vam za rezervacijo vstopnic za prvi Sretenjski bal. Vaša rezervacija je evidentirana pod številko:'],
+      outro: function () {
         return [
-          'V 3 dneh vam bomo poslali podatke za plačilo.',
-          'Shranite številko rezervacije in jo navedite pri plačilu, v namenu plačila: »Sretenjski bal ' + n + '«.',
+          'V 3 dneh Vam bomo poslali podatke za plačilo.',
           'Če imate vprašanja ali želite kaj spremeniti, preprosto odgovorite na to sporočilo.',
         ];
       },
     },
     instructions: {
       subject: function (n) { return 'Sretenjski bal — navodila za plačilo, rezervacija ' + n; },
-      intro: ['pregledali smo vašo rezervacijo. Spodaj sta znesek in podatki za plačilo.'],
+      intro: ['Pregledali smo Vašo rezervacijo. Spodaj sta znesek in podatki za plačilo.'],
       outro: function (n, x) {
         return [
           'Prosimo, da plačilo izvedete najpozneje do ' + x.deadline + ' in v namenu plačila obvezno navedete »Sretenjski bal ' + n + '«, da ga bomo lahko povezali z vašo rezervacijo.',
-          'Ko bo plačilo vidno na izpisku, vam bomo poslali potrditev.',
+          'Ko bo plačilo vidno na izpisku, Vam bomo poslali potrditev.',
           'Če imate vprašanja, preprosto odgovorite na to sporočilo.',
         ];
       },
     },
     reminder: {
       subject: function (n) { return 'Sretenjski bal — opomnik za plačilo, rezervacija ' + n; },
-      intro: ['prijazno vas opominjamo, da plačila za vašo rezervacijo še nismo prejeli, rok plačila pa je potekel.'],
+      intro: ['Prijazno Vas opominjamo, da plačila za Vašo rezervacijo še nismo prejeli, rok plačila pa je potekel.'],
       outro: function (n, x) {
         return [
           'Če plačilo do ' + x.expiresOn + ' ne bo evidentirano, rezervacija poteče in mesta se sprostijo.',
-          'Če ste plačilo že izvedli, vendar še ni vidno na našem izpisku, preprosto odgovorite na to sporočilo — preverili bomo in se vam oglasili.',
+          'Če ste plačilo že izvedli, vendar še ni vidno na našem izpisku, preprosto odgovorite na to sporočilo — preverili bomo in se Vam oglasili.',
           'V namen plačila navedite »Sretenjski bal ' + n + '«.',
         ];
       },
     },
     paid: {
       subject: function (n) { return 'Sretenjski bal — plačilo za rezervacijo ' + n + ' je evidentirano'; },
-      intro: ['potrjujemo, da je plačilo za vašo rezervacijo evidentirano. Hvala!'],
+      intro: ['Potrjujemo, da je plačilo za Vašo rezervacijo evidentirano. Hvala!'],
       outro: function () { return ['Veselimo se vašega obiska na Sretenjskem balu.', 'Če imate vprašanja, preprosto odgovorite na to sporočilo.']; },
     },
   },
   en: {
     greeting: function (n) { return 'Dear ' + n + ','; },
-    signoff: ['Kind regards,', 'Sretenjski bal'],
-    labels: { number: 'Reservation number', ticketType: 'Ticket type', ticketCount: 'Number of tickets', diet: 'Dietary requirements', amount: 'Amount due', deadline: 'Payment deadline', payee: 'Payee', iban: 'IBAN', bic: 'BIC/SWIFT', bank: 'Bank', purpose: 'Payment reference' },
+    signoff: ['Kind regards,', 'The Sretenjski bal organising team'],
+    labels: { number: 'Reservation number', ticketType: 'Ticket type', ticketCount: 'Number of tickets', diet: 'Allergies', amount: 'Amount due', deadline: 'Payment deadline', payee: 'Payee', iban: 'IBAN', bic: 'BIC/SWIFT', bank: 'Bank', purpose: 'Payment reference' },
     received: {
-      subject: function (n) { return 'Sretenjski bal — reservation ' + n + ' received'; },
-      intro: ['thank you for your reservation for Sretenjski bal. Your request has been recorded under the reservation number below.'],
-      outro: function (n) {
+      subject: function (n) { return 'Tickets for the first Sretenjski bal — reservation ' + n; },
+      title: 'Tickets for the first Sretenjski bal',
+      intro: ['Thank you for reserving tickets for the first Sretenjski bal. Your reservation has been recorded under the number:'],
+      outro: function () {
         return [
           'We will contact you within 3 days with the payment details.',
-          'Please keep your reservation number and quote it when paying, as the payment reference: "Sretenjski bal ' + n + '".',
           'If you have any questions or would like to change something, simply reply to this email.',
         ];
       },
     },
     instructions: {
       subject: function (n) { return 'Sretenjski bal — payment instructions, reservation ' + n; },
-      intro: ['we have reviewed your reservation. The amount and payment details are below.'],
+      intro: ['We have reviewed your reservation. The amount and payment details are below.'],
       outro: function (n, x) {
         return [
           'Please make the payment by ' + x.deadline + ' and be sure to use the payment reference "Sretenjski bal ' + n + '" so we can match it to your reservation.',
@@ -1006,7 +1006,7 @@ const MAIL = {
     },
     reminder: {
       subject: function (n) { return 'Sretenjski bal — payment reminder, reservation ' + n; },
-      intro: ['this is a friendly reminder that we have not yet recorded the payment for your reservation, and the payment deadline has passed.'],
+      intro: ['This is a friendly reminder that we have not yet recorded the payment for your reservation, and the payment deadline has passed.'],
       outro: function (n, x) {
         return [
           'If the payment is not recorded by ' + x.expiresOn + ', the reservation will expire and the seats will be released.',
@@ -1017,7 +1017,7 @@ const MAIL = {
     },
     paid: {
       subject: function (n) { return 'Sretenjski bal — payment for reservation ' + n + ' received'; },
-      intro: ['we confirm that the payment for your reservation has been recorded. Thank you!'],
+      intro: ['We confirm that the payment for your reservation has been recorded. Thank you!'],
       outro: function () { return ['We look forward to welcoming you at Sretenjski bal.', 'If you have any questions, simply reply to this email.']; },
     },
   },
@@ -1066,6 +1066,7 @@ function sendGuestMail_(kind, r, settings, extra) {
   if (kind === 'instructions' && settings.paymentNote) outro.splice(1, 0, settings.paymentNote);
 
   const mail = renderMail_({
+    title: k.title,
     greeting: m.greeting(String(r.fullName).trim()),
     intro: k.intro,
     highlight: [m.labels.number, n],
@@ -1145,6 +1146,7 @@ function sendMail_(settings, m) {
   const options = { name: settings.senderName };
   if (m.replyTo) options.replyTo = m.replyTo;
   if (m.htmlBody) options.htmlBody = m.htmlBody;
+  if (m.htmlBody && m.htmlBody.indexOf('cid:' + MAIL_LOGO_CID) >= 0) options.inlineImages = mailLogo_();
   let from;
   if (settings.senderEmail && senderAliases_().indexOf(settings.senderEmail) >= 0) {
     options.from = settings.senderEmail;
@@ -1194,9 +1196,19 @@ function senderAliases_() {
   return senderAliasesCache_;
 }
 
-/** Isti sadržaj kao običan tekst i kao jednostavan HTML u bojama sajta. */
+/** Logo (zlatni monogram SB, PNG 200×142) ugrađen u mejl kao slika u prilogu, da se vidi i bez spoljnog linka. */
+const MAIL_LOGO_CID = 'sblogo';
+const MAIL_LOGO_PNG_BASE64 = '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';
+
+function mailLogo_() {
+  const o = {};
+  o[MAIL_LOGO_CID] = Utilities.newBlob(Utilities.base64Decode(MAIL_LOGO_PNG_BASE64), 'image/png', 'sretenjski-bal.png');
+  return o;
+}
+
+/** Isti sadržaj kao običan tekst i kao HTML u bojama sajta (bordo zaglavlje sa logom). */
 function renderMail_(m) {
-  const text = [m.greeting, '']
+  const text = (m.title ? [m.title, ''] : []).concat([m.greeting, ''])
     .concat(m.intro.length ? m.intro.concat(['']) : [])
     .concat([m.highlight[0] + ': ' + m.highlight[1], ''])
     .concat(m.details.map(function (d) { return d[0] + ':' + (String(d[1]).indexOf('\n') >= 0 ? '\n' : ' ') + d[1]; }))
@@ -1215,15 +1227,20 @@ function renderMail_(m) {
   }).join('');
   const html =
     '<div style="background:#eee7da;padding:24px 12px;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:#171413">' +
-    '<div style="max-width:560px;margin:0 auto;background:#f6f1e8;padding:32px 28px;border-top:3px solid #5a1723">' +
-    '<p style="margin:0 0 20px;font-family:Georgia,serif;font-size:22px;color:#5a1723">Sretenjski bal</p>' +
+    '<div style="max-width:560px;margin:0 auto;background:#f6f1e8">' +
+    '<div style="background:#5a1723;padding:28px 28px 22px;text-align:center;border-bottom:2px solid #b49a63">' +
+    '<img src="cid:' + MAIL_LOGO_CID + '" width="100" height="71" alt="Sretenjski bal" style="display:block;margin:0 auto 12px;border:0;width:100px;height:71px">' +
+    '<p style="margin:0;font-family:Georgia,serif;font-size:13px;letter-spacing:.32em;text-transform:uppercase;color:#d3bb82">Sretenjski bal</p>' +
+    '</div>' +
+    '<div style="padding:32px 28px">' +
+    (m.title ? '<p style="margin:0 0 22px;font-family:Georgia,serif;font-size:24px;line-height:1.3;color:#5a1723">' + esc(m.title) + '</p>' : '') +
     p(m.greeting) + m.intro.map(p).join('') +
     '<p style="margin:20px 0 4px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#5a1723">' + esc(m.highlight[0]) + '</p>' +
     '<p style="margin:0 0 20px;font-family:Georgia,serif;font-size:36px;color:#5a1723">' + esc(m.highlight[1]) + '</p>' +
     '<table style="border-collapse:collapse;margin:0 0 20px;border-top:1px solid #b49a63;width:100%">' + rows + '</table>' +
     m.outro.map(p).join('') +
-    (m.signoff.length ? '<p style="margin:20px 0 0">' + m.signoff.map(esc).join('<br>') + '</p>' : '') +
-    '</div></div>';
+    (m.signoff.length ? '<p style="margin:24px 0 0">' + m.signoff.map(esc).join('<br>') + '</p>' : '') +
+    '</div></div></div>';
   return { text: text, html: html };
 }
 

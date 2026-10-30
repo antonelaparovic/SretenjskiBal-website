@@ -236,7 +236,7 @@ describe('Apps Script (Code.gs)', () => {
       const admin = gas.outbox.find((m) => m.to === 'info@kcsretenje.si')!;
       expect(admin.subject).toBe('Nova rezervacija za Sretenjski bal — 27001 · posebna ishrana');
       expect(admin.body).toContain('ISHRANA I ALERGIJE: Jedna osoba bez glutena, jedna vegetarijanska.');
-      expect(gas.outbox.find((m) => m.to === 'ana@primer.si')!.body).toContain('Ishrana i alergije: Jedna osoba bez glutena');
+      expect(gas.outbox.find((m) => m.to === 'ana@primer.si')!.body).toContain('Alergije: Jedna osoba bez glutena');
     });
 
     it('nova kolona se sama dodaje u tabelu postavljenu starijom verzijom skripte', () => {
@@ -262,11 +262,14 @@ describe('Apps Script (Code.gs)', () => {
       create(reservation({ locale: 'sl', email: 'sl@primer.si' }));
       create(reservation({ locale: 'en', email: 'en@primer.si', tickets: [{ ticketType: 'GALERIJA', count: 2 }] }));
       const sr = gas.outbox.find((m) => m.to === 'ana@primer.si')!;
-      expect(sr.subject).toBe('Sretenjski bal — rezervacija 27001 je evidentirana');
-      expect(sr.body).toContain('Javićemo vam se u roku od 3 dana sa detaljima za uplatu.');
-      expect(sr.body).toContain('Sretenjski bal 27001');
+      expect(sr.subject).toBe('Ulaznice za prvi Sretenjski bal — rezervacija 27001');
+      expect(sr.body).toContain('Poštovani/a Ana Anić,');
+      expect(sr.htmlBody).toContain('cid:sblogo');
+      expect(Object.keys(sr.inlineImages as object)).toEqual(['sblogo']);
+      expect(sr.body).toContain('Javićemo Vam se u roku od 3 dana sa detaljima za uplatu.');
+      expect(sr.body).toContain('27001');
       expect(sr.replyTo).toBe('info@kcsretenje.si');
-      expect(gas.outbox.find((m) => m.to === 'sl@primer.si')!.body).toContain('V 3 dneh vam bomo poslali podatke za plačilo.');
+      expect(gas.outbox.find((m) => m.to === 'sl@primer.si')!.body).toContain('V 3 dneh Vam bomo poslali podatke za plačilo.');
       const en = gas.outbox.find((m) => m.to === 'en@primer.si')!;
       expect(en.body).toContain('We will contact you within 3 days with the payment details.');
       expect(en.body).toContain('Ticket type: Gallery');
