@@ -95,7 +95,7 @@ describe('ReservationFormComponent', () => {
     expect($('form')).toBeTruthy();
     expect($$('h2.legend').map((h) => h.textContent!.trim())).toEqual(['Vaši podaci', 'Ulaznice', 'Ishrana i napomene']);
     expect($('.guests')).toBeNull();
-    expect(el.textContent).toContain('Ulaznice glase na Vaše ime.');
+    expect(el.textContent).toContain('Ulaznice će glasiti na Vaše ime');
     expect(el.textContent).toContain('Sva polja su obavezna, osim označenih kao opciona.');
     expect($('a[href="/privacy"]')).toBeTruthy();
   });

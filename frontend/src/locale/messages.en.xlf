@@ -1234,9 +1234,9 @@
           <context context-type="linenumber">39,40</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="8844456149957196950" datatype="html">
-        <source>Ulaznice glase na Vaše ime. Na ovaj e-mail šaljemo potvrdu i podatke za uplatu.</source>
-        <target>Tickets are issued in your name. We will send the confirmation and payment details to this email.</target>
+      <trans-unit id="92536735377516765" datatype="html">
+        <source>Ulaznice će glasiti na Vaše ime, a potvrdu rezervacije i podatke za uplatu poslaćemo na navedenu e-mail adresu.</source>
+        <target>Tickets will be issued in your name, and we will send the reservation confirmation and payment details to the email address provided.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.html</context>
           <context context-type="linenumber">40,41</context>
