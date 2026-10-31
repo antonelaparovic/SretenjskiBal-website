@@ -85,6 +85,9 @@ export interface ReservationPayload {
   /** Isti za ponovljena slanja iste rezervacije — backend tako sprečava duplikat. */
   requestId: string;
   fullName: string;
+  /** Ime i prezime nosioca posebno (tab „Gosti" u tabeli). */
+  firstName?: string;
+  lastName?: string;
   email: string;
   phone: string;
   /** Ulaznice glase na osobu koja rezerviše. Lista da bi se kasnije mogli kombinovati tipovi; za sada jedna stavka. */

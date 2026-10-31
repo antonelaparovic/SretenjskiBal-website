@@ -203,6 +203,17 @@ objašnjenje kolone. Boje upozorenja: **žuto** = posebna ishrana, **crven rok**
 „Podesi tabelu" može da se pokrene bilo kad: sređuje raspored i boje, podaci se premeštaju zajedno sa
 kolonama i ništa se ne briše. Isključuje samo trenutno uključene filtere.
 
+### Tab „Gosti" — svi gosti, jedan red po osobi
+
+- Za svaku rezervaciju upisuje se red **Nosilac** (osoba koja je rezervisala, podebljano) i redovi **Gost 2, Gost 3…**,
+  svi pod istim brojem rezervacije. Prvih šest kolona svake rezervacije je u istoj boji (dve nijanse se smenjuju).
+- Za svakog gosta: ime, prezime, e-mail i telefon. Zajedničko za rezervaciju: tip ulaznice, kako su saznali za bal,
+  alergije i napomena.
+- **Status rezervacije** (siva kolona) se ovde samo prikazuje — menjajte ga u tabu **Rezervacije**.
+- Imena i kontakte gostiju možete ispraviti direktno ovde; ulaznice se prave iz ovog taba.
+- Rezervacije napravljene pre uvođenja ovog taba dodaje meni **Sretenjski bal → Podesi tabelu**.
+- Tabelu možete filtrirati (npr. po broju rezervacije), ali ne premeštajte kolone.
+
 ### Statusi
 
 | Status | Značenje | Ko ga postavlja |
@@ -239,7 +250,8 @@ podsetnik niti oslobađati mesto.
 3. Upisuje se **Datum slanja potvrde uplate**. Ponovni pokušaj neće poslati drugu potvrdu.
    Ako baš treba ponovo poslati, obrišite taj datum.
 4. U potvrdi gost dobija **QR kodove**: po jedan za svakog gosta iz rezervacije, sa imenom i tipom ulaznice.
-   Svi kodovi idu osobi koja je rezervisala. Ulaznice se upisuju u tab **Ulaznice** (jedan red po gostu).
+   Svi kodovi idu osobi koja je rezervisala. Kod svakog gosta se upisuje u tab **Gosti**, u kolonu **Kod ulaznice**.
+   Ulaznice se prave po redosledu redova u tabu **Gosti**; ako je gostiju manje nego ulaznica, dodaju se redovi „Gost 3"… koje možete dopuniti.
    Ponovno slanje (posle brisanja datuma) šalje iste kodove i ne pravi duple redove.
 
 ## Ulaz na balu — skeniranje ulaznica
@@ -248,21 +260,21 @@ podsetnik niti oslobađati mesto.
 1. U tabu **Podešavanja** u red `SCANNER_PIN` upišite PIN od najmanje 6 cifara. Dok je prazno, skeniranje ne radi.
 2. PIN recite samo ljudima na ulazu.
 3. Proba: pošaljite sebi potvrdu uplate za probnu rezervaciju i skenirajte svoju ulaznicu (pa u tabu
-   **Ulaznice** obrišite vreme u koloni **Ulazak** da bi ulaznica opet važila).
+   **Gosti** obrišite vreme u koloni **Ulazak** da bi ulaznica opet važila).
 
 **Na ulazu:**
 1. Na telefonu otvorite **sretenjskibal.si/ulaz** (Chrome ili Safari).
 2. Upišite PIN i ime/mesto (npr. „Ulaz 1 — Marko"), pa **Počni skeniranje**. Dozvolite pristup kameri.
    Telefon pamti PIN, pa sledeći put odmah otvara kameru.
 3. Usmerite kameru na QR kod gosta (sa telefona ili papira). Ekran postaje:
-   - **zelen — Ulaz odobren**: ime i tip ulaznice; vreme ulaska se upisuje u tab **Ulaznice**;
+   - **zelen — Ulaz odobren**: ime i tip ulaznice; vreme ulaska se upisuje u tab **Gosti**;
    - **narandžast — Već iskorišćena**: ulaznica je već skenirana (piše kad i ko je skenirao);
    - **crven — Nevažeća / Nije plaćena / Nije izdata**: kod nije naš, rezervacija nije PLAĆENO (npr. otkazana)
      ili ulaznica nije poslata.
 4. Ako kamera ne radi, kod sa ulaznice (npr. `27006-2-K7QH3M9P`) upišite ručno u polje ispod kamere.
 5. Gore piše koliko je gostiju ušlo od ukupnog broja ulaznica.
 
-**Rezervna varijanta:** pre bala odštampajte tab **Ulaznice** (ili ga otvorite na laptopu), za slučaj da
+**Rezervna varijanta:** pre bala odštampajte tab **Gosti** (ili ga otvorite na laptopu), za slučaj da
 na ulazu nema interneta. Svako skeniranje ide preko interneta i traje 1–2 sekunde.
 
 **Važno:** u Svojstvima skripte postoji `TICKET_SECRET` (pravi se sam pri prvoj ulaznici) — njim su potpisani

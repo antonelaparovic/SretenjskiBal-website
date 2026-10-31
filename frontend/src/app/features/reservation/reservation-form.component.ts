@@ -283,6 +283,8 @@ export class ReservationFormComponent {
     return {
       requestId,
       fullName: `${v.firstName.trim()} ${v.lastName.trim()}`,
+      firstName: v.firstName.trim(),
+      lastName: v.lastName.trim(),
       email: v.email.trim(),
       phone: v.phone.trim(),
       tickets: [{ ticketType: v.ticketType as TicketTypeCode, count: v.ticketCount as number }],

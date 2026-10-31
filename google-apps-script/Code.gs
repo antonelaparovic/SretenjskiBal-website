@@ -8,7 +8,8 @@
  *  - prima poruke iz kontakt forme (tab „Poruke" + mejl organizatoru)
  *  - meni „Sretenjski bal": instrukcije za uplatu, potvrda uplate, ručna provera rokova
  *  - dnevna provera rokova: podsetnik posle roka za uplatu, ISTEKLO posle perioda tolerancije
- *  - ulaznice: uz potvrdu uplate gost dobija po jednu ulaznicu sa QR kodom za svakog gosta (tab „Ulaznice"),
+ *  - tab „Gosti": jedan red po gostu (nosilac rezervacije + ostali gosti), grupisano i obojeno po rezervaciji
+ *  - ulaznice: uz potvrdu uplate gost dobija po jedan QR kod za svakog gosta (upisuje se u tab „Gosti"),
  *    a na ulazu se kodovi skeniraju stranicom /ulaz na sajtu (akcija „checkin", zaštićena PIN-om)
  *
  * Projekat ima dva fajla: Code.gs (ovaj) i QrCode.gs (biblioteka za crtanje QR kodova).
@@ -24,7 +25,7 @@ const SHEET_RESERVATIONS = 'Rezervacije';
 const SHEET_SETTINGS = 'Podešavanja';
 const SHEET_STATS = 'Statistika';
 const SHEET_MESSAGES = 'Poruke';
-const SHEET_TICKETS = 'Ulaznice';
+const SHEET_GUESTS = 'Gosti';
 const TIME_ZONE = 'Europe/Ljubljana';
 
 const STATUS = {
@@ -267,6 +268,12 @@ function createReservation_(input, captcha) {
     }
     record = buildRecord_(input, nextNumber_(t, settings.ballYear), new Date(), settings);
     appendRecord_(t, record);
+    try {
+      appendGuestRows_(guestRowsFromInput_(record, input, guestsSheet_().getLastRow() + 1));
+    } catch (err) {
+      // Rezervacija je upisana; gosti se mogu dopuniti menijem „Podesi tabelu".
+      console.error('Rezervacija ' + record.number + ': redovi u tabu Gosti nisu upisani.');
+    }
     SpreadsheetApp.flush();
   } finally {
     lock.releaseLock();
@@ -324,6 +331,8 @@ function validateReservation_(r) {
   const str = str_;
   if (!str(r.requestId, 8, 64) || !/^[A-Za-z0-9-]+$/.test(r.requestId)) bad.push('requestId');
   if (!str(r.fullName, 2, 120)) bad.push('fullName');
+  if (!optionalStr_(r.firstName, 60)) bad.push('firstName');
+  if (!optionalStr_(r.lastName, 60)) bad.push('lastName');
   if (!str(r.email, 3, 254) || !EMAIL_RE.test(String(r.email).trim())) bad.push('email');
   if (!str(r.phone, 6, 30) || !PHONE_RE.test(String(r.phone).trim())) bad.push('phone');
   const tickets = Array.isArray(r.tickets) ? r.tickets : [];
@@ -1277,9 +1286,19 @@ function renderMail_(m) {
 // Ulaznice i QR kodovi
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Kolone taba „Ulaznice" — jedan red po gostu (ulaznici). Skripta ih traži po redosledu, ne menjati. */
-const TICKET_HEADERS = ['Kod ulaznice', 'Broj rezervacije', 'Redni broj', 'Gost', 'Tip ulaznice', 'Izdato', 'Ulazak', 'Skenirao'];
-const TICKET_COL = { code: 0, number: 1, index: 2, name: 3, type: 4, issuedAt: 5, enteredAt: 6, scannedBy: 7 };
+/**
+ * Tab „Gosti" — jedan red po gostu: prvo nosilac rezervacije, pa ostali gosti, svi pod istim brojem rezervacije.
+ * Imena i kontakte gostiju ovde možete ispraviti (ulaznice se prave iz ovog taba). Status se menja samo u
+ * tabu „Rezervacije", a ovde se prikazuje sam (formula). Skripta kolone traži po redosledu — ne premeštati ih.
+ */
+const GUEST_HEADERS = [
+  'Broj rezervacije', 'Gost', 'Ime', 'Prezime', 'E-mail', 'Telefon', 'Status rezervacije', 'Tip ulaznice',
+  'Kako je saznao/la za bal', 'Alergije', 'Napomena', 'Kod ulaznice', 'Ulazak', 'Skenirao',
+];
+const G = { number: 0, role: 1, first: 2, last: 3, email: 4, phone: 5, status: 6, type: 7, source: 8, diet: 9, note: 10, code: 11, enteredAt: 12, scannedBy: 13 };
+const GUEST_HOLDER = 'Nosilac';
+/** Kolone koje dobijaju boju rezervacije (Broj … Telefon). */
+const GUEST_COLORED_COLS = 6;
 /** Početak sadržaja QR koda, da skener prepozna da je kod naš. */
 const TICKET_QR_PREFIX = 'SB:';
 /** Crockford base32 — bez slova koja liče na cifre (I, L, O, U), pa se kod lako prepisuje i ručno. */
@@ -1372,62 +1391,160 @@ function guestNote_(note) {
   return String(note || '').split('\n').filter(function (line) { return !/^Gost \d+: /.test(line.trim()); }).join('\n').trim();
 }
 
-/** Ulaznice za rezervaciju: prva glasi na kontakt osobu, ostale na goste iz forme. */
-function ticketsFor_(r) {
-  const number = String(r.number).trim();
-  const count = Math.max(1, parseInt(r.ticketCount, 10) || 1);
-  const types = ticketTypesFor_(r.ticketType, count);
-  const names = guestNamesFromNote_(r.note);
-  const holder = String(r.fullName || '').trim();
-  const out = [];
-  for (let i = 1; i <= count; i++) {
-    out.push({
-      index: i,
-      count: count,
-      number: number,
-      code: ticketCode_(number, i),
-      name: i === 1 ? holder : names[i] || 'Gost ' + i + ' · ' + holder,
-      type: types[i - 1],
-    });
-  }
-  return out;
+/** „Ana Marija Anić" → ['Ana Marija', 'Anić'] (za stare rezervacije u kojima je ime upisano zajedno). */
+function splitName_(full) {
+  const parts = String(full || '').trim().split(/\s+/).filter(Boolean);
+  if (parts.length < 2) return [parts[0] || '', ''];
+  return [parts.slice(0, -1).join(' '), parts[parts.length - 1]];
 }
 
-function ticketsSheet_() {
+/** Status rezervacije u tabu „Gosti": uvek onaj iz taba „Rezervacije" (red nosioca), ne kuca se ručno. */
+function guestStatusFormula_(row) {
+  const res = "'" + SHEET_RESERVATIONS + "'!";
+  const col = function (header) { return 'MATCH("' + header + '", ' + res + '$1:$1, 0)'; };
+  return '=IFERROR(INDEX(' + res + '$A:$ZZ, MATCH($A' + row + ', INDEX(' + res + '$A:$ZZ, 0, ' + col(COL.number) + '), 0), ' +
+    col(COL.status) + '), "")';
+}
+
+function guestsSheet_() {
   const ss = spreadsheet_();
-  let sheet = ss.getSheetByName(SHEET_TICKETS);
+  let sheet = ss.getSheetByName(SHEET_GUESTS);
   if (!sheet) {
-    sheet = ss.insertSheet(SHEET_TICKETS);
-    sheet.getRange(1, 1, 1, TICKET_HEADERS.length).setValues([TICKET_HEADERS]).setFontWeight('bold').setBackground('#5a1723').setFontColor('#f6f1e8');
+    sheet = ss.insertSheet(SHEET_GUESTS);
+    sheet.getRange(1, 1, 1, GUEST_HEADERS.length).setValues([GUEST_HEADERS]).setFontWeight('bold').setBackground('#5a1723').setFontColor('#f6f1e8');
+    sheet.getRange(1, G.status + 1).setNote('Popunjava se samo iz taba „Rezervacije". Status menjajte tamo, u redu rezervacije.');
+    sheet.getRange(1, G.code + 1).setNote('Upisuje se kad se pošalje potvrda uplate (sa QR kodovima). Ne menjati.');
+    sheet.getRange(1, G.enteredAt + 1).setNote('Vreme kad je ulaznica skenirana na ulazu. Obrišite ga da bi ulaznica ponovo važila.');
     sheet.setFrozenRows(1);
-    sheet.setColumnWidth(1, 170);
-    sheet.setColumnWidth(4, 220);
-    sheet.setColumnWidth(6, 130);
-    sheet.setColumnWidth(7, 130);
+    sheet.setFrozenColumns(4);
+    [110, 80, 130, 140, 220, 140, 150, 110, 170, 220, 260, 170, 130, 130].forEach(function (w, i) { sheet.setColumnWidth(i + 1, w); });
+    // Svaka rezervacija u svojoj boji (naizmenično dve nijanse), nosilac podebljan, status sivom pozadinom (ne menja se ovde).
+    const rows = sheet.getMaxRows();
+    const colored = sheet.getRange(2, 1, rows - 1, GUEST_COLORED_COLS);
+    const all = sheet.getRange(2, 1, rows - 1, GUEST_HEADERS.length);
+    sheet.setConditionalFormatRules([
+      SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=AND($A2<>"", ISODD(COUNTUNIQUE($A$2:$A2)))').setBackground('#f3e3e6').setRanges([colored]).build(),
+      SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=AND($A2<>"", ISEVEN(COUNTUNIQUE($A$2:$A2)))').setBackground('#f6efe2').setRanges([colored]).build(),
+      SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=$B2="' + GUEST_HOLDER + '"').setBold(true).setRanges([all]).build(),
+    ]);
+    sheet.getRange(2, G.status + 1, rows - 1, 1).setBackground('#ececec').setFontColor('#5b4f48');
   }
   return sheet;
 }
 
+/** Redovi taba „Gosti" za jednu rezervaciju (nosilac i gosti), iz podataka sa forme. */
+function guestRowsFromInput_(record, input, startRow) {
+  const shared = function (role, first, last, email, phone) {
+    return [record.number, role, first, last, email, phone, null, record.ticketType, record.source + (record.sourceOther ? ' — ' + record.sourceOther : ''),
+      record.diet, guestNote_(record.note), '', '', ''];
+  };
+  const holder = input.firstName && input.lastName ? [clean_(input.firstName), clean_(input.lastName)] : splitName_(record.fullName);
+  const rows = [shared(GUEST_HOLDER, holder[0], holder[1], record.email, record.phone)];
+  (Array.isArray(input.guests) ? input.guests : []).forEach(function (g, i) {
+    rows.push(shared('Gost ' + (i + 2), clean_(g.firstName), clean_(g.lastName), clean_(g.email).toLowerCase(), clean_(g.phone)));
+  });
+  return finishGuestRows_(rows, startRow);
+}
+
+/** Bezbedne vrednosti ćelija + formula za status u svakom redu. */
+function finishGuestRows_(rows, startRow) {
+  return rows.map(function (row, i) {
+    return row.map(function (v, c) { return c === G.status ? guestStatusFormula_(startRow + i) : safeCell_(v); });
+  });
+}
+
+function appendGuestRows_(rows) {
+  if (!rows.length) return;
+  const sheet = guestsSheet_();
+  sheet.getRange(sheet.getLastRow() + 1, 1, rows.length, GUEST_HEADERS.length).setValues(rows);
+}
+
 /**
- * Upisuje ulaznice rezervacije u tab „Ulaznice" (ponovno slanje ne pravi duplikate: postojeći red dobija
- * ažurirano ime i tip, a vreme ulaska ostaje). Pozivati pod zaključavanjem (updateReservation_).
+ * Rezervacije koje još nemaju redove u tabu „Gosti" (npr. napravljene pre ove verzije skripte) dodaje
+ * iz taba „Rezervacije": nosilac + gosti iz napomene („Gost 2: Ime Prezime, e-adresa, telefon").
+ */
+function backfillGuests_() {
+  const sheet = guestsSheet_();
+  const have = {};
+  sheet.getDataRange().getValues().slice(1).forEach(function (row) { have[String(row[G.number]).trim()] = true; });
+  const t = openTable_();
+  let added = 0;
+  t.rows.forEach(function (row) {
+    const r = rowToObj_(t, row);
+    const number = String(r.number || '').trim();
+    if (!number || have[number]) return;
+    const record = { number: number, ticketType: r.ticketType, source: r.source || '', sourceOther: r.sourceOther || '', diet: r.diet || '', note: r.note || '' };
+    const holder = splitName_(r.fullName);
+    const rows = [[number, GUEST_HOLDER, holder[0], holder[1], String(r.email || ''), String(r.phone || '')]];
+    String(r.note || '').split('\n').forEach(function (line) {
+      const m = /^Gost (\d+): ([^,]+), ([^,]+), (.+)$/.exec(line.trim());
+      if (m) {
+        const name = splitName_(m[2]);
+        rows.push([number, 'Gost ' + m[1], name[0], name[1], m[3].trim(), m[4].trim()]);
+      }
+    });
+    const full = rows.map(function (x) {
+      return x.concat([null, record.ticketType, record.source + (record.sourceOther ? ' — ' + record.sourceOther : ''), record.diet, guestNote_(record.note), '', '', '']);
+    });
+    appendGuestRows_(finishGuestRows_(full, sheet.getLastRow() + 1));
+    added++;
+  });
+  return added;
+}
+
+/** Redovi gostiju jedne rezervacije: [{ row (broj reda u tabeli), values }], redom kako su upisani. */
+function guestRowsFor_(sheet, number) {
+  const out = [];
+  sheet.getDataRange().getValues().forEach(function (v, i) {
+    if (i > 0 && String(v[G.number]).trim() === String(number).trim()) out.push({ row: i + 1, values: v });
+  });
+  return out;
+}
+
+function guestName_(v, holder) {
+  const name = (String(v[G.first] || '').trim() + ' ' + String(v[G.last] || '').trim()).trim();
+  return name || 'Gost · ' + holder;
+}
+
+/**
+ * Ulaznice za rezervaciju iz taba „Gosti": po jedna za svaki red (redom), koliko je kupljeno ulaznica.
+ * Ako gostiju ima manje nego ulaznica, dodaju se redovi „Gost N" koje kasnije možete dopuniti.
+ * Kod ulaznice se upisuje u red gosta. Ponovno slanje daje iste kodove. Pozivati pod zaključavanjem.
  */
 function issueTickets_(r) {
-  const tickets = ticketsFor_(r);
-  const sheet = ticketsSheet_();
-  const values = sheet.getDataRange().getValues();
-  const rowByCode = {};
-  for (let i = 1; i < values.length; i++) rowByCode[String(values[i][TICKET_COL.code]).trim()] = i + 1;
-  const now = new Date();
-  tickets.forEach(function (t) {
-    const row = rowByCode[t.code];
-    if (row) {
-      sheet.getRange(row, TICKET_COL.name + 1, 1, 2).setValues([[safeCell_(t.name), safeCell_(t.type)]]);
-    } else {
-      sheet.appendRow([t.code, safeCell_(t.number), t.index, safeCell_(t.name), safeCell_(t.type), now, '', '']);
+  const number = String(r.number).trim();
+  const count = Math.max(1, parseInt(r.ticketCount, 10) || 1);
+  const types = ticketTypesFor_(r.ticketType, count);
+  const holder = String(r.fullName || '').trim();
+  const sheet = guestsSheet_();
+  let rows = guestRowsFor_(sheet, number);
+  if (!rows.length) {
+    backfillGuests_();
+    rows = guestRowsFor_(sheet, number);
+  }
+  if (rows.length < count) {
+    const missing = [];
+    for (let i = rows.length + 1; i <= count; i++) {
+      missing.push([number, 'Gost ' + i, 'Gost ' + i, '', '', '', null, r.ticketType, '', '', '', '', '', '']);
     }
+    appendGuestRows_(finishGuestRows_(missing, sheet.getLastRow() + 1));
+    rows = guestRowsFor_(sheet, number);
+  }
+  return rows.slice(0, count).map(function (g, i) {
+    const index = i + 1;
+    const code = ticketCode_(number, index);
+    if (String(g.values[G.code]).trim() !== code) sheet.getRange(g.row, G.code + 1).setValue(code);
+    const first = String(g.values[G.first] || '').trim();
+    const placeholder = /^Gost \d+$/.test(first) && !String(g.values[G.last] || '').trim();
+    return {
+      index: index,
+      count: count,
+      number: number,
+      code: code,
+      name: placeholder ? first + ' · ' + holder : guestName_(g.values, holder),
+      type: types[i] || String(g.values[G.type] || ''),
+    };
   });
-  return tickets;
 }
 
 /** QR slika (GIF) za ulaznicu; sadržaj je „SB:" + kod. */
@@ -1469,8 +1586,13 @@ function ticketMailBlocks_(tickets, lang, labels) {
 /** Broj ulaznica i ulazaka, za zaglavlje stranice za skeniranje. */
 function ticketStats_(values) {
   let entered = 0;
-  for (let i = 1; i < values.length; i++) if (values[i][TICKET_COL.enteredAt]) entered++;
-  return { entered: entered, total: Math.max(0, values.length - 1) };
+  let total = 0;
+  for (let i = 1; i < values.length; i++) {
+    if (!String(values[i][G.code] || '').trim()) continue;
+    total++;
+    if (values[i][G.enteredAt]) entered++;
+  }
+  return { entered: entered, total: total };
 }
 
 function pinLocked_() {
@@ -1496,7 +1618,7 @@ function checkin_(req) {
     return { ok: false, code: 'BAD_PIN' };
   }
   const scannedBy = clean_(String(req.device || '')).slice(0, 40) || 'ulaz';
-  const sheet = ticketsSheet_();
+  const sheet = guestsSheet_();
   if (!req.code) return { ok: true, stats: ticketStats_(sheet.getDataRange().getValues()) };
 
   const parsed = parseTicketCode_(req.code);
@@ -1508,12 +1630,12 @@ function checkin_(req) {
     const values = sheet.getDataRange().getValues();
     let row = -1;
     for (let i = 1; i < values.length; i++) {
-      if (String(values[i][TICKET_COL.code]).trim() === parsed.code) { row = i; break; }
+      if (String(values[i][G.code]).trim() === parsed.code) { row = i; break; }
     }
     const base = { ok: true, code: parsed.code, number: parsed.number, index: parsed.index };
     if (row < 0) return Object.assign(base, { result: 'UNKNOWN', stats: ticketStats_(values) });
     const v = values[row];
-    const info = Object.assign(base, { name: String(v[TICKET_COL.name]), type: String(v[TICKET_COL.type]) });
+    const info = Object.assign(base, { name: guestName_(v, ''), type: String(v[G.type]) });
 
     const t = openTable_();
     const resRow = findRow_(t, parsed.number);
@@ -1521,18 +1643,18 @@ function checkin_(req) {
     if (status !== STATUS.PAID) return Object.assign(info, { result: 'NOT_PAID', status: status || 'NEPOZNATA', stats: ticketStats_(values) });
 
     const tz = sheetTimeZone_();
-    const already = parseDate_(v[TICKET_COL.enteredAt]);
+    const already = parseDate_(v[G.enteredAt]);
     if (already) {
       return Object.assign(info, {
         result: 'USED',
         enteredAt: Utilities.formatDate(already, tz, 'HH:mm'),
-        scannedBy: String(v[TICKET_COL.scannedBy] || ''),
+        scannedBy: String(v[G.scannedBy] || ''),
         stats: ticketStats_(values),
       });
     }
     const now = new Date();
-    sheet.getRange(row + 1, TICKET_COL.enteredAt + 1, 1, 2).setValues([[now, safeCell_(scannedBy)]]);
-    values[row][TICKET_COL.enteredAt] = now;
+    sheet.getRange(row + 1, G.enteredAt + 1, 1, 2).setValues([[now, safeCell_(scannedBy)]]);
+    values[row][G.enteredAt] = now;
     return Object.assign(info, { result: 'OK', enteredAt: Utilities.formatDate(now, tz, 'HH:mm'), stats: ticketStats_(values) });
   } finally {
     lock.releaseLock();
@@ -1644,7 +1766,8 @@ function setup() {
   setupSettingsSheet_(ss);
   setupStatsSheet_(ss);
   setupMessagesSheet_(ss);
-  ticketsSheet_();
+  const backfilled = backfillGuests_();
+  if (backfilled) notes.push('U tab „Gosti" dodato rezervacija iz ranije: ' + backfilled + '.');
 
   const props = PropertiesService.getScriptProperties();
   props.setProperty('SPREADSHEET_ID', ss.getId());

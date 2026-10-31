@@ -230,6 +230,8 @@ describe('ReservationFormComponent', () => {
     const body = reservationOf(req);
     expect(body).toMatchObject({
       fullName: 'Ana Anić',
+      firstName: 'Ana',
+      lastName: 'Anić',
       email: 'ana@primer.si',
       phone: '+386 40 123 456',
       tickets: [{ ticketType: 'GALERIJA', count: 2 }],
