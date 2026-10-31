@@ -903,7 +903,7 @@ function sendPaymentConfirmationFor_(number) {
 const MAIL = {
   sr: {
     greeting: function (n) { return 'Poštovani/a ' + n + ','; },
-    signoff: ['Srdačan pozdrav,', 'Organizacioni tim Sretenjskog bala'],
+    signoff: ['Srdačan pozdrav,', 'Kulturni centar Sretenje'],
     tickets: { label: 'Ulaznica', of: 'od', code: 'Kod' },
     labels: { number: 'Broj rezervacije', ticketType: 'Tip ulaznice', ticketCount: 'Broj ulaznica', guests: 'Gosti', note: 'Napomena', diet: 'Alergije', amount: 'Iznos za uplatu', deadline: 'Rok za uplatu', payee: 'Primalac', iban: 'IBAN', bic: 'BIC/SWIFT', bank: 'Banka', purpose: 'Svrha uplate' },
     received: {
@@ -949,7 +949,7 @@ const MAIL = {
   },
   sl: {
     greeting: function (n) { return 'Spoštovani/-a ' + n + ','; },
-    signoff: ['Lep pozdrav,', 'Organizacijska ekipa Sretenjskega bala'],
+    signoff: ['Lep pozdrav,', 'Kulturni center Sretenje'],
     tickets: { label: 'Vstopnica', of: 'od', code: 'Koda' },
     labels: { number: 'Številka rezervacije', ticketType: 'Vrsta vstopnice', ticketCount: 'Število vstopnic', guests: 'Gostje', note: 'Opomba', diet: 'Alergije', amount: 'Znesek za plačilo', deadline: 'Rok plačila', payee: 'Prejemnik', iban: 'IBAN', bic: 'BIC/SWIFT', bank: 'Banka', purpose: 'Namen plačila' },
     received: {
@@ -995,7 +995,7 @@ const MAIL = {
   },
   en: {
     greeting: function (n) { return 'Dear ' + n + ','; },
-    signoff: ['Kind regards,', 'The Sretenjski bal organising team'],
+    signoff: ['Kind regards,', 'Kulturni centar Sretenje'],
     tickets: { label: 'Ticket', of: 'of', code: 'Code' },
     labels: { number: 'Reservation number', ticketType: 'Ticket type', ticketCount: 'Number of tickets', guests: 'Guests', note: 'Note', diet: 'Allergies', amount: 'Amount due', deadline: 'Payment deadline', payee: 'Payee', iban: 'IBAN', bic: 'BIC/SWIFT', bank: 'Bank', purpose: 'Payment reference' },
     received: {
