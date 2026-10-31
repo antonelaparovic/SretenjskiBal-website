@@ -247,21 +247,6 @@
   color: var(--c-burgundy);
 }
 
-.number {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-
-  &__value {
-    font-family: var(--font-display);
-    font-weight: 300;
-    font-size: clamp(4rem, 9vw, 6.5rem);
-    line-height: 1;
-    letter-spacing: 0.04em;
-    color: var(--c-burgundy);
-  }
-}
-
 .summary {
   display: flex;
   flex-wrap: wrap;

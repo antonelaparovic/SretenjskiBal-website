@@ -251,7 +251,8 @@ describe('ReservationFormComponent', () => {
     req.flush({ ok: true, reservationNumber: '27001', guestMailSent: true });
     await render();
     expect($('form')).toBeNull();
-    expect($('.number__value').textContent).toBe('27001');
+    expect($('.success')).toBeTruthy();
+    expect(el.textContent).not.toContain('27001');
     expect(el.textContent).toContain('Javićemo Vam se u roku od 3 dana sa detaljima za uplatu.');
     expect(el.textContent).not.toContain('svrsi uplate');
     expect($('.summary').textContent).toContain('Galerija');
@@ -277,7 +278,8 @@ describe('ReservationFormComponent', () => {
     expect(reservationOf(second).requestId).toBe(reservationOf(first).requestId);
     second.flush({ ok: true, reservationNumber: '27001', guestMailSent: false });
     await render();
-    expect($('.number__value').textContent).toBe('27001');
+    expect($('.success')).toBeTruthy();
+    expect(el.textContent).not.toContain('27001');
   });
 
   it('mrežna greška (backend nedostupan) ne prikazuje uspeh', async () => {
@@ -286,7 +288,7 @@ describe('ReservationFormComponent', () => {
     await click('button[type=submit]');
     script('create').error(new ProgressEvent('error'));
     await render();
-    expect($('.number__value')).toBeNull();
+    expect($('.success')).toBeNull();
     expect($('.server-error').textContent).toContain('Rezervacija nije sačuvana');
   });
 
