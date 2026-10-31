@@ -1,0 +1,8 @@
+{
+  "name": "sretenjski-bal",
+  "private": true,
+  "description": "Koren repozitorijuma — samo za Cloudflare build ako se pokrene iz korena (sajt je u frontend/).",
+  "scripts": {
+    "build": "npm ci --prefix frontend && npm run build --prefix frontend"
+  }
+}

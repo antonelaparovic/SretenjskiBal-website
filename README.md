@@ -64,7 +64,7 @@ na `<app-editorial-image>`.
 
 ## 4. Objava sajta
 
-Besplatno, na Cloudflare Pages — uputstvo korak po korak: **[docs/DEPLOY.md](docs/DEPLOY.md)**.
+Besplatno, na Cloudflare — uputstvo korak po korak: **[docs/DEPLOY.md](docs/DEPLOY.md)**.
 
 Build za proveru na svom računaru:
 

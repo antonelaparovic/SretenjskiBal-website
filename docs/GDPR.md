@@ -4,12 +4,12 @@ Nisam pravnik — tekstove treba da pregleda pravnik, a SL i EN verzije izvorni 
 
 ## Šta je urađeno
 - Stranice `/privacy` i `/cookies` (SR/SL/EN, prekidač jezika): `frontend/src/app/core/content/legal-content.ts`.
-- Podaci o organizatoru: `ORGANIZER` u `site-content.ts` — **zameniti sve [UPISATI: …] pre objave** (adresa, matična/davčna, e-adresa za privatnost). Hosting (Cloudflare Pages) i e-pošta (Google Workspace) su upisani.
+- Podaci o organizatoru: `ORGANIZER` u `site-content.ts` — **zameniti sve [UPISATI: …] pre objave** (adresa, matična/davčna, e-adresa za privatnost). Hosting (Cloudflare Workers) i e-pošta (Google Workspace) su upisani.
 - Verzija teksta: `PRIVACY_POLICY_VERSION` — menjati pri svakoj izmeni teksta; upisuje se uz rezervaciju (kolona „Saglasnost").
 - Rezervacija: izričita saglasnost (čl. 9(2)(a)) za polje „Posebna ishrana i alergije" (podatak o zdravlju). Bez saglasnosti forma i Apps Script odbijaju ishranu.
 - Kontakt forma: saglasnost sa jasnim svrhom i rokom čuvanja.
 - Kolačići: sajt ne postavlja kolačiće ni localStorage i nema analitike → baner nije potreban (ZEKom-2, čl. 225). Ako se doda analitika/embed, uvesti baner PRE toga.
-- Arhitektura: sajt je statički (Cloudflare Pages); forme šalju podatke direktno Google Apps Scriptu (tabela + Gmail). Forme učitavaju **Cloudflare Turnstile** (zaštita od botova) sa challenges.cloudflare.com.
+- Arhitektura: sajt je statički (Cloudflare Workers); forme šalju podatke direktno Google Apps Scriptu (tabela + Gmail). Forme učitavaju **Cloudflare Turnstile** (zaštita od botova) sa challenges.cloudflare.com.
 - Link „Uslovi korišćenja" je sakriven.
 
 ## Rokovi čuvanja (moje pretpostavke — potvrditi)

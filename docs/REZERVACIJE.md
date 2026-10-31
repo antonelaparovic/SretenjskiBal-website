@@ -6,7 +6,7 @@ u Google tabelu „Bal rezervacije". Organizator dobija mejl, a gost potvrdu. Iz
 radi sama, jednom dnevno.
 
 ```
-Statički sajt (Cloudflare Pages) ──► Google Apps Script u tabeli ──► tabela + Gmail
+Statički sajt (Cloudflare) ──► Google Apps Script u tabeli ──► tabela + Gmail
   forma, provere u browseru,           Turnstile provera, provera podataka, ograničenje slanja,
   Cloudflare Turnstile                 zaključavanje, broj, upis reda, mejlovi, meni, dnevna provera
 ```
@@ -30,7 +30,7 @@ Sve ove stavke su u kodu označene sa `TODO`. Spisak u kodu daje komanda
 | 2 | **Pravi podaci za uplatu**: primalac sa adresom, IBAN, BIC, banka. Sada stoje izmišljene vrednosti sa „TODO", obojene žuto. | Tabela → tab „Podešavanja" (početne vrednosti su u `google-apps-script/Code.gs`, `SETTINGS`) |
 | 3 | Opisi (šta je uključeno) za Svečanu i Galeriju | `frontend/src/app/core/content/site-content.ts`, `TICKETS` |
 | 4 | Otvaranje prodaje na sajtu: `salesStatus: 'OPEN'` | `site-content.ts`, `EVENT` |
-| 5 | Objava sajta (Cloudflare Pages) i Turnstile ključevi | uputstvo: [DEPLOY.md](DEPLOY.md); `frontend/src/app/core/config/app.constants.ts` |
+| 5 | Objava sajta (Cloudflare) i Turnstile ključevi | uputstvo: [DEPLOY.md](DEPLOY.md); `frontend/src/app/core/config/app.constants.ts` |
 | 6 | Politika privatnosti: tekst je napisan, treba upisati podatke organizatora | [GDPR.md](GDPR.md); `frontend/src/app/core/content/legal-content.ts` |
 
 Dok u podacima za uplatu piše „TODO", meni „Pošalji instrukcije za uplatu" odbija slanje i kaže šta

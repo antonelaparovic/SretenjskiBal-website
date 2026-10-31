@@ -1,9 +1,9 @@
-# Objava sajta — Cloudflare Pages (besplatno)
+# Objava sajta — Cloudflare (besplatno)
 
 Sajt je **statički**: `npm run build` napravi gotove HTML stranice, a forme šalju rezervacije i poruke
 direktno Google skripti u tabeli. Zato mu ne treba server — dovoljan je besplatan statički hosting.
 
-**Cloudflare Pages:** besplatno bez kartice, komercijalna upotreba dozvoljena, HTTPS i domen uključeni,
+**Cloudflare Workers (statički sajt):** besplatno bez kartice, komercijalna upotreba dozvoljena, HTTPS i domen uključeni,
 sajt nikad „ne spava", brz u celoj Evropi. Isti Cloudflare nalog daje i **Turnstile** (zaštita formi od botova).
 
 ---
@@ -17,7 +17,7 @@ sajt nikad „ne spava", brz u celoj Evropi. Isti Cloudflare nalog daje i **Turn
 1. Cloudflare → **Turnstile** → **Add widget**.
 2. **Widget name:** `Sretenjski bal`.
    **Hostnames:** adresa sajta (vidi odeljak 4, npr. `sretenjskibal.si` i `www.sretenjskibal.si`)
-   i adresa koju da Cloudflare Pages (`sretenjski-bal.pages.dev`). Za `localhost` ne treba ništa —
+   i adresa koju da Cloudflare (`sretenjskibal-website.fbozic7.workers.dev`). Za `localhost` ne treba ništa —
    lokalno sajt sam koristi Cloudflareov probni ključ.
    **Widget mode:** **Managed**.
 3. **Create** → dobijate dva ključa:
@@ -29,41 +29,28 @@ sajt nikad „ne spava", brz u celoj Evropi. Isti Cloudflare nalog daje i **Turn
 Obavezno upišite **oba** ključa pre otvaranja prodaje. Dok `TURNSTILE_SECRET` nije upisan, skripta
 propušta sve (probni režim).
 
-## 3. Prva objava
+## 3. Prva objava (Cloudflare Workers, automatski iz GitHuba)
 
-Dve mogućnosti — **A** je za stalno, **B** radi odmah i bez pristupa GitHubu.
-
-### A) Automatski iz GitHuba (preporučeno)
-
-Cloudflare → **Workers & Pages** → **Create** → **Pages** → **Connect to Git** → GitHub →
-repozitorijum `SretenjskiBal-website` (GitHub traži da instalaciju Cloudflare aplikacije odobri
-**vlasnik repozitorijuma**). Podešavanja:
+Cloudflare → **Workers & Pages** → **Create** → **Import a repository** → GitHub → organizacija
+**kcsretenje** → `SretenjskiBal-website`. Podešavanja (kasnije: Worker → **Settings → Build**):
 
 | Polje | Vrednost |
 |---|---|
-| Project name | `sretenjski-bal` |
+| Project name | `sretenjskibal-website` (mora biti isto kao `name` u `frontend/wrangler.jsonc`) |
 | Production branch | `main` |
-| Framework preset | `None` |
 | Root directory | `frontend` |
 | Build command | `npm run build` |
-| Build output directory | `dist/frontend/browser` |
+| Deploy command | `npx wrangler deploy` |
 
-**Save and Deploy.** Od tada svaki merge na `main` sam objavi novu verziju (~2–3 min), a svaki
-pull request dobije svoju probnu adresu.
+`frontend/wrangler.jsonc` kaže Cloudflareu da objavi gotove stranice iz `dist/frontend/browser`,
+da za nepoznate adrese vrati `404.html` i da adrese budu bez kose crte na kraju (`/rezervacija`).
+Bez tog fajla Cloudflare objavi prazan sajt (sve adrese 404).
 
-### B) Ručno sa računara (bez GitHuba)
+Od tada svaki merge na `main` sam objavi novu verziju (~2–3 min). Sajt je na
+**https://sretenjskibal-website.fbozic7.workers.dev** (dok se ne poveže domen).
 
-```bash
-cd frontend
-npm run build
-npx wrangler login                     # jednom: otvara browser, prijava na Cloudflare
-npx wrangler pages deploy dist/frontend/browser --project-name sretenjski-bal
-```
-
-Prvi put pita da napravi projekat → **Yes**, production branch → `main`.
-Za svaku novu verziju ponovite `npm run build` i poslednju komandu.
-
-Posle objave sajt je na **https://sretenjski-bal.pages.dev**.
+Ručna objava sa računara, ako zatreba: `cd frontend && npm run build && npx wrangler deploy`
+(prvi put `npx wrangler login`).
 
 ## 4. Adresa sajta (domen)
 
@@ -73,8 +60,10 @@ Posle objave sajt je na **https://sretenjski-bal.pages.dev**.
 Izaberite jednu od dve mogućnosti:
 
 **a) Poddomen kulturnog centra, npr. `bal.kcsretenje.si`** — besplatno, odmah:
-1. Cloudflare → projekat `sretenjski-bal` → **Custom domains** → **Set up a domain** → `bal.kcsretenje.si`.
-2. Ko ima pristup DNS-u kod Neoserva doda zapis: **CNAME** `bal` → `sretenjski-bal.pages.dev`.
+1. Za sopstveni domen Workers traži da DNS domena bude na Cloudflareu. Za `bal.kcsretenje.si` to znači
+   preneti DNS zonu kcsretenje.si na Cloudflare (besplatno; Cloudflare uveze postojeće zapise, uključujući mejl),
+   ili koristiti varijantu b sa novim domenom.
+2. Zatim Worker → **Settings → Domains & Routes → Add → Custom domain** → `bal.kcsretenje.si`.
 3. HTTPS se uključi sam za nekoliko minuta.
 
 **b) Sopstveni domen `sretenjskibal.si`** — registracija ~10–20 € godišnje (npr. kod Neoserva):
@@ -114,10 +103,11 @@ Ako forma kaže „Rezervacije trenutno nisu dostupne" iako je `BOOKING_OPEN` uk
 ## Šta je gde (za tehničku osobu)
 
 - `frontend/` — Angular, `outputMode: static` + prerender svih stranica; `npm run build` = `ng build`
-  + `scripts/postbuild.mjs` (kopira stranicu /404 u `404.html`, koju Pages vraća sa statusom 404).
+  + `scripts/postbuild.mjs` (kopira stranicu /404 u `404.html`, koju Cloudflare vraća sa statusom 404).
 - `frontend/public/_redirects` — trajno preusmerenje `/karte` → `/rezervacija`.
 - `frontend/public/_headers` — bezbednosna zaglavlja i dugo keširanje JS/CSS fajlova.
 - `frontend/.node-version` — Node 24 za build na Cloudflareu.
+- `frontend/wrangler.jsonc` — Cloudflare Workers: folder sa gotovim sajtom, 404 stranica, adrese bez kose crte.
 - `frontend/src/app/core/services/forms-api.service.ts` — poziv skripte (POST, JSON kao `text/plain`,
   pa browser ne traži CORS dozvolu koju Apps Script ne podržava; proveren u pravom Chromeu).
 - `google-apps-script/` — skripta u tabeli i njeni testovi (`npm test`).

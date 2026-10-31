@@ -126,6 +126,6 @@ export const ORGANIZER = {
   /** Pitanja, kontakt forma i privatnost. */
   email: 'info@kcsretenje.si',
   privacyEmail: 'info@kcsretenje.si',
-  hosting: 'Cloudflare, Inc. (Cloudflare Pages)',
+  hosting: 'Cloudflare, Inc. (Cloudflare Workers)',
   mailProvider: 'Google Ireland Ltd. (Google Workspace / Gmail)',
 } as const;
