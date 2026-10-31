@@ -267,12 +267,26 @@ describe('Apps Script (Code.gs)', () => {
       expect(sr.htmlBody).toContain('cid:sblogo');
       expect(Object.keys(sr.inlineImages as object)).toEqual(['sblogo']);
       expect(sr.body).toContain('Javićemo Vam se u roku od 3 dana sa detaljima za uplatu.');
+      expect(sr.body).toContain('Gosti: Ana Anić');
+      expect(sr.body).toContain('Napomena: Sedimo sa porodicom Petrović.');
       expect(sr.body).toContain('27001');
       expect(sr.replyTo).toBe('info@kcsretenje.si');
       expect(gas.outbox.find((m) => m.to === 'sl@primer.si')!.body).toContain('V 3 dneh Vam bomo poslali podatke za plačilo.');
       const en = gas.outbox.find((m) => m.to === 'en@primer.si')!;
       expect(en.body).toContain('We will contact you within 3 days with the payment details.');
       expect(en.body).toContain('Ticket type: Gallery');
+    });
+
+    it('potvrda rezervacije navodi sve goste i napomenu bez redova o gostima', () => {
+      create(reservation({
+        tickets: [{ ticketType: 'GALERIJA', count: 2 }],
+        guests: [{ firstName: 'Maja', lastName: 'Anić', email: 'maja@primer.si', phone: '+386 41 222 333' }],
+      }));
+      const mail = gas.outbox.find((m) => m.to === 'ana@primer.si')!;
+      expect(mail.body).toContain('Gosti:\nAna Anić\nMaja Anić');
+      expect(mail.body).toContain('Napomena: Sedimo sa porodicom Petrović.');
+      expect(mail.body).not.toContain('maja@primer.si');
+      expect(mail.htmlBody).toContain('Ana Anić<br>Maja Anić');
     });
 
     it('mejlovi idu sa info@ kad je alias podešen u Gmailu, inače sa glavne adrese naloga', () => {

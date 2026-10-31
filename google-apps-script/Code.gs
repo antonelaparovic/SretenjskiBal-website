@@ -905,7 +905,7 @@ const MAIL = {
     greeting: function (n) { return 'Poštovani/a ' + n + ','; },
     signoff: ['Srdačan pozdrav,', 'Organizacioni tim Sretenjskog bala'],
     tickets: { label: 'Ulaznica', of: 'od', code: 'Kod' },
-    labels: { number: 'Broj rezervacije', ticketType: 'Tip ulaznice', ticketCount: 'Broj ulaznica', diet: 'Alergije', amount: 'Iznos za uplatu', deadline: 'Rok za uplatu', payee: 'Primalac', iban: 'IBAN', bic: 'BIC/SWIFT', bank: 'Banka', purpose: 'Svrha uplate' },
+    labels: { number: 'Broj rezervacije', ticketType: 'Tip ulaznice', ticketCount: 'Broj ulaznica', guests: 'Gosti', note: 'Napomena', diet: 'Alergije', amount: 'Iznos za uplatu', deadline: 'Rok za uplatu', payee: 'Primalac', iban: 'IBAN', bic: 'BIC/SWIFT', bank: 'Banka', purpose: 'Svrha uplate' },
     received: {
       subject: function (n) { return 'Ulaznice za prvi Sretenjski bal — rezervacija ' + n; },
       title: 'Ulaznice za prvi Sretenjski bal',
@@ -951,7 +951,7 @@ const MAIL = {
     greeting: function (n) { return 'Spoštovani/-a ' + n + ','; },
     signoff: ['Lep pozdrav,', 'Organizacijska ekipa Sretenjskega bala'],
     tickets: { label: 'Vstopnica', of: 'od', code: 'Koda' },
-    labels: { number: 'Številka rezervacije', ticketType: 'Vrsta vstopnice', ticketCount: 'Število vstopnic', diet: 'Alergije', amount: 'Znesek za plačilo', deadline: 'Rok plačila', payee: 'Prejemnik', iban: 'IBAN', bic: 'BIC/SWIFT', bank: 'Banka', purpose: 'Namen plačila' },
+    labels: { number: 'Številka rezervacije', ticketType: 'Vrsta vstopnice', ticketCount: 'Število vstopnic', guests: 'Gostje', note: 'Opomba', diet: 'Alergije', amount: 'Znesek za plačilo', deadline: 'Rok plačila', payee: 'Prejemnik', iban: 'IBAN', bic: 'BIC/SWIFT', bank: 'Banka', purpose: 'Namen plačila' },
     received: {
       subject: function (n) { return 'Vstopnice za prvi Sretenjski bal — rezervacija ' + n; },
       title: 'Vstopnice za prvi Sretenjski bal',
@@ -997,7 +997,7 @@ const MAIL = {
     greeting: function (n) { return 'Dear ' + n + ','; },
     signoff: ['Kind regards,', 'The Sretenjski bal organising team'],
     tickets: { label: 'Ticket', of: 'of', code: 'Code' },
-    labels: { number: 'Reservation number', ticketType: 'Ticket type', ticketCount: 'Number of tickets', diet: 'Allergies', amount: 'Amount due', deadline: 'Payment deadline', payee: 'Payee', iban: 'IBAN', bic: 'BIC/SWIFT', bank: 'Bank', purpose: 'Payment reference' },
+    labels: { number: 'Reservation number', ticketType: 'Ticket type', ticketCount: 'Number of tickets', guests: 'Guests', note: 'Note', diet: 'Allergies', amount: 'Amount due', deadline: 'Payment deadline', payee: 'Payee', iban: 'IBAN', bic: 'BIC/SWIFT', bank: 'Bank', purpose: 'Payment reference' },
     received: {
       subject: function (n) { return 'Tickets for the first Sretenjski bal — reservation ' + n; },
       title: 'Tickets for the first Sretenjski bal',
@@ -1068,7 +1068,12 @@ function sendGuestMail_(kind, r, settings, extra) {
     [m.labels.ticketType, localizeTickets_(r.ticketType, lang)],
     [m.labels.ticketCount, String(r.ticketCount)],
   ];
-  if (kind === 'received' && String(r.diet || '').trim()) details.push([m.labels.diet, String(r.diet)]);
+  if (kind === 'received') {
+    details.push([m.labels.guests, guestList_(r).join('\n')]);
+    if (String(r.diet || '').trim()) details.push([m.labels.diet, String(r.diet)]);
+    const note = guestNote_(r.note);
+    if (note) details.push([m.labels.note, note]);
+  }
   if (kind === 'instructions' || kind === 'reminder') {
     if (Number(r.amount) > 0) details.push([m.labels.amount, formatAmount_(r.amount, settings.currency, lang)]);
     if (kind === 'instructions') details.push([m.labels.deadline, x.deadline]);
@@ -1352,6 +1357,19 @@ function guestNamesFromNote_(note) {
     if (m) names[Number(m[1])] = m[2].trim();
   });
   return names;
+}
+
+/** Imena gostiju redom: kontakt osoba, pa ostali iz forme (za potvrdu rezervacije). */
+function guestList_(r) {
+  const names = guestNamesFromNote_(r.note);
+  const list = [String(r.fullName || '').trim()];
+  Object.keys(names).map(Number).sort(function (a, b) { return a - b; }).forEach(function (i) { list.push(names[i]); });
+  return list.filter(Boolean);
+}
+
+/** Napomena gosta bez redova „Gost N: …" koje skripta dodaje na početak. */
+function guestNote_(note) {
+  return String(note || '').split('\n').filter(function (line) { return !/^Gost \d+: /.test(line.trim()); }).join('\n').trim();
 }
 
 /** Ulaznice za rezervaciju: prva glasi na kontakt osobu, ostale na goste iz forme. */
