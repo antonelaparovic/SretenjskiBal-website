@@ -242,6 +242,15 @@ Ako instrukcije šaljete sami iz Gmaila (šablon je u odeljku 4), u red ručno u
 instrukcija za uplatu**, **Rok za uplatu** i status **ČEKA NA UPLATU**. Bez ta dva datuma sistem neće slati
 podsetnik niti oslobađati mesto.
 
+### UPN QR kod za uplatu
+
+- Mejl sa instrukcijama za uplatu (i podsetnik) ima **UPN QR kod**: gost ga skenira u aplikaciji slovenačke banke i
+  primalac, iznos, rok, referenca (`SI00` + broj rezervacije) i svrha se popune sami.
+- Kod se pravi samo kad su podaci za uplatu pravi: `IBAN` je slovenački (počinje sa `SI56`) i `PAYEE` je upisan u obliku
+  **„Naziv, ulica i broj, poštanski broj i mesto"**, npr. `Kulturni centar Sretenje, Zagrebška cesta 20, 2000 Maribor`.
+  Inače mejl ide bez QR koda (podaci za ručnu uplatu su uvek tu).
+- Gosti sa računom van Slovenije plaćaju ručno, po podacima iz mejla.
+
 ### Uplata je na izvodu → PLAĆENO
 
 1. Promenite status u **PLAĆENO**. Po želji upišite **Datum evidentirane uplate**; ako ga ne upišete,

@@ -534,6 +534,42 @@ describe('Apps Script (Code.gs)', () => {
       expect([deadline.getFullYear(), deadline.getMonth(), deadline.getDate()]).toEqual([expected.getFullYear(), expected.getMonth(), expected.getDate()]);
     });
 
+    it('instrukcije za uplatu imaju UPN QR kod i referencu kad je račun slovenački', () => {
+      setSetting('PAYEE', 'Kulturni centar Sretenje, Zagrebška cesta 20, 2000 Maribor');
+      setSetting('IBAN', 'SI56 0310 0100 1234 567');
+      addRow({ number: '27001', status: 'NOVA', email: 'ana@primer.si', fullName: 'Ana Anić', amount: 280, locale: 'sr', ticketType: 'Svečana', ticketCount: 2 });
+      gas.ctx.sendPaymentInstructionsFor_('27001');
+      const mail = gas.outbox[0];
+      expect(Object.keys(mail.inlineImages!).sort()).toEqual(['sblogo', 'upnqr']);
+      expect((mail.inlineImages!.upnqr as { type: string }).type).toBe('image/gif');
+      expect(mail.htmlBody).toContain('cid:upnqr');
+      expect(mail.body).toContain('Referenca primaoca: SI00 27001');
+      expect(mail.body).toContain('Plaćanje QR kodom');
+    });
+
+    it('UPN QR sadržaj po standardu ZBS (polja, iznos u centima, kontrolna suma)', () => {
+      const text = gas.ctx.upnText_({
+        payerName: 'Nikola Đorđević', amount: 280, purpose: 'Sretenjski bal 27006', dueDate: '14.11.2026',
+        iban: 'SI56031001001234567', reference: 'SI0027006',
+        payee: { name: 'Kulturni centar Sretenje', street: 'Zagrebška cesta 20', city: '2000 Maribor' },
+      });
+      const lines = text.split('\n');
+      expect(lines).toHaveLength(21);
+      expect(lines.slice(0, 19)).toEqual(['UPNQR', '', '', '', '', 'Nikola Đorđević', '', '', '00000028000', '', '', 'OTHR', 'Sretenjski bal 27006',
+        '14.11.2026', 'SI56031001001234567', 'SI0027006', 'Kulturni centar Sretenje', 'Zagrebška cesta 20', '2000 Maribor']);
+      expect(Number(lines[19])).toBe(lines.slice(0, 19).join('').length + 19);
+      expect(gas.ctx.iso88592Bytes_('ČčŠšŽžĆćĐđ')).toEqual([0xc8, 0xe8, 0xa9, 0xb9, 0xae, 0xbe, 0xc6, 0xe6, 0xd0, 0xf0]);
+    });
+
+    it('bez UPN QR koda kad račun nije slovenački ili nedostaje mesto primaoca', () => {
+      setSetting('IBAN', 'AT61 1904 3002 3457 3201');
+      addRow({ number: '27001', status: 'NOVA', email: 'ana@primer.si', fullName: 'Ana', amount: 70, locale: 'sr' });
+      gas.ctx.sendPaymentInstructionsFor_('27001');
+      expect(Object.keys(gas.outbox[0].inlineImages!)).toEqual(['sblogo']);
+      expect(gas.outbox[0].body).not.toContain('Referenca primaoca');
+      expect(gas.ctx.upnPayee_('Kulturni centar Sretenje')).toBeNull();
+    });
+
     it('ne šalje instrukcije za plaćene, istekle i otkazane', () => {
       const rows = { '27001': 'PLAĆENO', '27002': 'ISTEKLO', '27003': 'OTKAZANO' };
       for (const [number, status] of Object.entries(rows)) addRow({ number, status, email: 'a@b.si', amount: 100 });

@@ -918,7 +918,8 @@ const MAIL = {
     greeting: function (n) { return 'Poštovani/a ' + n + ','; },
     signoff: ['Srdačan pozdrav,', 'Kulturni centar Sretenje'],
     tickets: { label: 'Ulaznica', of: 'od', code: 'Kod' },
-    labels: { number: 'Broj rezervacije', ticketType: 'Tip ulaznice', ticketCount: 'Broj ulaznica', guests: 'Gosti', note: 'Napomena', diet: 'Alergije', amount: 'Iznos za uplatu', deadline: 'Rok za uplatu', payee: 'Primalac', iban: 'IBAN', bic: 'BIC/SWIFT', bank: 'Banka', purpose: 'Svrha uplate' },
+    upn: { title: 'Plaćanje QR kodom', text: 'Skenirajte kod u aplikaciji svoje banke (UPN QR, za račune u Sloveniji) — primalac, iznos, rok, referenca i svrha se popunjavaju sami.' },
+    labels: { number: 'Broj rezervacije', ticketType: 'Tip ulaznice', ticketCount: 'Broj ulaznica', guests: 'Gosti', note: 'Napomena', diet: 'Alergije', amount: 'Iznos za uplatu', deadline: 'Rok za uplatu', payee: 'Primalac', iban: 'IBAN', bic: 'BIC/SWIFT', bank: 'Banka', purpose: 'Svrha uplate', reference: 'Referenca primaoca' },
     received: {
       subject: function (n) { return 'Ulaznice za prvi Sretenjski bal — rezervacija ' + n; },
       title: 'Ulaznice za prvi Sretenjski bal',
@@ -964,7 +965,8 @@ const MAIL = {
     greeting: function (n) { return 'Spoštovani/-a ' + n + ','; },
     signoff: ['Lep pozdrav,', 'Kulturni center Sretenje'],
     tickets: { label: 'Vstopnica', of: 'od', code: 'Koda' },
-    labels: { number: 'Številka rezervacije', ticketType: 'Vrsta vstopnice', ticketCount: 'Število vstopnic', guests: 'Gostje', note: 'Opomba', diet: 'Alergije', amount: 'Znesek za plačilo', deadline: 'Rok plačila', payee: 'Prejemnik', iban: 'IBAN', bic: 'BIC/SWIFT', bank: 'Banka', purpose: 'Namen plačila' },
+    upn: { title: 'Plačilo s kodo QR', text: 'Kodo skenirajte v mobilni banki (UPN QR) — prejemnik, znesek, rok, referenca in namen se izpolnijo sami.' },
+    labels: { number: 'Številka rezervacije', ticketType: 'Vrsta vstopnice', ticketCount: 'Število vstopnic', guests: 'Gostje', note: 'Opomba', diet: 'Alergije', amount: 'Znesek za plačilo', deadline: 'Rok plačila', payee: 'Prejemnik', iban: 'IBAN', bic: 'BIC/SWIFT', bank: 'Banka', purpose: 'Namen plačila', reference: 'Referenca prejemnika' },
     received: {
       subject: function (n) { return 'Vstopnice za prvi Sretenjski bal — rezervacija ' + n; },
       title: 'Vstopnice za prvi Sretenjski bal',
@@ -1010,7 +1012,8 @@ const MAIL = {
     greeting: function (n) { return 'Dear ' + n + ','; },
     signoff: ['Kind regards,', 'Kulturni centar Sretenje'],
     tickets: { label: 'Ticket', of: 'of', code: 'Code' },
-    labels: { number: 'Reservation number', ticketType: 'Ticket type', ticketCount: 'Number of tickets', guests: 'Guests', note: 'Note', diet: 'Allergies', amount: 'Amount due', deadline: 'Payment deadline', payee: 'Payee', iban: 'IBAN', bic: 'BIC/SWIFT', bank: 'Bank', purpose: 'Payment reference' },
+    upn: { title: 'Pay by QR code', text: 'Scan the code in your banking app (UPN QR, for accounts at Slovenian banks) — payee, amount, due date, reference and purpose are filled in automatically.' },
+    labels: { number: 'Reservation number', ticketType: 'Ticket type', ticketCount: 'Number of tickets', guests: 'Guests', note: 'Note', diet: 'Allergies', amount: 'Amount due', deadline: 'Payment deadline', payee: 'Payee', iban: 'IBAN', bic: 'BIC/SWIFT', bank: 'Bank', purpose: 'Payment reference', reference: 'Creditor reference' },
     received: {
       subject: function (n) { return 'Tickets for the first Sretenjski bal — reservation ' + n; },
       title: 'Tickets for the first Sretenjski bal',
@@ -1097,18 +1100,25 @@ function sendGuestMail_(kind, r, settings, extra) {
       if (settings.bank) details.push([m.labels.bank, settings.bank]);
     }
     details.push([m.labels.purpose, 'Sretenjski bal ' + n]);
+    if (paymentDetailsReady_(settings) && upnIban_(settings.iban)) details.push([m.labels.reference, 'SI00 ' + n]);
   }
   const outro = k.outro(n, x);
   if (kind === 'instructions' && settings.paymentNote) outro.splice(1, 0, settings.paymentNote);
 
   const tickets = kind === 'paid' && x.tickets && x.tickets.length ? x.tickets : null;
+  // UPN QR za uplatu (instrukcije i podsetnik), samo kad su podaci za uplatu pravi i potpuni.
+  const upn = kind === 'instructions' || kind === 'reminder'
+    ? upnQrFor_(r, settings, kind === 'instructions' ? x.deadline : x.expiresOn)
+    : null;
+  const blocks = tickets ? ticketMailBlocks_(tickets, lang, m.tickets) : upn ? [upnMailBlock_(m.upn)] : null;
+  const images = tickets ? ticketQrImages_(tickets) : upn ? { upnqr: upn } : null;
   const mail = renderMail_({
     title: k.title,
     greeting: m.greeting(String(r.fullName).trim()),
     intro: kind === 'paid' && !tickets ? k.intro.slice(0, 1) : k.intro,
     highlight: [m.labels.number, n],
     details: details,
-    tickets: tickets ? ticketMailBlocks_(tickets, lang, m.tickets) : null,
+    tickets: blocks,
     outro: outro,
     signoff: m.signoff,
   });
@@ -1118,7 +1128,7 @@ function sendGuestMail_(kind, r, settings, extra) {
     body: mail.text,
     htmlBody: mail.html,
     replyTo: settings.replyTo,
-    inlineImages: tickets ? ticketQrImages_(tickets) : null,
+    inlineImages: images,
   });
 }
 
@@ -1670,6 +1680,106 @@ function checkin_(req) {
   } finally {
     lock.releaseLock();
   }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// UPN QR — QR kod za uplatu (standard Združenja bank Slovenije, skeniraju ga slovenačke banke)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Šifra namene uplate u UPN (OTHR = ostalo). */
+const UPN_PURPOSE_CODE = 'OTHR';
+
+/** IBAN bez razmaka ako je slovenački (UPN važi za uplate na račune u Sloveniji), inače ''. */
+function upnIban_(iban) {
+  const v = String(iban || '').replace(/\s+/g, '').toUpperCase();
+  return /^SI56\d{15}$/.test(v) ? v : '';
+}
+
+/** „Naziv, ulica i broj, 2000 Maribor" → { name, street, city }; bez mesta UPN nije ispravan. */
+function upnPayee_(payee) {
+  const parts = String(payee || '').split(',').map(function (p) { return p.trim(); }).filter(Boolean);
+  if (parts.length < 2) return null;
+  return { name: parts[0], street: parts.length > 2 ? parts.slice(1, -1).join(', ') : '', city: parts[parts.length - 1] };
+}
+
+/**
+ * Sadržaj UPN QR koda: 19 polja odvojenih novim redom, kontrolna suma (dužina svih polja + 19) i prazno rezervno polje.
+ * Iznos u centima, 11 cifara; datum dd.mm.gggg; referenca bez razmaka (SI00 + broj rezervacije).
+ */
+function upnText_(d) {
+  const cut = function (v, n) { return String(v || '').replace(/[\r\n]+/g, ' ').trim().slice(0, n); };
+  const fields = [
+    'UPNQR', '', '', '', '',
+    cut(d.payerName, 33), '', '',
+    String(Math.round(Number(d.amount) * 100)).padStart(11, '0'),
+    '', '',
+    UPN_PURPOSE_CODE,
+    cut(d.purpose, 42),
+    d.dueDate,
+    d.iban,
+    d.reference,
+    cut(d.payee.name, 33), cut(d.payee.street, 33), cut(d.payee.city, 33),
+  ];
+  const sum = fields.reduce(function (n, f) { return n + f.length; }, 0) + 19;
+  return fields.concat([String(sum).padStart(3, '0'), '']).join('\n');
+}
+
+/** Znakovi u kodnoj strani ISO-8859-2 (kako traži UPN); slova kojih tamo nema postaju „?". */
+const ISO_8859_2_EXTRA = { 'Č': 0xC8, 'č': 0xE8, 'Ć': 0xC6, 'ć': 0xE6, 'Š': 0xA9, 'š': 0xB9, 'Ž': 0xAE, 'ž': 0xBE, 'Đ': 0xD0, 'đ': 0xF0,
+  'Ä': 0xC4, 'ä': 0xE4, 'Ö': 0xD6, 'ö': 0xF6, 'Ü': 0xDC, 'ü': 0xFC, 'ß': 0xDF, 'É': 0xC9, 'é': 0xE9, 'Á': 0xC1, 'á': 0xE1, 'Í': 0xCD, 'í': 0xED, 'Ó': 0xD3, 'ó': 0xF3, 'Ú': 0xDA, 'ú': 0xFA };
+
+function iso88592Bytes_(text) {
+  const out = [];
+  for (const ch of String(text)) {
+    const c = ch.charCodeAt(0);
+    out.push(c < 0x80 ? c : ISO_8859_2_EXTRA[ch] || 0x3F);
+  }
+  return out;
+}
+
+/** UPN QR kao GIF slika (verzija 15, nivo korekcije M, ECI 4 = ISO-8859-2). */
+function upnQrBlob_(text) {
+  const segs = [qrcodegen.QrSegment.makeEci(4), qrcodegen.QrSegment.makeBytes(iso88592Bytes_(text))];
+  const upn = qrcodegen.QrCode.encodeSegments(segs, qrcodegen.QrCode.Ecc.MEDIUM, 15, 15, -1, false);
+  // Sliku crta prva biblioteka (ima GIF), sa modulima UPN koda.
+  const img = qrcode(1, 'L');
+  img.addData('x');
+  img.make();
+  img.getModuleCount = function () { return upn.size; };
+  img.isDark = function (row, col) { return upn.getModule(col, row); };
+  const dataUrl = img.createDataURL(4, 16);
+  return Utilities.newBlob(Utilities.base64Decode(dataUrl.split(',')[1]), 'image/gif', 'upn-qr.gif');
+}
+
+/** UPN QR za rezervaciju, ili null kad podaci za uplatu nisu potpuni (tada mejl ide bez QR koda). */
+function upnQrFor_(r, settings, dueDate) {
+  const iban = upnIban_(settings.iban);
+  const payee = upnPayee_(settings.payee);
+  if (!paymentDetailsReady_(settings) || !iban || !payee || !(Number(r.amount) > 0) || !/^\d\d\.\d\d\.\d{4}$/.test(String(dueDate || ''))) return null;
+  const n = String(r.number).trim();
+  return upnQrBlob_(upnText_({
+    payerName: r.fullName,
+    amount: r.amount,
+    purpose: 'Sretenjski bal ' + n,
+    dueDate: dueDate,
+    iban: iban,
+    reference: 'SI00' + n,
+    payee: payee,
+  }));
+}
+
+function upnMailBlock_(labels) {
+  const esc = function (s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); };
+  return {
+    text: labels.title + ': ' + labels.text,
+    html:
+      '<table role="presentation" style="width:100%;border-collapse:collapse;margin:0 0 22px;border:1px solid #c9a96b;background-color:#ffffff;background-image:linear-gradient(#ffffff,#ffffff)">' +
+      '<tr><td style="padding:20px;text-align:center">' +
+      '<p style="margin:0 0 6px;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#a07a35">' + esc(labels.title) + '</p>' +
+      '<img src="cid:upnqr" width="260" height="260" alt="UPN QR" style="display:block;margin:8px auto;border:0;width:260px;height:260px">' +
+      '<p style="margin:8px 0 0;font-size:13px;line-height:1.5;color:#5b4f48">' + esc(labels.text) + '</p>' +
+      '</td></tr></table>',
+  };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
