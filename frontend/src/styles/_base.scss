@@ -134,15 +134,3 @@ ul {
   }
 }
 
-// Štampa (npr. ulaznice): samo sadržaj stranice, bez zaglavlja, podnožja i boja pozadine.
-@media print {
-  app-header,
-  app-footer,
-  .skip-link {
-    display: none !important;
-  }
-
-  body {
-    background: #fff !important;
-  }
-}

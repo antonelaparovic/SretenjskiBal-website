@@ -161,7 +161,6 @@ const SETTINGS = [
   ['BIC', 'TODO: BIC/SWIFT banke', 'BIC/SWIFT (opciono — obrišite ako nije potreban).'],
   ['BANK', 'TODO: naziv banke', 'Naziv banke (opciono — obrišite ako nije potreban).'],
   ['PAYMENT_NOTE', '', 'Dodatna rečenica u instrukcijama za uplatu (opciono).'],
-  ['SITE_URL', 'https://sretenjskibal.si', 'Adresa sajta — za dugme „Otvorite ulaznice" u mejlu sa ulaznicama.'],
   ['SCANNER_PIN', '', 'PIN za stranicu za skeniranje ulaznica na ulazu (sretenjskibal.si/ulaz), najmanje 6 cifara. Dok je prazno, skeniranje je isključeno. Recite ga samo ljudima na ulazu.'],
 ];
 
@@ -651,7 +650,6 @@ function normalizeSettings_(raw) {
     bic: text('BIC'),
     bank: text('BANK'),
     paymentNote: text('PAYMENT_NOTE'),
-    siteUrl: String(get('SITE_URL')).trim().replace(/\/+$/, ''),
     scannerPin: text('SCANNER_PIN'),
   };
 }
@@ -906,7 +904,7 @@ const MAIL = {
   sr: {
     greeting: function (n) { return 'Poštovani/a ' + n + ','; },
     signoff: ['Srdačan pozdrav,', 'Organizacioni tim Sretenjskog bala'],
-    tickets: { label: 'Ulaznica', of: 'od', guest: 'Gost', open: 'Otvorite ulaznice za čuvanje i štampu', code: 'Kod' },
+    tickets: { label: 'Ulaznica', of: 'od', code: 'Kod' },
     labels: { number: 'Broj rezervacije', ticketType: 'Tip ulaznice', ticketCount: 'Broj ulaznica', diet: 'Alergije', amount: 'Iznos za uplatu', deadline: 'Rok za uplatu', payee: 'Primalac', iban: 'IBAN', bic: 'BIC/SWIFT', bank: 'Banka', purpose: 'Svrha uplate' },
     received: {
       subject: function (n) { return 'Ulaznice za prvi Sretenjski bal — rezervacija ' + n; },
@@ -925,7 +923,6 @@ const MAIL = {
         return [
           'Molimo Vas da uplatu izvršite najkasnije do ' + x.deadline + ' i da u svrsi uplate obavezno navedete „Sretenjski bal ' + n + '", kako bismo uplatu povezali sa Vašom rezervacijom.',
           'Kada uplatu evidentiramo na izvodu, poslaćemo Vam potvrdu.',
-          'Ako imate pitanja, samo odgovorite na ovaj mejl.',
         ];
       },
     },
@@ -947,13 +944,13 @@ const MAIL = {
         'Potvrđujemo da je uplata za Vašu rezervaciju evidentirana. Hvala Vam!',
         'U nastavku su Vaše ulaznice, po jedna za svakog gosta. Na ulazu je dovoljno pokazati QR kod sa telefona; svaki kod važi za jedan ulazak.',
       ],
-      outro: function () { return ['Radujemo se Vašem dolasku na Sretenjski bal.', 'Ako imate pitanja, samo odgovorite na ovaj mejl.']; },
+      outro: function () { return ['Radujemo se Vašem dolasku na Sretenjski bal.']; },
     },
   },
   sl: {
     greeting: function (n) { return 'Spoštovani/-a ' + n + ','; },
     signoff: ['Lep pozdrav,', 'Organizacijska ekipa Sretenjskega bala'],
-    tickets: { label: 'Vstopnica', of: 'od', guest: 'Gost', open: 'Odprite vstopnice za shranjevanje in tiskanje', code: 'Koda' },
+    tickets: { label: 'Vstopnica', of: 'od', code: 'Koda' },
     labels: { number: 'Številka rezervacije', ticketType: 'Vrsta vstopnice', ticketCount: 'Število vstopnic', diet: 'Alergije', amount: 'Znesek za plačilo', deadline: 'Rok plačila', payee: 'Prejemnik', iban: 'IBAN', bic: 'BIC/SWIFT', bank: 'Banka', purpose: 'Namen plačila' },
     received: {
       subject: function (n) { return 'Vstopnice za prvi Sretenjski bal — rezervacija ' + n; },
@@ -972,7 +969,6 @@ const MAIL = {
         return [
           'Prosimo, da plačilo izvedete najpozneje do ' + x.deadline + ' in v namenu plačila obvezno navedete »Sretenjski bal ' + n + '«, da ga bomo lahko povezali z vašo rezervacijo.',
           'Ko bo plačilo vidno na izpisku, Vam bomo poslali potrditev.',
-          'Če imate vprašanja, preprosto odgovorite na to sporočilo.',
         ];
       },
     },
@@ -994,13 +990,13 @@ const MAIL = {
         'Potrjujemo, da je plačilo za Vašo rezervacijo evidentirano. Hvala!',
         'Spodaj so Vaše vstopnice, po ena za vsakega gosta. Ob vstopu zadošča, da pokažete QR kodo na telefonu; vsaka koda velja za en vstop.',
       ],
-      outro: function () { return ['Veselimo se vašega obiska na Sretenjskem balu.', 'Če imate vprašanja, preprosto odgovorite na to sporočilo.']; },
+      outro: function () { return ['Veselimo se Vašega obiska na Sretenjskem balu.']; },
     },
   },
   en: {
     greeting: function (n) { return 'Dear ' + n + ','; },
     signoff: ['Kind regards,', 'The Sretenjski bal organising team'],
-    tickets: { label: 'Ticket', of: 'of', guest: 'Guest', open: 'Open your tickets to save or print', code: 'Code' },
+    tickets: { label: 'Ticket', of: 'of', code: 'Code' },
     labels: { number: 'Reservation number', ticketType: 'Ticket type', ticketCount: 'Number of tickets', diet: 'Allergies', amount: 'Amount due', deadline: 'Payment deadline', payee: 'Payee', iban: 'IBAN', bic: 'BIC/SWIFT', bank: 'Bank', purpose: 'Payment reference' },
     received: {
       subject: function (n) { return 'Tickets for the first Sretenjski bal — reservation ' + n; },
@@ -1019,7 +1015,6 @@ const MAIL = {
         return [
           'Please make the payment by ' + x.deadline + ' and be sure to use the payment reference "Sretenjski bal ' + n + '" so we can match it to your reservation.',
           'Once the payment appears on our bank statement, we will send you a confirmation.',
-          'If you have any questions, simply reply to this email.',
         ];
       },
     },
@@ -1041,7 +1036,7 @@ const MAIL = {
         'We confirm that the payment for your reservation has been recorded. Thank you!',
         'Below are your tickets, one for each guest. At the entrance, simply show the QR code on your phone; each code is valid for one entry.',
       ],
-      outro: function () { return ['We look forward to welcoming you at Sretenjski bal.', 'If you have any questions, simply reply to this email.']; },
+      outro: function () { return ['We look forward to welcoming you at Sretenjski bal.']; },
     },
   },
 };
@@ -1096,7 +1091,6 @@ function sendGuestMail_(kind, r, settings, extra) {
     highlight: [m.labels.number, n],
     details: details,
     tickets: tickets ? ticketMailBlocks_(tickets, lang, m.tickets) : null,
-    button: tickets ? { label: m.tickets.open, url: ticketPageUrl_(settings, lang, n, tickets) } : null,
     outro: outro,
     signoff: m.signoff,
   });
@@ -1242,7 +1236,6 @@ function renderMail_(m) {
     .concat(m.details.map(function (d) { return d[0] + ':' + (String(d[1]).indexOf('\n') >= 0 ? '\n' : ' ') + d[1]; }))
     .concat([''])
     .concat(m.tickets ? m.tickets.map(function (t) { return t.text; }).concat(['']) : [])
-    .concat(m.button ? [m.button.label + ':', m.button.url, ''] : [])
     .concat(m.outro)
     .concat(m.signoff.length ? [''].concat(m.signoff) : [])
     .join('\n');
@@ -1269,9 +1262,6 @@ function renderMail_(m) {
     '<p style="margin:0 0 20px;font-family:Georgia,serif;font-size:36px;color:#5a1723">' + esc(m.highlight[1]) + '</p>' +
     '<table style="border-collapse:collapse;margin:0 0 20px;border-top:1px solid #b49a63;width:100%">' + rows + '</table>' +
     (m.tickets ? m.tickets.map(function (t) { return t.html; }).join('') : '') +
-    (m.button
-      ? '<p style="margin:8px 0 28px;text-align:center"><a href="' + esc(m.button.url) + '" style="display:inline-block;padding:13px 26px;background:#5a1723;color:#f6f1e8;text-decoration:none;font-size:13px;letter-spacing:.14em;text-transform:uppercase">' + esc(m.button.label) + '</a></p>'
-      : '') +
     m.outro.map(p).join('') +
     (m.signoff.length ? '<p style="margin:24px 0 0">' + m.signoff.map(esc).join('<br>') + '</p>' : '') +
     '</div></div></div>';
@@ -1456,16 +1446,6 @@ function ticketMailBlocks_(tickets, lang, labels) {
         '</td></tr></table>',
     };
   });
-}
-
-/**
- * Link ka stranici sa ulaznicama na sajtu (lepo za čuvanje i štampu). Podaci su u delu adrese posle „#",
- * koji browser ne šalje serveru; QR kod na stranici se svejedno proverava na ulazu.
- */
-function ticketPageUrl_(settings, lang, number, tickets) {
-  const data = { r: number, t: tickets.map(function (t) { return [t.code, t.name, t.type]; }) };
-  const hash = Utilities.base64EncodeWebSafe(JSON.stringify(data), Utilities.Charset.UTF_8).replace(/=+$/, '');
-  return settings.siteUrl + (lang === 'sr' ? '' : '/' + lang) + '/ulaznice#' + hash;
 }
 
 /** Broj ulaznica i ulazaka, za zaglavlje stranice za skeniranje. */

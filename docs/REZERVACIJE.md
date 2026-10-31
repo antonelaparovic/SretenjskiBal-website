@@ -238,9 +238,8 @@ podsetnik niti oslobađati mesto.
 2. **Sretenjski bal → Pošalji potvrdu uplate (izabrani red)** → **Da**.
 3. Upisuje se **Datum slanja potvrde uplate**. Ponovni pokušaj neće poslati drugu potvrdu.
    Ako baš treba ponovo poslati, obrišite taj datum.
-4. Uz potvrdu gost dobija **ulaznice**: po jednu za svakog gosta iz rezervacije, sa imenom, tipom i QR kodom,
-   plus dugme koje otvara iste ulaznice na sajtu u izgledu štampane karte (za čuvanje kao PDF ili štampu).
-   Sve ulaznice idu osobi koja je rezervisala. Ulaznice se upisuju u tab **Ulaznice** (jedan red po gostu).
+4. U potvrdi gost dobija **QR kodove**: po jedan za svakog gosta iz rezervacije, sa imenom i tipom ulaznice.
+   Svi kodovi idu osobi koja je rezervisala. Ulaznice se upisuju u tab **Ulaznice** (jedan red po gostu).
    Ponovno slanje (posle brisanja datuma) šalje iste kodove i ne pravi duple redove.
 
 ## Ulaz na balu — skeniranje ulaznica

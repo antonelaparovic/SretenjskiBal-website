@@ -564,23 +564,20 @@ describe('Apps Script (Code.gs)', () => {
         expect(mail.body).toContain('Ulaznica 2 od 3 — Maja Anić (Galerija)');
         expect(mail.body).toContain('Ulaznica 3 od 3 — Gost 3 · Antonela Parović (Galerija)');
         expect(mail.htmlBody).toContain('cid:qr3');
-        const link = /https:\/\/sretenjskibal\.si\/ulaznice#([A-Za-z0-9_-]+)/.exec(mail.body)!;
-        const data = JSON.parse(Buffer.from(link[1], 'base64url').toString('utf8'));
-        expect(data.r).toBe('27006');
-        expect(data.t.map((t: string[]) => t[1])).toEqual(['Antonela Parović', 'Maja Anić', 'Gost 3 · Antonela Parović']);
+        expect(mail.body).not.toContain('ulaznice#');
+        expect(mail.body).not.toContain('odgovorite na ovaj mejl');
         expect(tickets().slice(1).map((r) => [r[1], r[2], r[3]])).toEqual([
           ['27006', 1, 'Antonela Parović'], ['27006', 2, 'Maja Anić'], ['27006', 3, 'Gost 3 · Antonela Parović'],
         ]);
         expect(String(tickets()[1][0])).toMatch(/^27006-1-[0-9A-HJKMNP-TV-Z]{8}$/);
       });
 
-      it('ponovno slanje ne pravi duple ulaznice, a link je na jeziku rezervacije', () => {
+      it('ponovno slanje ne pravi duple ulaznice, a mejl je na jeziku rezervacije', () => {
         const row = paid({ locale: 'en' });
         gas.ctx.sendPaymentConfirmationFor_('27006');
         res.data[row - 1][H.indexOf(COL.paymentConfirmedAt)] = '';
         gas.ctx.sendPaymentConfirmationFor_('27006');
         expect(tickets()).toHaveLength(4);
-        expect(gas.outbox[1].body).toContain('https://sretenjskibal.si/en/ulaznice#');
         expect(gas.outbox[1].body).toContain('Ticket 1 of 3 — Antonela Parović (Gallery)');
       });
 
