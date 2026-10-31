@@ -538,6 +538,8 @@ describe('Apps Script (Code.gs)', () => {
       const rows = { '27001': 'PLAĆENO', '27002': 'ISTEKLO', '27003': 'OTKAZANO' };
       for (const [number, status] of Object.entries(rows)) addRow({ number, status, email: 'a@b.si', amount: 100 });
       for (const n of Object.keys(rows)) expect(() => gas.ctx.sendPaymentInstructionsFor_(n)).toThrow(/ne šalju/);
+      addRow({ number: '27004', status: 'NOVA', email: 'a@b.si', amount: 100, paidAt: new Date() });
+      expect(() => gas.ctx.sendPaymentInstructionsFor_('27004')).toThrow(/Datum evidentirane uplate" već postoji datum/);
       expect(gas.outbox).toHaveLength(0);
     });
 

@@ -849,8 +849,12 @@ function processDeadline_(number, action, settings, tz, today, report) {
 /** Zašto instrukcije ne mogu da se pošalju, ili null. */
 function instructionsBlocker_(r, settings) {
   const status = normStatus_(r.status);
-  if (isPaid_(r) || [STATUS.EXPIRED, STATUS.CANCELLED].indexOf(status) >= 0) {
-    return 'Rezervacija ima status ' + (status || 'PLAĆENO') + ' — instrukcije se ne šalju.';
+  if (status === STATUS.PAID || [STATUS.EXPIRED, STATUS.CANCELLED].indexOf(status) >= 0) {
+    return 'Rezervacija ima status ' + status + ' — instrukcije se ne šalju.';
+  }
+  if (isPaid_(r)) {
+    return 'U koloni „' + COL.paidAt + '" već postoji datum, pa se rezervacija vodi kao plaćena — instrukcije se ne šalju. ' +
+      'Ako uplata nije stigla, obrišite taj datum (i datum u koloni „' + COL.paymentConfirmedAt + '"), pa pokušajte ponovo.';
   }
   if (!(Number(r.amount) > 0)) return 'Upišite iznos u kolonu „' + COL.amount + '".';
   if (!settings.payee || !settings.iban) return 'U tabu „' + SHEET_SETTINGS + '" popunite PAYEE i IBAN.';
