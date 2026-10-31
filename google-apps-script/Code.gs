@@ -8,6 +8,10 @@
  *  - prima poruke iz kontakt forme (tab „Poruke" + mejl organizatoru)
  *  - meni „Sretenjski bal": instrukcije za uplatu, potvrda uplate, ručna provera rokova
  *  - dnevna provera rokova: podsetnik posle roka za uplatu, ISTEKLO posle perioda tolerancije
+ *  - ulaznice: uz potvrdu uplate gost dobija po jednu ulaznicu sa QR kodom za svakog gosta (tab „Ulaznice"),
+ *    a na ulazu se kodovi skeniraju stranicom /ulaz na sajtu (akcija „checkin", zaštićena PIN-om)
+ *
+ * Projekat ima dva fajla: Code.gs (ovaj) i QrCode.gs (biblioteka za crtanje QR kodova).
  *
  * Sajt je statički i šalje direktno ovoj skripti, pa je skripta javna: svaka rezervacija i poruka
  * prolazi Cloudflare Turnstile proveru („da li je čovek"), proveru podataka i ograničenje broja slanja.
@@ -20,6 +24,7 @@ const SHEET_RESERVATIONS = 'Rezervacije';
 const SHEET_SETTINGS = 'Podešavanja';
 const SHEET_STATS = 'Statistika';
 const SHEET_MESSAGES = 'Poruke';
+const SHEET_TICKETS = 'Ulaznice';
 const TIME_ZONE = 'Europe/Ljubljana';
 
 const STATUS = {
@@ -156,6 +161,8 @@ const SETTINGS = [
   ['BIC', 'TODO: BIC/SWIFT banke', 'BIC/SWIFT (opciono — obrišite ako nije potreban).'],
   ['BANK', 'TODO: naziv banke', 'Naziv banke (opciono — obrišite ako nije potreban).'],
   ['PAYMENT_NOTE', '', 'Dodatna rečenica u instrukcijama za uplatu (opciono).'],
+  ['SITE_URL', 'https://sretenjskibal.si', 'Adresa sajta — za dugme „Otvorite ulaznice" u mejlu sa ulaznicama.'],
+  ['SCANNER_PIN', '', 'PIN za stranicu za skeniranje ulaznica na ulazu (sretenjskibal.si/ulaz), najmanje 6 cifara. Dok je prazno, skeniranje je isključeno. Recite ga samo ljudima na ulazu.'],
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -178,6 +185,7 @@ function doPost(e) {
     if (req.action === 'status') return json_(getStatus_());
     if (req.action === 'create') return json_(createReservation_(req.reservation || {}, req.captcha));
     if (req.action === 'contact') return json_(sendContact_(req.contact || {}, req.captcha));
+    if (req.action === 'checkin') return json_(checkin_(req));
     return json_({ ok: false, code: 'BAD_REQUEST' });
   } catch (err) {
     console.error('doPost greška: ' + err.message);
@@ -643,6 +651,8 @@ function normalizeSettings_(raw) {
     bic: text('BIC'),
     bank: text('BANK'),
     paymentNote: text('PAYMENT_NOTE'),
+    siteUrl: String(get('SITE_URL')).trim().replace(/\/+$/, ''),
+    scannerPin: text('SCANNER_PIN'),
   };
 }
 
@@ -880,7 +890,8 @@ function sendPaymentConfirmationFor_(number) {
     if (normStatus_(r.status) !== STATUS.PAID) throw new Error('Prvo promenite status u ' + STATUS.PAID + '.');
     if (parseDate_(r.paymentConfirmedAt)) throw new Error('Potvrda uplate je već poslata. Da biste je poslali ponovo, obrišite datum u koloni „' + COL.paymentConfirmedAt + '".');
     if (!String(r.email || '').trim()) throw new Error('Rezervacija nema e-mail adresu.');
-    sendGuestMail_('paid', r, settings);
+    const tickets = issueTickets_(r);
+    sendGuestMail_('paid', r, settings, { tickets: tickets });
     const fields = { paymentConfirmedAt: new Date() };
     if (!parseDate_(r.paidAt)) fields.paidAt = new Date();
     return fields;
@@ -895,6 +906,7 @@ const MAIL = {
   sr: {
     greeting: function (n) { return 'Poštovani/a ' + n + ','; },
     signoff: ['Srdačan pozdrav,', 'Organizacioni tim Sretenjskog bala'],
+    tickets: { label: 'Ulaznica', of: 'od', guest: 'Gost', open: 'Otvorite ulaznice za čuvanje i štampu', code: 'Kod' },
     labels: { number: 'Broj rezervacije', ticketType: 'Tip ulaznice', ticketCount: 'Broj ulaznica', diet: 'Alergije', amount: 'Iznos za uplatu', deadline: 'Rok za uplatu', payee: 'Primalac', iban: 'IBAN', bic: 'BIC/SWIFT', bank: 'Banka', purpose: 'Svrha uplate' },
     received: {
       subject: function (n) { return 'Ulaznice za prvi Sretenjski bal — rezervacija ' + n; },
@@ -929,14 +941,19 @@ const MAIL = {
       },
     },
     paid: {
-      subject: function (n) { return 'Sretenjski bal — uplata za rezervaciju ' + n + ' je evidentirana'; },
-      intro: ['Potvrđujemo da je uplata za Vašu rezervaciju evidentirana. Hvala Vam!'],
+      subject: function (n) { return 'Vaše ulaznice za prvi Sretenjski bal — rezervacija ' + n; },
+      title: 'Vaše ulaznice za prvi Sretenjski bal',
+      intro: [
+        'Potvrđujemo da je uplata za Vašu rezervaciju evidentirana. Hvala Vam!',
+        'U nastavku su Vaše ulaznice, po jedna za svakog gosta. Na ulazu je dovoljno pokazati QR kod sa telefona; svaki kod važi za jedan ulazak.',
+      ],
       outro: function () { return ['Radujemo se Vašem dolasku na Sretenjski bal.', 'Ako imate pitanja, samo odgovorite na ovaj mejl.']; },
     },
   },
   sl: {
     greeting: function (n) { return 'Spoštovani/-a ' + n + ','; },
     signoff: ['Lep pozdrav,', 'Organizacijska ekipa Sretenjskega bala'],
+    tickets: { label: 'Vstopnica', of: 'od', guest: 'Gost', open: 'Odprite vstopnice za shranjevanje in tiskanje', code: 'Koda' },
     labels: { number: 'Številka rezervacije', ticketType: 'Vrsta vstopnice', ticketCount: 'Število vstopnic', diet: 'Alergije', amount: 'Znesek za plačilo', deadline: 'Rok plačila', payee: 'Prejemnik', iban: 'IBAN', bic: 'BIC/SWIFT', bank: 'Banka', purpose: 'Namen plačila' },
     received: {
       subject: function (n) { return 'Vstopnice za prvi Sretenjski bal — rezervacija ' + n; },
@@ -971,14 +988,19 @@ const MAIL = {
       },
     },
     paid: {
-      subject: function (n) { return 'Sretenjski bal — plačilo za rezervacijo ' + n + ' je evidentirano'; },
-      intro: ['Potrjujemo, da je plačilo za Vašo rezervacijo evidentirano. Hvala!'],
+      subject: function (n) { return 'Vaše vstopnice za prvi Sretenjski bal — rezervacija ' + n; },
+      title: 'Vaše vstopnice za prvi Sretenjski bal',
+      intro: [
+        'Potrjujemo, da je plačilo za Vašo rezervacijo evidentirano. Hvala!',
+        'Spodaj so Vaše vstopnice, po ena za vsakega gosta. Ob vstopu zadošča, da pokažete QR kodo na telefonu; vsaka koda velja za en vstop.',
+      ],
       outro: function () { return ['Veselimo se vašega obiska na Sretenjskem balu.', 'Če imate vprašanja, preprosto odgovorite na to sporočilo.']; },
     },
   },
   en: {
     greeting: function (n) { return 'Dear ' + n + ','; },
     signoff: ['Kind regards,', 'The Sretenjski bal organising team'],
+    tickets: { label: 'Ticket', of: 'of', guest: 'Guest', open: 'Open your tickets to save or print', code: 'Code' },
     labels: { number: 'Reservation number', ticketType: 'Ticket type', ticketCount: 'Number of tickets', diet: 'Allergies', amount: 'Amount due', deadline: 'Payment deadline', payee: 'Payee', iban: 'IBAN', bic: 'BIC/SWIFT', bank: 'Bank', purpose: 'Payment reference' },
     received: {
       subject: function (n) { return 'Tickets for the first Sretenjski bal — reservation ' + n; },
@@ -1013,8 +1035,12 @@ const MAIL = {
       },
     },
     paid: {
-      subject: function (n) { return 'Sretenjski bal — payment for reservation ' + n + ' received'; },
-      intro: ['We confirm that the payment for your reservation has been recorded. Thank you!'],
+      subject: function (n) { return 'Your tickets for the first Sretenjski bal — reservation ' + n; },
+      title: 'Your tickets for the first Sretenjski bal',
+      intro: [
+        'We confirm that the payment for your reservation has been recorded. Thank you!',
+        'Below are your tickets, one for each guest. At the entrance, simply show the QR code on your phone; each code is valid for one entry.',
+      ],
       outro: function () { return ['We look forward to welcoming you at Sretenjski bal.', 'If you have any questions, simply reply to this email.']; },
     },
   },
@@ -1062,12 +1088,15 @@ function sendGuestMail_(kind, r, settings, extra) {
   const outro = k.outro(n, x);
   if (kind === 'instructions' && settings.paymentNote) outro.splice(1, 0, settings.paymentNote);
 
+  const tickets = kind === 'paid' && x.tickets && x.tickets.length ? x.tickets : null;
   const mail = renderMail_({
     title: k.title,
     greeting: m.greeting(String(r.fullName).trim()),
-    intro: k.intro,
+    intro: kind === 'paid' && !tickets ? k.intro.slice(0, 1) : k.intro,
     highlight: [m.labels.number, n],
     details: details,
+    tickets: tickets ? ticketMailBlocks_(tickets, lang, m.tickets) : null,
+    button: tickets ? { label: m.tickets.open, url: ticketPageUrl_(settings, lang, n, tickets) } : null,
     outro: outro,
     signoff: m.signoff,
   });
@@ -1077,6 +1106,7 @@ function sendGuestMail_(kind, r, settings, extra) {
     body: mail.text,
     htmlBody: mail.html,
     replyTo: settings.replyTo,
+    inlineImages: tickets ? ticketQrImages_(tickets) : null,
   });
 }
 
@@ -1144,6 +1174,7 @@ function sendMail_(settings, m) {
   if (m.replyTo) options.replyTo = m.replyTo;
   if (m.htmlBody) options.htmlBody = m.htmlBody;
   if (m.htmlBody && m.htmlBody.indexOf('cid:' + MAIL_LOGO_CID) >= 0) options.inlineImages = mailLogo_();
+  if (m.inlineImages) options.inlineImages = Object.assign(options.inlineImages || {}, m.inlineImages);
   let from;
   if (settings.senderEmail && senderAliases_().indexOf(settings.senderEmail) >= 0) {
     options.from = settings.senderEmail;
@@ -1210,6 +1241,8 @@ function renderMail_(m) {
     .concat([m.highlight[0] + ': ' + m.highlight[1], ''])
     .concat(m.details.map(function (d) { return d[0] + ':' + (String(d[1]).indexOf('\n') >= 0 ? '\n' : ' ') + d[1]; }))
     .concat([''])
+    .concat(m.tickets ? m.tickets.map(function (t) { return t.text; }).concat(['']) : [])
+    .concat(m.button ? [m.button.label + ':', m.button.url, ''] : [])
     .concat(m.outro)
     .concat(m.signoff.length ? [''].concat(m.signoff) : [])
     .join('\n');
@@ -1235,10 +1268,277 @@ function renderMail_(m) {
     '<p style="margin:20px 0 4px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#5a1723">' + esc(m.highlight[0]) + '</p>' +
     '<p style="margin:0 0 20px;font-family:Georgia,serif;font-size:36px;color:#5a1723">' + esc(m.highlight[1]) + '</p>' +
     '<table style="border-collapse:collapse;margin:0 0 20px;border-top:1px solid #b49a63;width:100%">' + rows + '</table>' +
+    (m.tickets ? m.tickets.map(function (t) { return t.html; }).join('') : '') +
+    (m.button
+      ? '<p style="margin:8px 0 28px;text-align:center"><a href="' + esc(m.button.url) + '" style="display:inline-block;padding:13px 26px;background:#5a1723;color:#f6f1e8;text-decoration:none;font-size:13px;letter-spacing:.14em;text-transform:uppercase">' + esc(m.button.label) + '</a></p>'
+      : '') +
     m.outro.map(p).join('') +
     (m.signoff.length ? '<p style="margin:24px 0 0">' + m.signoff.map(esc).join('<br>') + '</p>' : '') +
     '</div></div></div>';
   return { text: text, html: html };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Ulaznice i QR kodovi
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Kolone taba „Ulaznice" — jedan red po gostu (ulaznici). Skripta ih traži po redosledu, ne menjati. */
+const TICKET_HEADERS = ['Kod ulaznice', 'Broj rezervacije', 'Redni broj', 'Gost', 'Tip ulaznice', 'Izdato', 'Ulazak', 'Skenirao'];
+const TICKET_COL = { code: 0, number: 1, index: 2, name: 3, type: 4, issuedAt: 5, enteredAt: 6, scannedBy: 7 };
+/** Početak sadržaja QR koda, da skener prepozna da je kod naš. */
+const TICKET_QR_PREFIX = 'SB:';
+/** Crockford base32 — bez slova koja liče na cifre (I, L, O, U), pa se kod lako prepisuje i ručno. */
+const BASE32_ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+/** Posle ovoliko pogrešnih PIN-ova u 10 minuta skeniranje se privremeno zaključava. */
+const MAX_PIN_FAILURES = 15;
+
+/**
+ * Tajni ključ kojim se potpisuju kodovi ulaznica (Svojstva skripte → TICKET_SECRET). Pravi se sam pri prvoj ulaznici.
+ * NE BRISATI i NE MENJATI posle slanja prvih ulaznica — već poslati QR kodovi bi prestali da važe.
+ */
+function ticketSecret_() {
+  const props = PropertiesService.getScriptProperties();
+  let secret = props.getProperty('TICKET_SECRET');
+  if (!secret) {
+    secret = Utilities.getUuid() + Utilities.getUuid();
+    props.setProperty('TICKET_SECRET', secret);
+  }
+  return secret;
+}
+
+function base32_(bytes, length) {
+  let bits = 0;
+  let value = 0;
+  let out = '';
+  for (let i = 0; i < bytes.length && out.length < length; i++) {
+    value = (value << 8) | (bytes[i] & 0xff);
+    bits += 8;
+    while (bits >= 5 && out.length < length) {
+      out += BASE32_ALPHABET[(value >>> (bits - 5)) & 31];
+      bits -= 5;
+    }
+    value &= (1 << bits) - 1;
+  }
+  return out;
+}
+
+/** Kod ulaznice, npr. 27006-2-K7QH3M9P: broj rezervacije, redni broj gosta i potpis koji se ne može pogoditi. */
+function ticketCode_(number, index) {
+  const base = String(number).trim() + '-' + index;
+  return base + '-' + base32_(Utilities.computeHmacSha256Signature(base, ticketSecret_()), 8);
+}
+
+/** Kod iz skenera ili ručnog unosa → { code, number, index } ako je potpis ispravan, inače null. */
+function parseTicketCode_(raw) {
+  let s = String(raw || '').trim().toUpperCase().replace(/\s+/g, '');
+  if (s.indexOf(TICKET_QR_PREFIX) === 0) s = s.slice(TICKET_QR_PREFIX.length);
+  const m = /^(\d{4,6})-(\d{1,3})-([0-9A-Z]{8})$/.exec(s);
+  if (!m) return null;
+  const sig = m[3].replace(/O/g, '0').replace(/[IL]/g, '1');
+  const expected = ticketCode_(m[1], Number(m[2]));
+  if (expected !== m[1] + '-' + Number(m[2]) + '-' + sig) return null;
+  return { code: expected, number: m[1], index: Number(m[2]) };
+}
+
+/** „Svečana" ×2 → ['Svečana', 'Svečana']; „Svečana ×2, Galerija ×1" → po jedan tip za svaku ulaznicu. */
+function ticketTypesFor_(ticketType, count) {
+  const text = String(ticketType || '').trim();
+  const out = [];
+  if (text.indexOf('×') >= 0) {
+    text.split(',').forEach(function (part) {
+      const m = /^\s*(.+?)\s*×\s*(\d+)\s*$/.exec(part);
+      if (m) for (let i = 0; i < Number(m[2]); i++) out.push(m[1]);
+    });
+  }
+  while (out.length < count) out.push(text.indexOf('×') >= 0 ? '' : text);
+  return out.slice(0, count);
+}
+
+/** Imena ostalih gostiju iz napomene („Gost 2: Ime Prezime, e-adresa, telefon"). */
+function guestNamesFromNote_(note) {
+  const names = {};
+  String(note || '').split('\n').forEach(function (line) {
+    const m = /^Gost (\d+): ([^,]+),/.exec(line.trim());
+    if (m) names[Number(m[1])] = m[2].trim();
+  });
+  return names;
+}
+
+/** Ulaznice za rezervaciju: prva glasi na kontakt osobu, ostale na goste iz forme. */
+function ticketsFor_(r) {
+  const number = String(r.number).trim();
+  const count = Math.max(1, parseInt(r.ticketCount, 10) || 1);
+  const types = ticketTypesFor_(r.ticketType, count);
+  const names = guestNamesFromNote_(r.note);
+  const holder = String(r.fullName || '').trim();
+  const out = [];
+  for (let i = 1; i <= count; i++) {
+    out.push({
+      index: i,
+      count: count,
+      number: number,
+      code: ticketCode_(number, i),
+      name: i === 1 ? holder : names[i] || 'Gost ' + i + ' · ' + holder,
+      type: types[i - 1],
+    });
+  }
+  return out;
+}
+
+function ticketsSheet_() {
+  const ss = spreadsheet_();
+  let sheet = ss.getSheetByName(SHEET_TICKETS);
+  if (!sheet) {
+    sheet = ss.insertSheet(SHEET_TICKETS);
+    sheet.getRange(1, 1, 1, TICKET_HEADERS.length).setValues([TICKET_HEADERS]).setFontWeight('bold').setBackground('#5a1723').setFontColor('#f6f1e8');
+    sheet.setFrozenRows(1);
+    sheet.setColumnWidth(1, 170);
+    sheet.setColumnWidth(4, 220);
+    sheet.setColumnWidth(6, 130);
+    sheet.setColumnWidth(7, 130);
+  }
+  return sheet;
+}
+
+/**
+ * Upisuje ulaznice rezervacije u tab „Ulaznice" (ponovno slanje ne pravi duplikate: postojeći red dobija
+ * ažurirano ime i tip, a vreme ulaska ostaje). Pozivati pod zaključavanjem (updateReservation_).
+ */
+function issueTickets_(r) {
+  const tickets = ticketsFor_(r);
+  const sheet = ticketsSheet_();
+  const values = sheet.getDataRange().getValues();
+  const rowByCode = {};
+  for (let i = 1; i < values.length; i++) rowByCode[String(values[i][TICKET_COL.code]).trim()] = i + 1;
+  const now = new Date();
+  tickets.forEach(function (t) {
+    const row = rowByCode[t.code];
+    if (row) {
+      sheet.getRange(row, TICKET_COL.name + 1, 1, 2).setValues([[safeCell_(t.name), safeCell_(t.type)]]);
+    } else {
+      sheet.appendRow([t.code, safeCell_(t.number), t.index, safeCell_(t.name), safeCell_(t.type), now, '', '']);
+    }
+  });
+  return tickets;
+}
+
+/** QR slika (GIF) za ulaznicu; sadržaj je „SB:" + kod. */
+function ticketQrBlob_(code, name) {
+  const qr = qrcode(0, 'M');
+  qr.addData(TICKET_QR_PREFIX + code);
+  qr.make();
+  const dataUrl = qr.createDataURL(8, 32);
+  return Utilities.newBlob(Utilities.base64Decode(dataUrl.split(',')[1]), 'image/gif', name);
+}
+
+function ticketQrImages_(tickets) {
+  const o = {};
+  tickets.forEach(function (t) { o['qr' + t.index] = ticketQrBlob_(t.code, 'ulaznica-' + t.code + '.gif'); });
+  return o;
+}
+
+/** Ulaznice u mejlu: kartica sa imenom, tipom i QR kodom za svakog gosta. */
+function ticketMailBlocks_(tickets, lang, labels) {
+  const esc = function (s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); };
+  return tickets.map(function (t) {
+    const head = labels.label + ' ' + t.index + ' ' + labels.of + ' ' + t.count;
+    const type = localizeTickets_(t.type, lang);
+    return {
+      text: head + ' — ' + t.name + (type ? ' (' + type + ')' : '') + ' — ' + labels.code + ': ' + t.code,
+      html:
+        '<table role="presentation" style="width:100%;border-collapse:separate;margin:0 0 18px;border:1px solid #c9a96b;outline:1px solid #c9a96b;outline-offset:3px;background:#ffffff">' +
+        '<tr><td style="padding:22px 20px 18px;text-align:center">' +
+        '<p style="margin:0 0 6px;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#a07a35">' + esc(head) + '</p>' +
+        '<p style="margin:0 0 4px;font-family:Georgia,serif;font-size:22px;line-height:1.25;color:#5a1723">' + esc(t.name) + '</p>' +
+        (type ? '<p style="margin:0 0 14px;font-family:Georgia,serif;font-style:italic;font-size:15px;color:#a07a35">' + esc(type) + '</p>' : '') +
+        '<img src="cid:qr' + t.index + '" width="200" height="200" alt="QR ' + esc(t.code) + '" style="display:block;margin:0 auto;border:0;width:200px;height:200px">' +
+        '<p style="margin:10px 0 0;font-family:Menlo,Consolas,monospace;font-size:13px;letter-spacing:.08em;color:#5b4f48">' + esc(t.code) + '</p>' +
+        '</td></tr></table>',
+    };
+  });
+}
+
+/**
+ * Link ka stranici sa ulaznicama na sajtu (lepo za čuvanje i štampu). Podaci su u delu adrese posle „#",
+ * koji browser ne šalje serveru; QR kod na stranici se svejedno proverava na ulazu.
+ */
+function ticketPageUrl_(settings, lang, number, tickets) {
+  const data = { r: number, t: tickets.map(function (t) { return [t.code, t.name, t.type]; }) };
+  const hash = Utilities.base64EncodeWebSafe(JSON.stringify(data), Utilities.Charset.UTF_8).replace(/=+$/, '');
+  return settings.siteUrl + (lang === 'sr' ? '' : '/' + lang) + '/ulaznice#' + hash;
+}
+
+/** Broj ulaznica i ulazaka, za zaglavlje stranice za skeniranje. */
+function ticketStats_(values) {
+  let entered = 0;
+  for (let i = 1; i < values.length; i++) if (values[i][TICKET_COL.enteredAt]) entered++;
+  return { entered: entered, total: Math.max(0, values.length - 1) };
+}
+
+function pinLocked_() {
+  return Number(CacheService.getScriptCache().get('pinFailures') || 0) >= MAX_PIN_FAILURES;
+}
+
+function pinFailed_() {
+  const cache = CacheService.getScriptCache();
+  cache.put('pinFailures', String(Number(cache.get('pinFailures') || 0) + 1), 600);
+}
+
+/**
+ * Skeniranje na ulazu. Bez koda samo proverava PIN (prijava na stranicu /ulaz).
+ * result: OK (ulaz dozvoljen, upisano vreme) | USED (već ušao) | NOT_PAID (rezervacija nije plaćena ili je otkazana)
+ *         | UNKNOWN (kod je ispravan, ali ulaznica nije izdata) | INVALID (kod nije naš ili je prepravljen)
+ */
+function checkin_(req) {
+  const settings = readSettings_();
+  if (!settings.scannerPin) return { ok: false, code: 'SCANNER_OFF' };
+  if (pinLocked_()) return { ok: false, code: 'LOCKED' };
+  if (String(req.pin || '').trim() !== settings.scannerPin) {
+    pinFailed_();
+    return { ok: false, code: 'BAD_PIN' };
+  }
+  const scannedBy = clean_(String(req.device || '')).slice(0, 40) || 'ulaz';
+  const sheet = ticketsSheet_();
+  if (!req.code) return { ok: true, stats: ticketStats_(sheet.getDataRange().getValues()) };
+
+  const parsed = parseTicketCode_(req.code);
+  if (!parsed) return { ok: true, result: 'INVALID', stats: ticketStats_(sheet.getDataRange().getValues()) };
+
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(20000)) return { ok: false, code: 'BUSY' };
+  try {
+    const values = sheet.getDataRange().getValues();
+    let row = -1;
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][TICKET_COL.code]).trim() === parsed.code) { row = i; break; }
+    }
+    const base = { ok: true, code: parsed.code, number: parsed.number, index: parsed.index };
+    if (row < 0) return Object.assign(base, { result: 'UNKNOWN', stats: ticketStats_(values) });
+    const v = values[row];
+    const info = Object.assign(base, { name: String(v[TICKET_COL.name]), type: String(v[TICKET_COL.type]) });
+
+    const t = openTable_();
+    const resRow = findRow_(t, parsed.number);
+    const status = resRow > 0 ? normStatus_(rowToObj_(t, t.rows[resRow - 2]).status) : '';
+    if (status !== STATUS.PAID) return Object.assign(info, { result: 'NOT_PAID', status: status || 'NEPOZNATA', stats: ticketStats_(values) });
+
+    const tz = sheetTimeZone_();
+    const already = parseDate_(v[TICKET_COL.enteredAt]);
+    if (already) {
+      return Object.assign(info, {
+        result: 'USED',
+        enteredAt: Utilities.formatDate(already, tz, 'HH:mm'),
+        scannedBy: String(v[TICKET_COL.scannedBy] || ''),
+        stats: ticketStats_(values),
+      });
+    }
+    const now = new Date();
+    sheet.getRange(row + 1, TICKET_COL.enteredAt + 1, 1, 2).setValues([[now, safeCell_(scannedBy)]]);
+    values[row][TICKET_COL.enteredAt] = now;
+    return Object.assign(info, { result: 'OK', enteredAt: Utilities.formatDate(now, tz, 'HH:mm'), stats: ticketStats_(values) });
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1346,6 +1646,7 @@ function setup() {
   setupSettingsSheet_(ss);
   setupStatsSheet_(ss);
   setupMessagesSheet_(ss);
+  ticketsSheet_();
 
   const props = PropertiesService.getScriptProperties();
   props.setProperty('SPREADSHEET_ID', ss.getId());

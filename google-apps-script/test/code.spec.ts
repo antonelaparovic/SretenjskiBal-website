@@ -533,11 +533,93 @@ describe('Apps Script (Code.gs)', () => {
       res.data[row - 1][H.indexOf(COL.status)] = 'PLAĆENO';
       gas.ctx.sendPaymentConfirmationFor_('27001');
       expect(gas.outbox).toHaveLength(1);
-      expect(gas.outbox[0].subject).toBe('Sretenjski bal — plačilo za rezervacijo 27001 je evidentirano');
+      expect(gas.outbox[0].subject).toBe('Vaše vstopnice za prvi Sretenjski bal — rezervacija 27001');
       expect(cell(row, 'paymentConfirmedAt')).toBeInstanceOf(Date);
       expect(cell(row, 'paidAt')).toBeInstanceOf(Date);
       expect(() => gas.ctx.sendPaymentConfirmationFor_('27001')).toThrow(/već poslata/);
       expect(gas.outbox).toHaveLength(1);
+    });
+
+    describe('ulaznice i skeniranje na ulazu', () => {
+      const tickets = () => gas.sheets.get('Ulaznice')!.data;
+      const paid = (overrides: Record<string, unknown> = {}) =>
+        addRow({
+          number: '27006', status: 'PLAĆENO', email: 'antonela@primer.si', fullName: 'Antonela Parović', locale: 'sr',
+          ticketType: 'Galerija', ticketCount: 3,
+          note: 'Gost 2: Maja Anić, maja@primer.si, +386 41 222 333\nSedimo zajedno.',
+          ...overrides,
+        });
+      const scan = (code: unknown, pin = '482913') => post({ action: 'checkin', pin, code, device: 'Ulaz 1' });
+
+      beforeEach(() => setSetting('SCANNER_PIN', '482913'));
+
+      it('uz potvrdu uplate šalje po jednu ulaznicu sa QR kodom za svakog gosta', () => {
+        paid();
+        gas.ctx.sendPaymentConfirmationFor_('27006');
+        const mail = gas.outbox[0];
+        expect(mail.subject).toBe('Vaše ulaznice za prvi Sretenjski bal — rezervacija 27006');
+        expect(Object.keys(mail.inlineImages!).sort()).toEqual(['qr1', 'qr2', 'qr3', 'sblogo']);
+        expect((mail.inlineImages!.qr1 as { type: string }).type).toBe('image/gif');
+        expect(mail.body).toContain('Ulaznica 1 od 3 — Antonela Parović (Galerija)');
+        expect(mail.body).toContain('Ulaznica 2 od 3 — Maja Anić (Galerija)');
+        expect(mail.body).toContain('Ulaznica 3 od 3 — Gost 3 · Antonela Parović (Galerija)');
+        expect(mail.htmlBody).toContain('cid:qr3');
+        const link = /https:\/\/sretenjskibal\.si\/ulaznice#([A-Za-z0-9_-]+)/.exec(mail.body)!;
+        const data = JSON.parse(Buffer.from(link[1], 'base64url').toString('utf8'));
+        expect(data.r).toBe('27006');
+        expect(data.t.map((t: string[]) => t[1])).toEqual(['Antonela Parović', 'Maja Anić', 'Gost 3 · Antonela Parović']);
+        expect(tickets().slice(1).map((r) => [r[1], r[2], r[3]])).toEqual([
+          ['27006', 1, 'Antonela Parović'], ['27006', 2, 'Maja Anić'], ['27006', 3, 'Gost 3 · Antonela Parović'],
+        ]);
+        expect(String(tickets()[1][0])).toMatch(/^27006-1-[0-9A-HJKMNP-TV-Z]{8}$/);
+      });
+
+      it('ponovno slanje ne pravi duple ulaznice, a link je na jeziku rezervacije', () => {
+        const row = paid({ locale: 'en' });
+        gas.ctx.sendPaymentConfirmationFor_('27006');
+        res.data[row - 1][H.indexOf(COL.paymentConfirmedAt)] = '';
+        gas.ctx.sendPaymentConfirmationFor_('27006');
+        expect(tickets()).toHaveLength(4);
+        expect(gas.outbox[1].body).toContain('https://sretenjskibal.si/en/ulaznice#');
+        expect(gas.outbox[1].body).toContain('Ticket 1 of 3 — Antonela Parović (Gallery)');
+      });
+
+      it('na ulazu: prvi put propušta, drugi put javlja da je ulaznica iskorišćena', () => {
+        paid();
+        gas.ctx.sendPaymentConfirmationFor_('27006');
+        const code = String(tickets()[2][0]);
+        const first = scan('SB:' + code);
+        expect(first).toMatchObject({ ok: true, result: 'OK', name: 'Maja Anić', type: 'Galerija', number: '27006', index: 2, stats: { entered: 1, total: 3 } });
+        expect(tickets()[2][6]).toBeInstanceOf(Date);
+        expect(tickets()[2][7]).toBe('Ulaz 1');
+        const second = scan(code.toLowerCase());
+        expect(second).toMatchObject({ ok: true, result: 'USED', name: 'Maja Anić', scannedBy: 'Ulaz 1' });
+        expect(second.enteredAt).toMatch(/^\d\d:\d\d$/);
+      });
+
+      it('odbija prepravljen ili izmišljen kod, neizdatu ulaznicu i neplaćenu rezervaciju', () => {
+        const row = paid();
+        gas.ctx.sendPaymentConfirmationFor_('27006');
+        const code = String(tickets()[1][0]);
+        const forged = code.slice(0, -1) + (code.endsWith('A') ? 'B' : 'A');
+        expect(scan(forged).result).toBe('INVALID');
+        expect(scan('27006-9-AAAAAAAA').result).toBe('INVALID');
+        expect(scan('https://primer.si').result).toBe('INVALID');
+        const notIssued = gas.ctx.ticketCode_('27006', 4);
+        expect(scan(notIssued).result).toBe('UNKNOWN');
+        res.data[row - 1][H.indexOf(COL.status)] = 'OTKAZANO';
+        expect(scan(code)).toMatchObject({ result: 'NOT_PAID', status: 'OTKAZANO' });
+        expect(tickets()[1][6]).toBe('');
+      });
+
+      it('PIN: bez PIN-a skeniranje je isključeno, pogrešan PIN se odbija, a posle mnogo pokušaja zaključava', () => {
+        setSetting('SCANNER_PIN', '');
+        expect(scan(null)).toEqual({ ok: false, code: 'SCANNER_OFF' });
+        setSetting('SCANNER_PIN', '482913');
+        expect(scan(null)).toEqual({ ok: true, stats: { entered: 0, total: 0 } });
+        for (let i = 0; i < 15; i++) expect(scan(null, '000000')).toEqual({ ok: false, code: 'BAD_PIN' });
+        expect(scan(null)).toEqual({ ok: false, code: 'LOCKED' });
+      });
     });
 
     it('pronalazi pravi red i kad je tabela u međuvremenu sortirana', () => {

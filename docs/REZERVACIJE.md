@@ -85,6 +85,8 @@ Tabela → **Deli (Share)** → Opšti pristup → **Ograničeno (Restricted)** 
 
 1. Otvorite tabelu → **Proširenja → Apps Script** (Extensions → Apps Script).
 2. U fajlu `Code.gs` obrišite sve i nalepite ceo sadržaj fajla `google-apps-script/Code.gs` iz ovog repozitorijuma.
+   Zatim pored **Files** kliknite **+** → **Script**, nazovite fajl `QrCode` i u njega nalepite ceo sadržaj
+   `google-apps-script/QrCode.gs` (biblioteka za QR kodove na ulaznicama; ovaj fajl se dodaje samo jednom).
 3. ⚙️ **Podešavanja projekta** (Project Settings) → uključite **„Prikaži datoteku manifesta appsscript.json"**.
    Vratite se u Editor, otvorite `appsscript.json` i zamenite sadržaj fajlom `google-apps-script/appsscript.json`.
 4. Sačuvajte (💾).
@@ -236,6 +238,36 @@ podsetnik niti oslobađati mesto.
 2. **Sretenjski bal → Pošalji potvrdu uplate (izabrani red)** → **Da**.
 3. Upisuje se **Datum slanja potvrde uplate**. Ponovni pokušaj neće poslati drugu potvrdu.
    Ako baš treba ponovo poslati, obrišite taj datum.
+4. Uz potvrdu gost dobija **ulaznice**: po jednu za svakog gosta iz rezervacije, sa imenom, tipom i QR kodom,
+   plus dugme koje otvara iste ulaznice na sajtu u izgledu štampane karte (za čuvanje kao PDF ili štampu).
+   Sve ulaznice idu osobi koja je rezervisala. Ulaznice se upisuju u tab **Ulaznice** (jedan red po gostu).
+   Ponovno slanje (posle brisanja datuma) šalje iste kodove i ne pravi duple redove.
+
+## Ulaz na balu — skeniranje ulaznica
+
+**Pre bala (jednom):**
+1. U tabu **Podešavanja** u red `SCANNER_PIN` upišite PIN od najmanje 6 cifara. Dok je prazno, skeniranje ne radi.
+2. PIN recite samo ljudima na ulazu.
+3. Proba: pošaljite sebi potvrdu uplate za probnu rezervaciju i skenirajte svoju ulaznicu (pa u tabu
+   **Ulaznice** obrišite vreme u koloni **Ulazak** da bi ulaznica opet važila).
+
+**Na ulazu:**
+1. Na telefonu otvorite **sretenjskibal.si/ulaz** (Chrome ili Safari).
+2. Upišite PIN i ime/mesto (npr. „Ulaz 1 — Marko"), pa **Počni skeniranje**. Dozvolite pristup kameri.
+   Telefon pamti PIN, pa sledeći put odmah otvara kameru.
+3. Usmerite kameru na QR kod gosta (sa telefona ili papira). Ekran postaje:
+   - **zelen — Ulaz odobren**: ime i tip ulaznice; vreme ulaska se upisuje u tab **Ulaznice**;
+   - **narandžast — Već iskorišćena**: ulaznica je već skenirana (piše kad i ko je skenirao);
+   - **crven — Nevažeća / Nije plaćena / Nije izdata**: kod nije naš, rezervacija nije PLAĆENO (npr. otkazana)
+     ili ulaznica nije poslata.
+4. Ako kamera ne radi, kod sa ulaznice (npr. `27006-2-K7QH3M9P`) upišite ručno u polje ispod kamere.
+5. Gore piše koliko je gostiju ušlo od ukupnog broja ulaznica.
+
+**Rezervna varijanta:** pre bala odštampajte tab **Ulaznice** (ili ga otvorite na laptopu), za slučaj da
+na ulazu nema interneta. Svako skeniranje ide preko interneta i traje 1–2 sekunde.
+
+**Važno:** u Svojstvima skripte postoji `TICKET_SECRET` (pravi se sam pri prvoj ulaznici) — njim su potpisani
+QR kodovi. Ne brisati ga i ne menjati, inače već poslate ulaznice prestaju da važe.
 
 ### Šta dnevna provera radi sama
 

@@ -122,3 +122,21 @@ export interface ReservationResult {
   reservationNumber: string;
   guestMailSent: boolean;
 }
+
+/** Odgovor skripte na skeniranje ulaznice (akcija „checkin"). */
+export interface CheckinResult {
+  ok: true;
+  /** Bez rezultata = samo provera PIN-a. */
+  result?: 'OK' | 'USED' | 'NOT_PAID' | 'UNKNOWN' | 'INVALID';
+  code?: string;
+  number?: string;
+  index?: number;
+  name?: string;
+  type?: string;
+  /** Status rezervacije kad nije plaćena (npr. OTKAZANO). */
+  status?: string;
+  /** Vreme ulaska (HH:mm): sada za OK, ranije za USED. */
+  enteredAt?: string;
+  scannedBy?: string;
+  stats: { entered: number; total: number };
+}

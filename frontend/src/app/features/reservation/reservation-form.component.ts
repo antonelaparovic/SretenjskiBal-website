@@ -246,7 +246,7 @@ export class ReservationFormComponent {
         });
         setTimeout(() => {
           const el = this.successEl()?.nativeElement;
-          el?.scrollIntoView({ block: 'start' });
+          el?.scrollIntoView?.({ block: 'start' });
           el?.focus({ preventScroll: true });
         });
       },

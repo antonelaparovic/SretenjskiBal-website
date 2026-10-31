@@ -27,7 +27,7 @@
         <source>Preskoči na sadržaj</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/app.ts</context>
-          <context context-type="linenumber">10,11</context>
+          <context context-type="linenumber">13,14</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3660549515718238198" datatype="html">
@@ -128,6 +128,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation-form.component.ts</context>
           <context context-type="linenumber">27</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tickets/tickets.page.ts</context>
+          <context context-type="linenumber">22</context>
         </context-group>
       </trans-unit>
       <trans-unit id="5684904892723536855" datatype="html">
@@ -379,6 +383,10 @@
           <context context-type="sourcefile">src/app/features/contact/contact.page.ts</context>
           <context context-type="linenumber">14,15</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tickets/tickets.page.ts</context>
+          <context context-type="linenumber">77,78</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="624503260347772493" datatype="html">
         <source>Pišite nam.</source>
@@ -592,6 +600,10 @@
           <context context-type="linenumber">28,29</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tickets/tickets.page.ts</context>
+          <context context-type="linenumber">67,68</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/layout/footer/footer.component.html</context>
           <context context-type="linenumber">7,8</context>
         </context-group>
@@ -786,6 +798,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/home/sections/venue.section.ts</context>
           <context context-type="linenumber">16</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tickets/tickets.page.ts</context>
+          <context context-type="linenumber">55,56</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/layout/nav.ts</context>
@@ -1643,6 +1659,97 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/reservation/reservation.page.ts</context>
           <context context-type="linenumber">67</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3632919985644849102" datatype="html">
+        <source>Svečana ulaznica</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tickets/tickets.page.ts</context>
+          <context context-type="linenumber">21</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6032115199501413136" datatype="html">
+        <source>Rezervacija <x id="INTERPOLATION" equiv-text="{{ number() }}"/></source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tickets/tickets.page.ts</context>
+          <context context-type="linenumber">39,40</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8494344058747560294" datatype="html">
+        <source>Vaše ulaznice</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tickets/tickets.page.ts</context>
+          <context context-type="linenumber">40,41</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8379275680746515337" datatype="html">
+        <source>Na ulazu pokažite QR kod, sa telefona ili odštampan. Svaki kod važi za jedan ulazak.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tickets/tickets.page.ts</context>
+          <context context-type="linenumber">41,42</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="728433548918637462" datatype="html">
+        <source>Sačuvaj kao PDF ili štampaj</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tickets/tickets.page.ts</context>
+          <context context-type="linenumber">42,43</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6657126796690497378" datatype="html">
+        <source>Prvi</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tickets/tickets.page.ts</context>
+          <context context-type="linenumber">54</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5833562365723669149" datatype="html">
+        <source>subota, 13. februar 2027.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tickets/tickets.page.ts</context>
+          <context context-type="linenumber">56,57</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3670004672463546412" datatype="html">
+        <source>Ulaznica <x id="INTERPOLATION" equiv-text="{{ t.index }}"/> od <x id="INTERPOLATION_1" equiv-text="{{ t.count }}"/></source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tickets/tickets.page.ts</context>
+          <context context-type="linenumber">58,59</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4640756737710964220" datatype="html">
+        <source>Ulaznice nisu pronađene</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tickets/tickets.page.ts</context>
+          <context context-type="linenumber">75,76</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3262473637129856932" datatype="html">
+        <source>Link nije potpun. Otvorite ulaznice ponovo preko dugmeta u mejlu „Vaše ulaznice&quot; ili nam pišite.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tickets/tickets.page.ts</context>
+          <context context-type="linenumber">76,77</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7902429201746630141" datatype="html">
+        <source>Učitavanje ulaznica…</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tickets/tickets.page.ts</context>
+          <context context-type="linenumber">81,82</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7918507880062362287" datatype="html">
+        <source>Vaše ulaznice | Sretenjski bal</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tickets/tickets.page.ts</context>
+          <context context-type="linenumber">148</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5405651656450907403" datatype="html">
+        <source>Ulaznice za prvi Sretenjski bal sa QR kodom za ulaz.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/tickets/tickets.page.ts</context>
+          <context context-type="linenumber">149</context>
         </context-group>
       </trans-unit>
       <trans-unit id="6260682911141366554" datatype="html">

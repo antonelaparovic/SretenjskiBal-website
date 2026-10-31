@@ -2,6 +2,7 @@
  * Minimalne zamene za Google Apps Script servise — dovoljno da se google-apps-script/Code.gs
  * izvrši u Node-u (vm) i proveri bez pravog Google naloga i bez slanja mejlova.
  */
+import { createHmac } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import vm from 'node:vm';
@@ -140,7 +141,8 @@ function formatDate(date: Date, tz: string, fmt: string): string {
 }
 
 export function loadAppsScript(): GasEnv {
-  const code = readFileSync(join(import.meta.dirname, '../../Code.gs'), 'utf8');
+  // U Apps Scriptu svi fajlovi projekta dele isti globalni prostor, pa ih učitavamo zajedno.
+  const code = ['QrCode.gs', 'Code.gs'].map((f) => readFileSync(join(import.meta.dirname, '../../', f), 'utf8')).join('\n;\n');
   const sheets = new Map<string, FakeSheet>();
   const props = new Map<string, string>();
   const cache = new Map<string, string>();
@@ -208,6 +210,10 @@ export function loadAppsScript(): GasEnv {
       getUuid: () => crypto.randomUUID(),
       base64Decode: (s: string) => [...Buffer.from(s, 'base64')],
       newBlob: (bytes: number[], type: string, name: string) => ({ bytes, type, name }),
+      Charset: { UTF_8: 'UTF-8' },
+      base64EncodeWebSafe: (s: string) => Buffer.from(s, 'utf8').toString('base64url'),
+      computeHmacSha256Signature: (value: string, key: string) =>
+        [...createHmac('sha256', key).update(value, 'utf8').digest()].map((b) => (b > 127 ? b - 256 : b)),
     },
     UrlFetchApp: {
       fetch: (_url: string, opts: { payload: { secret: string; response: string } }) => {

@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map, timeout } from 'rxjs';
 import { APPS_SCRIPT_URL } from '../config/app.constants';
-import { BookingStatus, ContactPayload, ReservationPayload, ReservationResult } from '../models/content.models';
+import { BookingStatus, CheckinResult, ContactPayload, ReservationPayload, ReservationResult } from '../models/content.models';
 
 /** Skripta je odgovorila, ali zahtev nije prihvaćen (npr. BOOKING_CLOSED, INVALID, CAPTCHA_FAILED, BUSY). */
 export class ScriptError extends Error {
@@ -32,6 +32,11 @@ export class FormsApiService {
 
   createReservation(payload: ReservationPayload, captcha: string): Observable<ReservationResult> {
     return this.call<ReservationResult>({ action: 'create', reservation: payload, captcha });
+  }
+
+  /** Skeniranje na ulazu (stranica /ulaz). Bez koda samo proverava PIN. */
+  checkin(pin: string, device: string, code?: string): Observable<CheckinResult> {
+    return this.call<CheckinResult>({ action: 'checkin', pin, device, ...(code ? { code } : {}) });
   }
 
   private call<T>(body: object): Observable<T> {

@@ -25,6 +25,9 @@ export const routes: Routes = [
   { path: 'karte', redirectTo: 'rezervacija' },
   { path: 'prostor', ...soon($localize`Prostor`) },
   { path: 'partneri', ...soon($localize`Partneri`) },
+  // Ulaznice iz mejla „Vaše ulaznice" (podaci su u linku) i skeniranje na ulazu — nisu u meniju i ne indeksiraju se.
+  { path: 'ulaznice', loadComponent: () => import('./features/tickets/tickets.page').then((m) => m.TicketsPage) },
+  { path: 'ulaz', loadComponent: () => import('./features/door/door.page').then((m) => m.DoorPage), data: { bare: true } },
   { path: 'privacy', loadComponent: () => import('./features/legal/legal.page').then((m) => m.LegalPage), data: { kind: 'privacy' } },
   // Uslovi korišćenja: sakriveno dok ne budu napisani.
   // { path: 'uslovi', ...soon($localize`Uslovi korišćenja`) },
