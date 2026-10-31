@@ -102,6 +102,8 @@ export interface SentMail {
   htmlBody?: string;
   replyTo?: string;
   name?: string;
+  /** Postavljeno kad je mejl poslat preko Gmail aliasa (GmailApp). */
+  from?: string;
 }
 
 export interface GasEnv {
@@ -111,6 +113,14 @@ export interface GasEnv {
   props: Map<string, string>;
   /** Vrati true da sendEmail baci grešku (npr. za proveru ponašanja kad mejl ne prođe). */
   failMail: (m: SentMail) => boolean;
+  /** Šta Cloudflare kaže za Turnstile token (podrazumevano: samo 'ok-token' prolazi). */
+  captchaOk: (token: string, secret: string) => boolean;
+  /** Pozivi Cloudflare provere: [token, ključ]. */
+  captchaCalls: [string, string][];
+  /** Adrese dodate u Gmailu kao „Pošalji poštu kao" (GmailApp.getAliases). */
+  aliases: string[];
+  /** Pretrage Gmaila i šta je urađeno sa pronađenim nitima (npr. ['moveToInbox', upit]). */
+  inboxMoves: [string, string][];
   get<T = unknown>(expr: string): T;
 }
 
@@ -129,10 +139,20 @@ function formatDate(date: Date, tz: string, fmt: string): string {
 }
 
 export function loadAppsScript(): GasEnv {
-  const code = readFileSync(join(import.meta.dirname, '../../../google-apps-script/Code.gs'), 'utf8');
+  const code = readFileSync(join(import.meta.dirname, '../../Code.gs'), 'utf8');
   const sheets = new Map<string, FakeSheet>();
   const props = new Map<string, string>();
-  const env = { sheets, outbox: [] as SentMail[], props, failMail: (_m: SentMail) => false } as GasEnv;
+  const cache = new Map<string, string>();
+  const env = {
+    sheets,
+    outbox: [] as SentMail[],
+    props,
+    failMail: (_m: SentMail) => false,
+    captchaOk: (token: string) => token === 'ok-token',
+    captchaCalls: [],
+    aliases: [],
+    inboxMoves: [],
+  } as unknown as GasEnv;
 
   const spreadsheet = {
     getSheetByName: (n: string) => (sheets.has(n) ? withStubs(sheets.get(n)!) : null),
@@ -141,6 +161,7 @@ export function loadAppsScript(): GasEnv {
       return withStubs(sheets.get(n)!);
     },
     getUrl: () => 'https://docs.google.com/spreadsheets/d/test',
+    getId: () => 'test-spreadsheet-id',
     getSpreadsheetTimeZone: () => 'Europe/Ljubljana',
   };
   const globals = {
@@ -153,6 +174,7 @@ export function loadAppsScript(): GasEnv {
       getScriptProperties: () => ({
         getProperty: (k: string) => props.get(k) ?? null,
         setProperty: (k: string, v: string) => props.set(k, v),
+        deleteProperty: (k: string) => props.delete(k),
       }),
     },
     MailApp: {
@@ -161,11 +183,38 @@ export function loadAppsScript(): GasEnv {
         env.outbox.push(m);
       },
     },
+    GmailApp: {
+      getAliases: () => env.aliases,
+      search: (query: string) => [
+        {
+          moveToInbox: () => env.inboxMoves.push(['moveToInbox', query]),
+          markUnread: () => env.inboxMoves.push(['markUnread', query]),
+        },
+      ],
+      sendEmail: (to: string, subject: string, body: string, opts: Omit<SentMail, 'to' | 'subject' | 'body'>) => {
+        const m = { to, subject, body, ...opts };
+        if (env.failMail(m)) throw new Error('Service invoked too many times');
+        env.outbox.push(m);
+      },
+    },
+    Session: { getEffectiveUser: () => ({ getEmail: () => 'admin@kcsretenje.si' }) },
     ContentService: {
       MimeType: { JSON: 'JSON' },
       createTextOutput: (content: string) => ({ content, setMimeType() { return this; } }),
     },
     Utilities: { formatDate, getUuid: () => crypto.randomUUID() },
+    UrlFetchApp: {
+      fetch: (_url: string, opts: { payload: { secret: string; response: string } }) => {
+        env.captchaCalls.push([opts.payload.response, opts.payload.secret]);
+        return { getContentText: () => JSON.stringify({ success: env.captchaOk(opts.payload.response, opts.payload.secret) }) };
+      },
+    },
+    CacheService: {
+      getScriptCache: () => ({
+        get: (k: string) => cache.get(k) ?? null,
+        put: (k: string, v: string) => cache.set(k, v),
+      }),
+    },
   };
   env.ctx = vm.createContext(globals);
   vm.runInContext(code, env.ctx, { filename: 'Code.gs' });

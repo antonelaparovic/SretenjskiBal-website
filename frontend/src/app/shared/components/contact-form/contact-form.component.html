@@ -46,6 +46,7 @@
     </label>
     @if (invalid('consent')) { <span class="field__error" i18n>Potrebna je vaša saglasnost.</span> }
 
+    <app-turnstile (token)="captcha.set($event)" (failed)="captchaFailed.set(true)" />
     @if (serverError()) { <p class="server-error" role="alert">{{ serverError() }}</p> }
 
     <button class="btn btn--primary submit" type="submit" [disabled]="status() === 'sending'" [attr.aria-busy]="status() === 'sending'">

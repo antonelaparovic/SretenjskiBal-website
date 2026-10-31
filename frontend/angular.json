@@ -41,17 +41,15 @@
               "src/styles.scss"
             ],
             "server": "src/main.server.ts",
-            "outputMode": "server",
+            "outputMode": "static",
             "security": {
               "allowedHosts": [
                 "localhost",
                 "127.0.0.1",
                 "sretenjskibal.si",
-                "www.sretenjskibal.si"
+                "www.sretenjskibal.si",
+                "*.run.app"
               ]
-            },
-            "ssr": {
-              "entry": "src/server.ts"
             },
             "polyfills": [
               "@angular/localize/init"
@@ -82,23 +80,6 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
-            },
-            "preview": {
-              "outputMode": "static",
-              "ssr": false,
-              "prerender": false,
-              "server": false,
-              "outputPath": "dist/preview",
-              "assets": [
-                {
-                  "glob": "**/*",
-                  "input": "public"
-                },
-                {
-                  "glob": "_redirects",
-                  "input": "netlify-preview"
-                }
-              ]
             }
           },
           "defaultConfiguration": "production"
@@ -113,10 +94,7 @@
               "buildTarget": "frontend:build:development"
             }
           },
-          "defaultConfiguration": "development",
-          "options": {
-            "proxyConfig": "proxy.conf.json"
-          }
+          "defaultConfiguration": "development"
         },
         "test": {
           "builder": "@angular/build:unit-test"

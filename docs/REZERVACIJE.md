@@ -6,13 +6,16 @@ u Google tabelu „Bal rezervacije". Organizator dobija mejl, a gost potvrdu. Iz
 radi sama, jednom dnevno.
 
 ```
-Browser ──► Angular SSR server (/api, isti domen) ──► NestJS backend ──► Google Apps Script ──► tabela + Gmail
-             forma, provere                          provera podataka,   zaključavanje, broj,
-                                                     zaštita od botova,  upis reda, mejlovi,
-                                                     tajni ključ         meni, dnevna provera
+Statički sajt (Cloudflare) ──► Google Apps Script u tabeli ──► tabela + Gmail
+  forma, provere u browseru,           Turnstile provera, provera podataka, ograničenje slanja,
+  Cloudflare Turnstile                 zaključavanje, broj, upis reda, mejlovi, meni, dnevna provera
 ```
 
-Browser nikad ne razgovara direktno sa Googleom: nema CORS problema, a tajni ključ ostaje na serveru.
+Sajt nema svoj server: browser šalje rezervaciju direktno skripti (JSON kao običan tekst, pa Google
+dozvoljava poziv sa drugog domena). Skripta je zato javna i sama proverava sve: Cloudflare Turnstile
+(„da li je čovek"), podatke, skriveno polje za botove i najviše 20 slanja u minuti za ceo sajt.
+U sajtu nema nijednog tajnog ključa; tajni Turnstile ključ je samo u Svojstvima skripte.
+Ista skripta prima i poruke iz kontakt forme (tab „Poruke" + mejl na `ADMIN_EMAIL`).
 
 ---
 
@@ -27,8 +30,8 @@ Sve ove stavke su u kodu označene sa `TODO`. Spisak u kodu daje komanda
 | 2 | **Pravi podaci za uplatu**: primalac sa adresom, IBAN, BIC, banka. Sada stoje izmišljene vrednosti sa „TODO", obojene žuto. | Tabela → tab „Podešavanja" (početne vrednosti su u `google-apps-script/Code.gs`, `SETTINGS`) |
 | 3 | Opisi (šta je uključeno) za Svečanu i Galeriju | `frontend/src/app/core/content/site-content.ts`, `TICKETS` |
 | 4 | Otvaranje prodaje na sajtu: `salesStatus: 'OPEN'` | `site-content.ts`, `EVENT` |
-| 5 | URL web aplikacije i ključ u produkcionom `.env` | `backend/.env` (vidi `backend/.env.example`) |
-| 6 | Tekst politike privatnosti | `frontend/src/app/app.routes.ts`, ruta `privacy` | (tekst napisan — vidi GDPR.md, treba upisati podatke organizatora)
+| 5 | Objava sajta (Cloudflare) i Turnstile ključevi | uputstvo: [DEPLOY.md](DEPLOY.md); `frontend/src/app/core/config/app.constants.ts` |
+| 6 | Politika privatnosti: tekst je napisan, treba upisati podatke organizatora | [GDPR.md](GDPR.md); `frontend/src/app/core/content/legal-content.ts` |
 
 Dok u podacima za uplatu piše „TODO", meni „Pošalji instrukcije za uplatu" odbija slanje i kaže šta
 nedostaje. Podsetnik tada izostavlja primaoca i IBAN. **Gost nikad ne dobija izmišljen broj računa.**
@@ -36,9 +39,39 @@ Opciona polja (`BIC`, `BANK`) koja vam ne trebaju jednostavno obrišite.
 
 ---
 
+## Prelazak sa probnog naloga na nalog kulturnog centra
+
+Probno je sve radilo pod nalogom fbozic7@gmail.com. Za pravu prodaju tabela i skripta treba da rade
+pod nalogom **admin@kcsretenje.si** (Google Workspace), a mejlovi da stižu sa **info@kcsretenje.si**,
+koji je alias tog naloga. Mejlove šalje nalog pod kojim radi skripta — zato prelazak.
+
+1. **fbozic7** podeli tabelu sa admin@kcsretenje.si (Deli → urednik).
+2. Prijavljeni kao **admin@kcsretenje.si** otvorite tabelu → **Datoteka → Napravi kopiju**.
+   Kopija dobija i skriptu i pripada admin@ nalogu.
+3. **Gmail naloga admin@** → ⚙️ **Sva podešavanja → Nalozi → Pošalji poštu kao → Dodaj drugu
+   adresu e-pošte** → `info@kcsretenje.si`, ime „Sretenjski bal", uključeno **„Tretiraj kao alias"** →
+   potvrda (kod stiže na info@, dakle u isto sanduče admin@). Bez ovoga mejlovi idu sa admin@.
+4. U kopiji: obrišite probne redove (Rezervacije, Poruke); u tabu **Podešavanja** proverite
+   `ADMIN_EMAIL`, `REPLY_TO` i `SENDER_EMAIL` = info@kcsretenje.si.
+5. Pratite odeljke **1.3–1.7** ispod, sve kao admin@: „Podesi tabelu", nova web aplikacija,
+   Turnstile ključ (`TURNSTILE_SECRET` — Svojstva skripte se ne kopiraju), dnevna provera rokova.
+   **„Pošalji probni mejl organizatoru"** prikaže i adresu pošiljaoca — treba da piše info@kcsretenje.si.
+6. Novu adresu web aplikacije upišite u `frontend/src/app/core/config/app.constants.ts`
+   (`APPS_SCRIPT_URL`) i objavite sajt.
+7. U staroj tabeli (fbozic7) arhivirajte web aplikaciju (Upravljaj primenama → Arhiviraj).
+
+Napomene:
+- Mejlove iz menija (instrukcije, potvrda uplate) šalje nalog **koji klikne** na meni. Zato meni
+  koristite prijavljeni kao admin@. Dnevne podsetnike šalje nalog koji je uključio dnevnu proveru.
+- Pri odobravanju skripta traži i pristup Gmailu naloga — to je potrebno za slanje sa adrese info@.
+- Ako Google javi da je **administrator blokirao** skriptu: Admin konzola (admin.google.com) →
+  Bezbednost → Kontrola pristupa API-jima → dozvolite ovu aplikaciju.
+
+---
+
 ## 1. Prvo postavljanje (jednom, ~20 minuta)
 
-Sve radite **prijavljeni kao `fbozic7@gmail.com`**. Sa tog naloga će se slati svi mejlovi gostima,
+Sve radite **prijavljeni kao `info@kcsretenje.si`**. Sa tog naloga će se slati svi mejlovi gostima,
 i tom nalogu gosti odgovaraju.
 
 ### 1.1 Ograničite deljenje tabele — VAŽNO
@@ -60,10 +93,11 @@ Tabela → **Deli (Share)** → Opšti pristup → **Ograničeno (Restricted)** 
 
 1. Vratite se u tabelu i osvežite stranicu. Pojaviće se meni **Sretenjski bal**.
 2. **Sretenjski bal → Podesi tabelu (prvo pokretanje)**.
-3. Google traži dozvolu: *Nastavi → izaberite fbozic7@gmail.com → Napredno (Advanced) →
+3. Google traži dozvolu: *Nastavi → izaberite info@kcsretenje.si → Napredno (Advanced) →
    Idi na projekat (nebezbedno) → Dozvoli*. Upozorenje „nebezbedno" se pojavljuje za svaku skriptu koju
    Google nije pregledao. Skripta je vaša i radi samo nad ovom tabelom.
-4. Skripta dodaje tabove **Rezervacije**, **Podešavanja** i **Statistika**. Postojeći `Sheet1` ostaje netaknut.
+4. Skripta dodaje tabove **Rezervacije**, **Podešavanja**, **Statistika** i **Poruke** (kontakt forma).
+   Postojeći `Sheet1` ostaje netaknut.
    Ponovno pokretanje „Podesi tabelu" je bezbedno: ništa ne briše i ne menja već upisane vrednosti.
    Jedino tab `Statistika` pravi iznova.
 
@@ -76,8 +110,9 @@ Tabela → **Deli (Share)** → Opšti pristup → **Ograničeno (Restricted)** 
 | `PRICE_SVECANA`, `PRICE_GALERIJA` | Cene u evrima (140, 70). Po njima se iznos za uplatu upisuje automatski kao predlog. Ako cenu menjate, promenite je i na sajtu (`site-content.ts`, `TICKETS`). |
 | `PAYMENT_DAYS` | Rok za uplatu u danima od slanja instrukcija (7). |
 | `GRACE_DAYS` | Dani posle podsetnika u kojima gost još može da plati (2). Sutradan rezervacija postaje ISTEKLO. |
-| `ADMIN_EMAIL` | Kome stižu nove rezervacije i dnevni izveštaj (fbozic7@gmail.com). |
-| `REPLY_TO` | Kome gosti odgovaraju (fbozic7@gmail.com). |
+| `ADMIN_EMAIL` | Kome stižu nove rezervacije i dnevni izveštaj (info@kcsretenje.si). |
+| `REPLY_TO` | Kome gosti odgovaraju (info@kcsretenje.si). |
+| `SENDER_EMAIL` | Adresa sa koje idu mejlovi (info@kcsretenje.si). Radi kad je dodata u Gmailu naloga kao „Pošalji poštu kao"; dok nije, mejlovi idu sa glavne adrese naloga. |
 | `GUEST_EMAILS` | ☑ = gost odmah dobija mejl da je rezervacija evidentirana. |
 | `PAYEE`, `IBAN` | **Obavezno** pre slanja instrukcija za uplatu: primalac i broj računa. Početno stoji privremena vrednost sa „TODO" (žuto) — zamenite je pravom. |
 | `BIC`, `BANK` | Opciono. Početno „TODO" — upišite pravu vrednost ili obrišite polje. |
@@ -89,20 +124,24 @@ premeštati, širiti i sortirati, ali **nemojte ih preimenovati**.
 ### 1.5 Objavite web aplikaciju
 
 1. U Apps Scriptu: **Primeni → Nova primena** (Deploy → New deployment) → tip ⚙️ **Web aplikacija**.
-2. *Izvrši kao:* **Ja (fbozic7@gmail.com)**. *Ko ima pristup:* **Bilo ko (Anyone)**.
-   Sajt poziva skriptu sa servera i bez Google prijave. Zaštita je tajni ključ: bez njega skripta ne radi ništa.
+2. *Izvrši kao:* **Ja (info@kcsretenje.si)**. *Ko ima pristup:* **Bilo ko (Anyone)**.
+   Posetioci sajta šalju skripti direktno iz browsera, bez Google prijave.
 3. **Primeni** → kopirajte **URL web aplikacije** (završava se na `/exec`).
 
-### 1.6 Povežite sajt
+Kod kasnijih izmena `Code.gs` **ne pravite novu primenu** (dobili biste novu adresu), nego
+**Primeni → Upravljaj primenama → ✏️ → Verzija: Nova verzija → Primeni**.
 
-U tabeli: **Sretenjski bal → Prikaži ključ za sajt**. Na serveru sajta, u `backend/.env`, upišite:
+### 1.6 Povežite sajt i uključite zaštitu od botova
 
-```
-APPS_SCRIPT_URL=https://script.google.com/macros/s/…/exec
-APPS_SCRIPT_SECRET=<ključ iz tabele>
-```
+1. Adresu iz 1.5 upišite u `frontend/src/app/core/config/app.constants.ts` → `APPS_SCRIPT_URL`.
+2. **Cloudflare Turnstile** (besplatno, uputstvo u [DEPLOY.md](DEPLOY.md)) daje dva ključa:
+   - **Site key** (javni) → `app.constants.ts` → `TURNSTILE_SITE_KEY`;
+   - **Secret key** (tajni) → Apps Script → ⚙️ Podešavanja projekta → **Svojstva skripte** →
+     dodajte svojstvo `TURNSTILE_SECRET` sa tom vrednošću. Tajni ključ nikad ne ide u kod sajta, git ili mejl.
+3. Objavite sajt (DEPLOY.md).
 
-Restartujte backend. Ključ ne stavljajte u frontend, git ili mejl.
+Dok `TURNSTILE_SECRET` nije upisan, skripta koristi Cloudflareov probni ključ koji uvek propušta —
+sajt radi, ali **zaštita od botova nije uključena** („Podesi tabelu" na to upozorava).
 
 ### 1.7 Uključite automatiku i proverite mejl
 
@@ -128,8 +167,8 @@ pojavljuju se kad u `frontend/src/app/core/content/site-content.ts` postavite `E
 Do tada sekcija prikazuje karte sa cenama i „Prodaja uskoro počinje".
 
 Tipovi karata su **Svečana** (140 €) i **Galerija** (70 €), isti na početnoj i u formi.
-Ako se menjaju, menjaju se na tri mesta (iste šifre): `reservation-form.component.ts` (`TICKET_TYPE_OPTIONS`),
-`backend/src/reservations/reservation.dto.ts` (`TICKET_TYPES`) i `google-apps-script/Code.gs` (`TICKET_TYPES`).
+Ako se menjaju, menjaju se na dva mesta (iste šifre): `reservation-form.component.ts` (`TICKET_TYPE_OPTIONS`)
+i `google-apps-script/Code.gs` (`TICKET_TYPES`), a naziv i cena još u `site-content.ts` (`TICKETS`).
 Posle izmene `Code.gs` ponovo pokrenite „Podesi tabelu", da tab Statistika dobije red za novi tip.
 
 ---
@@ -237,16 +276,19 @@ i UTM parametre kampanje (ako ih je link imao).
 
 ## 3. Šta treba znati
 
-- **Ograničenje Gmaila:** sa običnog Gmail naloga skripta može da pošalje oko **100 mejlova dnevno**.
-  Svaka rezervacija troši 2 (organizator + gost). Ako zatreba više, isključite `GUEST_EMAILS` ili
-  pređite na Google Workspace nalog (1.500 dnevno). Preostali broj prikazuje „Pošalji probni mejl".
+- **Ograničenje mejlova:** Google Workspace nalog (info@kcsretenje.si) može da pošalje oko **1.500 mejlova
+  dnevno**, običan Gmail oko 100. Svaka rezervacija odmah troši 2 (organizator + gost), poruka iz
+  kontakt forme 1. Preostali broj prikazuje „Pošalji probni mejl".
+- **Zaštita od zloupotrebe:** Turnstile provera, skriveno polje, najmanje 4 sekunde od otvaranja forme
+  i najviše 20 slanja u minuti za ceo sajt (ako ih je više, posetilac dobija „velika gužva, pokušajte za minut").
 - **Ako mejl ne prođe**, rezervacija ostaje sačuvana, a gost vidi uspešan ekran sa brojem.
   U koloni **Sistemska napomena** piše šta nije poslato.
 - **Brojevi rezervacija** se dodeljuju pod zaključavanjem, jedan po jedan, pa ni istovremene prijave
   ne mogu dobiti isti broj. Ponovljen zahtev (npr. posle prekida mreže) vraća isti broj i ne pravi
   novi red.
 - **Ispravke koda skripte:** posle izmene `Code.gs` → **Primeni → Upravljaj primenama → ✏️ → Verzija:
-  Nova verzija → Primeni**. URL ostaje isti. Bez ovog koraka sajt i dalje koristi staru verziju.
+  Nova verzija → Primeni**. URL ostaje isti. Bez ovog koraka sajt i dalje koristi staru verziju
+  (znak: forma kaže „Proverite unete podatke" ili „Rezervacije trenutno nisu dostupne" za ispravan unos).
   Meni i dnevna provera odmah koriste novi kod.
 - **Nova godina bala:** promenite `BALL_YEAR` (npr. `28`) i brojevi kreću od 28001.
 
@@ -293,11 +335,11 @@ Automatski mejlovi postoje na srpskom, slovenačkom i engleskom (`MAIL` u `Code.
 
 ## 5. Lokalni razvoj i testovi
 
-- Bez `APPS_SCRIPT_URL` backend lokalno upisuje rezervacije u `backend/data/rezervacije-dev.jsonl`,
-  sa istom numeracijom i bez slanja mejlova. U produkciji bez `APPS_SCRIPT_URL` rezervacije su zatvorene.
-- `cd backend && npm test`: provere API-ja, Apps Script klijenta, lokalnog skladišta i **cele logike
-  `Code.gs`**. Skripta se izvršava u Node-u sa lažnom tabelom i lažnim Gmailom, pa se ništa ne šalje.
-- `cd frontend && npx ng test --watch=false`: provere forme.
+- `cd frontend && npm start` → http://localhost:4200. Forme šalju pravoj skripti iz `APPS_SCRIPT_URL`
+  (lokalno sa Cloudflareovim probnim Turnstile ključem), pa probne rezervacije završavaju u tabeli.
+- `cd google-apps-script && npm install && npm test`: provere **cele logike `Code.gs`** — skripta se
+  izvršava u Node-u sa lažnom tabelom, lažnim Gmailom i lažnim Turnstileom, pa se ništa ne šalje.
+- `cd frontend && npx ng test --watch=false`: provere formi.
 - Za testiranje sa pravom tabelom koristite **kopiju tabele** (Datoteka → Napravi kopiju, kopija dobija
   i skriptu) sa sopstvenom web aplikacijom i svojim mejlom, a ne produkcionu tabelu.
 

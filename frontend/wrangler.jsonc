@@ -1,0 +1,16 @@
+// Cloudflare Workers — statički sajt (gotove stranice iz `npm run build`). Uputstvo: docs/DEPLOY.md.
+// Ime mora biti isto kao ime Workera u Cloudflare nalogu.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "sretenjskibal-website",
+  "compatibility_date": "2026-10-01",
+  // Probne verzije za grane i pull requestove (`npx wrangler preview` u Cloudflare buildu).
+  "previews": {},
+  "assets": {
+    "directory": "./dist/frontend/browser",
+    // Nepostojeće adrese dobijaju stranicu „Ova stranica ne postoji." sa statusom 404.
+    "not_found_handling": "404-page",
+    // Adrese bez kose crte na kraju (/rezervacija), kao u linkovima sajta i za pretraživače.
+    "html_handling": "drop-trailing-slash"
+  }
+}

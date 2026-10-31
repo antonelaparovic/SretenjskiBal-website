@@ -2,6 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { APPS_SCRIPT_URL } from '../../core/config/app.constants';
 import { ReservationPayload } from '../../core/models/content.models';
 import { ReservationFormComponent } from './reservation-form.component';
 
@@ -35,11 +36,19 @@ describe('ReservationFormComponent', () => {
   };
   const ticketRadios = () => $$('input[formcontrolname=ticketType]');
   const count = () => $('#ticketCount');
+  /** Zahtev ka Google skripti za datu akciju (status, create). */
+  const script = (action: string) =>
+    http.expectOne((r) => r.url === APPS_SCRIPT_URL && r.method === 'POST' && JSON.parse(r.body).action === action);
+  const noScript = (action: string) =>
+    http.expectNone((r) => r.url === APPS_SCRIPT_URL && JSON.parse(r.body).action === action);
+  const reservationOf = (req: { request: { body: string } }) => JSON.parse(req.request.body).reservation as ReservationPayload;
+  /** Lažni Cloudflare Turnstile: odmah daje token (ili ne, za test čekanja). */
+  let captchaToken: string | null = 'test-token';
   const errors = () => $$('.field__error').map((e) => e.textContent!.trim());
 
   async function open(status: object = { open: true }) {
     await render();
-    http.expectOne('/api/reservations/status').flush(status);
+    script('status').flush({ ok: true, ...status });
     await render();
   }
 
@@ -53,6 +62,18 @@ describe('ReservationFormComponent', () => {
   }
 
   beforeEach(() => {
+    captchaToken = 'test-token';
+    // Kao pravi Turnstile: token stiže posle render() i ponovo posle svakog reset().
+    let issue = () => {};
+    window.turnstile = {
+      render: (_el, opts) => {
+        issue = () => captchaToken && (opts['callback'] as (t: string) => void)(captchaToken);
+        issue();
+        return 'widget-1';
+      },
+      reset: () => issue(),
+      remove: () => {},
+    };
     TestBed.configureTestingModule({
       imports: [ReservationFormComponent],
       providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
@@ -82,11 +103,11 @@ describe('ReservationFormComponent', () => {
 
   it('kad backend nije dostupan nudi ponovni pokušaj', async () => {
     await render();
-    http.expectOne('/api/reservations/status').flush(null, { status: 503, statusText: 'Unavailable' });
+    script('status').error(new ProgressEvent('error'));
     await render();
     expect($('form')).toBeNull();
     await click('.notice button');
-    http.expectOne('/api/reservations/status').flush({ open: true });
+    script('status').flush({ ok: true, open: true });
     await render();
     expect($('form')).toBeTruthy();
   });
@@ -129,7 +150,7 @@ describe('ReservationFormComponent', () => {
     await open();
     await type(count(), '0');
     await click('button[type=submit]');
-    http.expectNone('/api/reservations');
+    noScript('create');
     expect(errors()).toEqual([
       'Unesite ime i prezime.',
       'Unesite ispravnu email adresu.',
@@ -154,12 +175,12 @@ describe('ReservationFormComponent', () => {
     expect($('[formcontrolname=name]')).toBeTruthy();
     await fillValid();
     await click('button[type=submit]');
-    http.expectNone('/api/reservations');
+    noScript('create');
     expect(errors()).toEqual(['Unesite naziv firme.', 'Unesite adresu firme.', 'Unesite poreski identifikacioni broj.', 'Izaberite jednu od ponuđenih mogućnosti.']);
     await click($$('input[formcontrolname=invoiceNeeded]')[0]);
     expect($('[formcontrolname=name]')).toBeNull();
     await click('button[type=submit]');
-    http.expectOne('/api/reservations').flush({ ok: true, reservationNumber: '27001', guestMailSent: false });
+    script('create').flush({ ok: true, reservationNumber: '27001', guestMailSent: false });
   });
 
   it('ishrana bez izričite saglasnosti se ne šalje; bez ishrane saglasnost nije potrebna', async () => {
@@ -169,7 +190,7 @@ describe('ReservationFormComponent', () => {
     await type('[formcontrolname=diet]', 'Bez glutena');
     expect($('input[formcontrolname=dietConsent]')).toBeTruthy();
     await click('button[type=submit]');
-    http.expectNone('/api/reservations');
+    noScript('create');
     expect(errors()).toContain('Bez saglasnosti ne možemo da primimo podatke o ishrani — uklonite ih ili potvrdite saglasnost.');
   });
 
@@ -188,8 +209,10 @@ describe('ReservationFormComponent', () => {
     await type('[formcontrolname=note]', 'Kupujem i za sestru, Maju Anić.');
     await click('button[type=submit]');
     await click('button[type=submit]'); // drugi klik dok se šalje
-    const req = http.expectOne('/api/reservations');
-    const body = req.request.body as ReservationPayload;
+    const req = script('create');
+    expect(req.request.headers.get('Content-Type')).toBe('text/plain;charset=utf-8');
+    expect(JSON.parse(req.request.body).captcha).toBe('test-token');
+    const body = reservationOf(req);
     expect(body).toMatchObject({
       fullName: 'Ana Anić',
       email: 'ana@primer.si',
@@ -225,8 +248,8 @@ describe('ReservationFormComponent', () => {
     await open();
     await fillValid();
     await click('button[type=submit]');
-    const first = http.expectOne('/api/reservations');
-    first.flush({ code: 'UNAVAILABLE' }, { status: 503, statusText: 'Unavailable' });
+    const first = script('create');
+    first.flush({ ok: false, code: 'SERVER_ERROR' });
     await render();
     expect($('.server-error').textContent).toContain('Rezervacija nije sačuvana');
     expect($('form')).toBeTruthy();
@@ -234,8 +257,8 @@ describe('ReservationFormComponent', () => {
     expect(count().value).toBe('2');
 
     await click('button[type=submit]');
-    const second = http.expectOne('/api/reservations');
-    expect(second.request.body.requestId).toBe(first.request.body.requestId);
+    const second = script('create');
+    expect(reservationOf(second).requestId).toBe(reservationOf(first).requestId);
     second.flush({ ok: true, reservationNumber: '27001', guestMailSent: false });
     await render();
     expect($('.number__value').textContent).toBe('27001');
@@ -245,7 +268,7 @@ describe('ReservationFormComponent', () => {
     await open();
     await fillValid();
     await click('button[type=submit]');
-    http.expectOne('/api/reservations').error(new ProgressEvent('error'));
+    script('create').error(new ProgressEvent('error'));
     await render();
     expect($('.number__value')).toBeNull();
     expect($('.server-error').textContent).toContain('Rezervacija nije sačuvana');
@@ -255,9 +278,32 @@ describe('ReservationFormComponent', () => {
     await open();
     await fillValid();
     await click('button[type=submit]');
-    http.expectOne('/api/reservations').flush({ code: 'BOOKING_CLOSED' }, { status: 409, statusText: 'Conflict' });
+    script('create').flush({ ok: false, code: 'BOOKING_CLOSED' });
     await render();
     expect(el.textContent).toContain('Rezervacije trenutno nisu dostupne.');
     expect(el.textContent).toContain('vaša rezervacija nije evidentirana');
+  });
+
+  it('bez Turnstile tokena ne šalje i objašnjava da sačeka', async () => {
+    captchaToken = null;
+    await open();
+    await fillValid();
+    await click('button[type=submit]');
+    noScript('create');
+    expect($('.server-error').textContent).toContain('proveravamo da niste robot');
+  });
+
+  it('neuspela Turnstile provera i gužva: jasne poruke, podaci ostaju', async () => {
+    await open();
+    await fillValid();
+    await click('button[type=submit]');
+    script('create').flush({ ok: false, code: 'CAPTCHA_FAILED' });
+    await render();
+    expect($('.server-error').textContent).toContain('Provera da niste robot nije prošla');
+    await click('button[type=submit]');
+    script('create').flush({ ok: false, code: 'BUSY' });
+    await render();
+    expect($('.server-error').textContent).toContain('velika gužva');
+    expect($('[formcontrolname=fullName]').value).toBe('Ana Anić');
   });
 });

@@ -1,0 +1,14 @@
+// Cloudflare Workers — ista podešavanja kao frontend/wrangler.jsonc, za build pokrenut iz korena repozitorijuma.
+// Ako se nešto menja, menja se u oba fajla. Uputstvo: docs/DEPLOY.md.
+{
+  "$schema": "frontend/node_modules/wrangler/config-schema.json",
+  "name": "sretenjskibal-website",
+  "compatibility_date": "2026-10-01",
+  // Probne verzije za grane i pull requestove (`npx wrangler preview` u Cloudflare buildu).
+  "previews": {},
+  "assets": {
+    "directory": "./frontend/dist/frontend/browser",
+    "not_found_handling": "404-page",
+    "html_handling": "drop-trailing-slash"
+  }
+}

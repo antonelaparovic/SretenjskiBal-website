@@ -1,0 +1,12 @@
+# Cloudflare — bezbednosna zaglavlja za sve stranice
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+
+# Fajlovi sa heš oznakom u imenu se nikad ne menjaju — mogu se dugo keširati
+/*.js
+  Cache-Control: public, max-age=31536000, immutable
+/*.css
+  Cache-Control: public, max-age=31536000, immutable
