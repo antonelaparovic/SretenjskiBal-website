@@ -4,6 +4,8 @@
   "$schema": "frontend/node_modules/wrangler/config-schema.json",
   "name": "sretenjskibal-website",
   "compatibility_date": "2026-10-01",
+  // Probne verzije za grane i pull requestove (`npx wrangler preview` u Cloudflare buildu).
+  "previews": {},
   "assets": {
     "directory": "./frontend/dist/frontend/browser",
     "not_found_handling": "404-page",
