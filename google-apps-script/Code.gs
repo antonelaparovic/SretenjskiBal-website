@@ -1266,10 +1266,17 @@ function renderMail_(m) {
     return '<tr><td style="padding:6px 16px 6px 0;color:#5b4f48;vertical-align:top;white-space:nowrap">' + esc(d[0]) +
       '</td><td style="padding:6px 0;vertical-align:top">' + esc(d[1]) + '</td></tr>';
   }).join('');
+  // Tamni režim na telefonu: aplikacije za mejl inače same „obrnu" boje (bordo → roze). Oznaka color-scheme
+  // to zabranjuje (Apple Mail, Outlook), a pozadina zadata i kao slika-gradijent ostaje ista i u Gmailu.
+  const bg = function (c) { return 'background-color:' + c + ';background-image:linear-gradient(' + c + ',' + c + ');'; };
   const html =
-    '<div style="background:#eee7da;padding:24px 12px;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:#171413">' +
-    '<div style="max-width:560px;margin:0 auto;background:#f6f1e8">' +
-    '<div style="background:#5a1723;padding:28px 28px 22px;text-align:center;border-bottom:2px solid #b49a63">' +
+    '<!DOCTYPE html><html lang="sr"><head><meta charset="utf-8">' +
+    '<meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light only">' +
+    '<style>:root{color-scheme:light only;supported-color-schemes:light only}</style></head>' +
+    '<body style="margin:0;padding:0;' + bg('#eee7da') + '">' +
+    '<div style="' + bg('#eee7da') + 'padding:24px 12px;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:#171413">' +
+    '<div style="max-width:560px;margin:0 auto;' + bg('#f6f1e8') + '">' +
+    '<div style="' + bg('#5a1723') + 'padding:28px 28px 22px;text-align:center;border-bottom:2px solid #b49a63">' +
     '<img src="cid:' + MAIL_LOGO_CID + '" width="100" height="71" alt="Sretenjski bal" style="display:block;margin:0 auto 12px;border:0;width:100px;height:71px">' +
     '<p style="margin:0;font-family:Georgia,serif;font-size:13px;letter-spacing:.32em;text-transform:uppercase;color:#d3bb82">Sretenjski bal</p>' +
     '</div>' +
@@ -1282,7 +1289,7 @@ function renderMail_(m) {
     (m.tickets ? m.tickets.map(function (t) { return t.html; }).join('') : '') +
     m.outro.map(p).join('') +
     (m.signoff.length ? '<p style="margin:24px 0 0">' + m.signoff.map(esc).join('<br>') + '</p>' : '') +
-    '</div></div></div>';
+    '</div></div></div></body></html>';
   return { text: text, html: html };
 }
 
@@ -1575,7 +1582,7 @@ function ticketMailBlocks_(tickets, lang, labels) {
     return {
       text: head + ' — ' + t.name + (type ? ' (' + type + ')' : '') + ' — ' + labels.code + ': ' + t.code,
       html:
-        '<table role="presentation" style="width:100%;border-collapse:separate;margin:0 0 18px;border:1px solid #c9a96b;outline:1px solid #c9a96b;outline-offset:3px;background:#ffffff">' +
+        '<table role="presentation" style="width:100%;border-collapse:separate;margin:0 0 18px;border:1px solid #c9a96b;outline:1px solid #c9a96b;outline-offset:3px;background-color:#ffffff;background-image:linear-gradient(#ffffff,#ffffff)">' +
         '<tr><td style="padding:22px 20px 18px;text-align:center">' +
         '<p style="margin:0 0 6px;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#a07a35">' + esc(head) + '</p>' +
         '<p style="margin:0 0 4px;font-family:Georgia,serif;font-size:22px;line-height:1.25;color:#5a1723">' + esc(t.name) + '</p>' +
