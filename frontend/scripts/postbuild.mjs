@@ -1,6 +1,6 @@
 /**
  * Posle `ng build`: stranicu „ne postoji" (prerender /404) kopira u 404.html u korenu,
- * jer statički hosting (Cloudflare Pages) taj fajl vraća sa statusom 404 za nepoznate adrese.
+ * jer statički hosting (Cloudflare) taj fajl vraća sa statusom 404 za nepoznate adrese.
  */
 import { copyFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';

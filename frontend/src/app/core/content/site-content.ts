@@ -117,6 +117,6 @@ export const ORGANIZER = {
   address: '[UPISATI: ulica i broj, poštanski broj, mesto]',
   registration: '[UPISATI: matična / davčna številka]',
   privacyEmail: '[UPISATI: e-adresa za pitanja o privatnosti]',
-  hosting: 'Cloudflare, Inc. (Cloudflare Pages)',
+  hosting: 'Cloudflare, Inc. (Cloudflare Workers)',
   mailProvider: 'Google Ireland Ltd. (Google Workspace / Gmail)',
 } as const;
