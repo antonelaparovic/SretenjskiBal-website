@@ -77,7 +77,7 @@ export interface BookingStatus {
   open: boolean;
 }
 
-export type CompanyCountry = 'SI' | 'EU' | 'OTHER';
+export type CompanyCountry = 'SI' | 'EU';
 
 export interface ReservationPayload {
   /** Ostali gosti (broj ulaznica − 1). */
@@ -96,7 +96,7 @@ export interface ReservationPayload {
     needed: boolean;
     companyName?: string;
     companyAddress?: string;
-    /** SI = firma iz Slovenije, EU = druga država EU, OTHER = izvan EU. Od ovoga zavisi obračun DDV-a. */
+    /** SI = firma iz Slovenije, EU = druga država EU (faktura se izdaje samo firmama iz EU). Od ovoga zavisi obračun DDV-a. */
     companyCountry?: CompanyCountry;
     /** Davčna številka (SI) odnosno ID za DDV (EU) / poreski broj (ostalo). */
     taxId?: string;

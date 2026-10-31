@@ -193,8 +193,8 @@
                   <select class="field__control" formControlName="country" required>
                     <option value="SI" i18n>Slovenija</option>
                     <option value="EU" i18n>Druga država članica EU</option>
-                    <option value="OTHER" i18n>Država izvan EU</option>
                   </select>
+                  <span class="field__hint" i18n>Fakturu izdajemo samo firmama sa sedištem u Sloveniji ili drugoj državi članici EU.</span>
                 </label>
                 <label class="field">
                   <span class="field__label" i18n>Sedež firme (ulica, poštanski broj, mesto)</span>
@@ -203,11 +203,8 @@
                   @if (invalid(form.controls.company.controls.address)) { <span class="field__error" id="err-company-address" i18n>Unesite adresu firme.</span> }
                 </label>
                 <label class="field">
-                  @switch (companyCountry()) {
-                    @case ('SI') { <span class="field__label" i18n>Davčna številka (ID za DDV)</span> }
-                    @case ('EU') { <span class="field__label" i18n>ID za PDV (sa oznakom države, npr. HR12345678901)</span> }
-                    @default { <span class="field__label" i18n>Poreski identifikacioni broj</span> }
-                  }
+                  @if (companyCountry() === 'SI') { <span class="field__label" i18n>Davčna številka (ID za DDV)</span> }
+                  @else { <span class="field__label" i18n>ID za PDV (sa oznakom države, npr. HR12345678901)</span> }
                   <input class="field__control" formControlName="taxId" required autocapitalize="characters"
                     [attr.aria-invalid]="invalid(form.controls.company.controls.taxId) || taxIdInvalid()" aria-describedby="err-company-tax" />
                   @if (invalid(form.controls.company.controls.taxId)) { <span class="field__error" id="err-company-tax" i18n>Unesite poreski identifikacioni broj.</span> }

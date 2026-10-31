@@ -370,7 +370,7 @@ describe('Apps Script (Code.gs)', () => {
       expect(results.at(-1)).toEqual({ ok: false, code: 'BUSY' });
     });
 
-    it('faktura: podaci firme i poreski broj po državi (Slovenija, EU, izvan EU)', () => {
+    it('faktura: samo firme iz Slovenije i EU, poreski broj po državi', () => {
       const firm = (inv: object) => reservation({ invoice: { needed: true, companyName: 'Firma d.o.o.', companyAddress: 'Glavni trg 1, Maribor', ...inv } });
       expect(create(firm({ companyCountry: 'SI', taxId: 'SI12345678', vatPayer: true }))).toMatchObject({ ok: true });
       expect(cell(2, 'company')).toContain('Davčna številka / ID za DDV: SI12345678');
@@ -379,7 +379,7 @@ describe('Apps Script (Code.gs)', () => {
       expect(create(firm({ companyCountry: 'SI', taxId: '12345678' })).fields).toEqual(['invoice.vatPayer']);
       expect(create(firm({ companyCountry: 'EU', taxId: 'HR12345678901' }))).toMatchObject({ ok: true });
       expect(create(firm({ companyCountry: 'EU', taxId: 'SI12345678' })).fields).toEqual(['invoice.taxId']);
-      expect(create(firm({ companyCountry: 'OTHER', taxId: 'EIN 12-3456789' }))).toMatchObject({ ok: true });
+      expect(create(firm({ companyCountry: 'OTHER', taxId: 'EIN 12-3456789' })).fields).toContain('invoice.companyCountry');
       expect(create(firm({ companyCountry: 'XX', taxId: '123' })).fields).toContain('invoice.companyCountry');
     });
 

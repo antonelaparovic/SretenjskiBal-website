@@ -455,8 +455,9 @@ function nextNumber_(t, ballYear) {
   return ballYear + String(next).padStart(3, '0');
 }
 
-const COMPANY_COUNTRIES_ = ['SI', 'EU', 'OTHER'];
-const COMPANY_COUNTRY_LABELS_ = { SI: 'Slovenija', EU: 'Druga država EU', OTHER: 'Izvan EU' };
+/** Faktura se izdaje samo firmama iz Slovenije i drugih država EU. */
+const COMPANY_COUNTRIES_ = ['SI', 'EU'];
+const COMPANY_COUNTRY_LABELS_ = { SI: 'Slovenija', EU: 'Druga država EU' };
 
 /** Ista pravila kao u formi za rezervaciju na sajtu (format poreskog broja po državi firme). */
 function isValidTaxId_(country, taxId) {
@@ -464,13 +465,13 @@ function isValidTaxId_(country, taxId) {
   const v = raw.replace(/[\s.-]/g, '').toUpperCase();
   if (country === 'SI') return /^(SI)?\d{8}$/.test(v);
   if (country === 'EU') return /^[A-Z]{2}[0-9A-Z+*]{2,12}$/.test(v) && v.indexOf('SI') !== 0;
-  return raw.trim().length >= 2 && raw.trim().length <= 40;
+  return false;
 }
 
 /** Podaci firme za fakturu, u jednoj ćeliji. Napomena o DDV-u pomaže knjigovođi da odmah vidi o kakvom je obračunu reč. */
 function companyDetails_(inv) {
   const country = inv.companyCountry;
-  const taxLabel = country === 'SI' ? 'Davčna številka / ID za DDV' : country === 'EU' ? 'ID za DDV' : 'Poreski broj';
+  const taxLabel = country === 'SI' ? 'Davčna številka / ID za DDV' : 'ID za DDV';
   const lines = [
     'Naziv: ' + clean_(inv.companyName),
     'Sedež: ' + clean_(inv.companyAddress),
@@ -479,7 +480,6 @@ function companyDetails_(inv) {
   ];
   if (country === 'SI') lines.push('Obveznik DDV: ' + (inv.vatPayer === true ? 'DA' : 'NE'));
   if (country === 'EU') lines.push('Obračun: reverse charge (0 % DDV) ako je ID za DDV važeći u VIES');
-  if (country === 'OTHER') lines.push('Obračun: izvan EU, proveriti sa računovođom');
   return lines.join('\n');
 }
 
